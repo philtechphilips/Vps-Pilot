@@ -58,10 +58,10 @@ export function TotpSetupPanel({ onCancel }: { onCancel?: () => void }) {
           <Step n={1} />
           <div className="min-w-0 flex-1">
             <p className="font-medium text-fg">Scan this QR code</p>
-            <p className="mt-0.5 text-[13px] text-muted">Use Google Authenticator, 1Password, Authy or any TOTP app.</p>
+            <p className="mt-0.5 text-[13px] text-muted">Use Microsoft Authenticator, Google Authenticator, 1Password, Authy or any TOTP app.</p>
             <div className="mt-4 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
               <div
-                className="size-[168px] shrink-0 overflow-hidden rounded-xl bg-white p-1.5 [&>svg]:size-full"
+                className="size-[200px] shrink-0 overflow-hidden rounded-xl bg-white [&>svg]:block [&>svg]:size-full"
                 role="img"
                 aria-label="QR code for your authenticator app"
                 dangerouslySetInnerHTML={{ __html: setup.qr_svg }}
