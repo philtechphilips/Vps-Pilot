@@ -12,15 +12,18 @@ import { displayName, useAuthStore } from "@/lib/stores/auth-store";
  */
 export function AuthGate({ children }: { children: ReactNode }) {
   const status = useAuthStore((s) => s.status);
+  const onboarded = useAuthStore((s) => s.user?.onboarding_completed);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     if (status === "unknown") refreshSession();
     else if (status === "anonymous") router.replace(`/login?next=${encodeURIComponent(pathname)}`);
-  }, [status, router, pathname]);
+    // Signed in but setup unfinished (no second factor chosen yet, etc.).
+    else if (status === "authenticated" && onboarded === false) router.replace("/setup");
+  }, [status, onboarded, router, pathname]);
 
-  if (status !== "authenticated") return <GateLoading />;
+  if (status !== "authenticated" || !onboarded) return <GateLoading />;
   return children;
 }
 
