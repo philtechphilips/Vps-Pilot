@@ -1,0 +1,267 @@
+import type { Metadata } from "next";
+import { Icon } from "@/components/icons";
+import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
+
+export const metadata: Metadata = { title: "Settings" };
+
+const sections = [
+  { id: "general", label: "General" },
+  { id: "security", label: "Security" },
+  { id: "sessions", label: "Sessions" },
+  { id: "enrollment", label: "Enrollment Tokens" },
+  { id: "notifications", label: "Notifications" },
+  { id: "storage", label: "Backup Storage" },
+  { id: "advanced", label: "Advanced" },
+];
+
+export default function SettingsPage() {
+  return (
+    <>
+      <PageHeader title="Settings" />
+      <Container className="grid gap-8 lg:grid-cols-[220px_1fr]">
+        <nav aria-label="Settings sections" className="no-scrollbar -mx-4 flex gap-1 overflow-x-auto px-4 lg:sticky lg:top-20 lg:mx-0 lg:h-fit lg:flex-col lg:px-0">
+          {sections.map((s, i) => (
+            <a
+              key={s.id}
+              href={`#${s.id}`}
+              className={`shrink-0 rounded-md px-3 py-2 text-sm transition-colors hover:bg-white/[0.06] hover:text-fg ${i === 0 ? "bg-white/[0.06] text-fg" : "text-muted"}`}
+            >
+              {s.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="min-w-0 space-y-8">
+          <div id="general" className="scroll-mt-20 space-y-8">
+            <FormCard
+              title="Control Plane Name"
+              description="Shown in the browser title, emails and agent installer output."
+              footer="Please use 32 characters at maximum."
+              action={
+                <Button variant="primary" size="sm">
+                  Save
+                </Button>
+              }
+            >
+              <Input defaultValue="Personal" className="max-w-sm" />
+            </FormCard>
+            <FormCard
+              title="Control Plane URL"
+              description="Agents connect to this address over HTTPS. Changing it requires agents to be re-pointed."
+              footer={
+                <span className="flex items-center gap-1.5">
+                  <Icon name="lock" size={13} /> Certificate valid until Dec 21, 2026
+                </span>
+              }
+              action={
+                <Button variant="primary" size="sm">
+                  Save
+                </Button>
+              }
+            >
+              <div className="flex max-w-md overflow-hidden rounded-md border border-line-strong">
+                <span className="flex items-center border-r border-line-strong bg-bg-200 px-3 text-sm text-subtle">https://</span>
+                <input defaultValue="pilot.example.com" className="h-10 flex-1 bg-bg px-3 font-mono text-sm outline-none" aria-label="Control plane host" />
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="security" className="scroll-mt-20 space-y-8">
+            <FormCard
+              title="Two-Factor Authentication"
+              description="Required for the owner account before production use."
+              footer={
+                <span className="flex items-center gap-1.5 text-ok">
+                  <Icon name="check-circle" size={14} /> Enabled with an authenticator app · 8 recovery codes remaining
+                </span>
+              }
+              action={
+                <Button variant="secondary" size="sm">
+                  Regenerate Recovery Codes
+                </Button>
+              }
+            />
+            <FormCard
+              title="Password"
+              description="Changing your password signs out every other session."
+              action={
+                <Button variant="primary" size="sm">
+                  Update Password
+                </Button>
+              }
+            >
+              <div className="grid max-w-xl gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="cur">Current password</Label>
+                  <Input id="cur" type="password" autoComplete="current-password" />
+                </div>
+                <div>
+                  <Label htmlFor="new">New password</Label>
+                  <Input id="new" type="password" autoComplete="new-password" />
+                </div>
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="sessions" className="scroll-mt-20">
+            <FormCard
+              title="Sessions"
+              description="Devices currently signed in to this control plane."
+              action={
+                <Button variant="secondary" size="sm">
+                  Revoke All Others
+                </Button>
+              }
+            >
+              <div className="overflow-hidden rounded-md border border-line">
+                {[
+                  { d: "Chrome on macOS", l: "Lagos, NG · 102.89.4.17", t: "Current session", current: true },
+                  { d: "Safari on iPhone", l: "Lagos, NG · 102.89.8.201", t: "Active 2h ago" },
+                  { d: "Firefox on Ubuntu", l: "Falkenstein, DE · 49.12.188.21", t: "Active 6d ago" },
+                ].map((s) => (
+                  <div key={s.d} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
+                    <Icon name="monitor" className="text-muted" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        {s.d} {s.current && <Badge tone="ok">This device</Badge>}
+                      </div>
+                      <div className="truncate text-xs text-subtle">
+                        {s.l} · {s.t}
+                      </div>
+                    </div>
+                    {!s.current && (
+                      <Button variant="ghost" size="xs">
+                        Revoke
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="enrollment" className="scroll-mt-20">
+            <FormCard
+              title="Enrollment Tokens"
+              description="Single-use tokens for connecting new servers. Stored hashed; the value is shown only once when created."
+              footer="Default lifetime: 15 minutes."
+              action={
+                <Button variant="primary" size="sm" icon="plus">
+                  Create Token
+                </Button>
+              }
+            >
+              <div className="overflow-hidden rounded-md border border-line">
+                {[
+                  { id: "ept_5Kq9…3f9a", name: "web-prod-03", state: "Pending · expires in 12m", tone: "blue" as const },
+                  { id: "ept_aP4r…Kk1z", name: "edge-jnb-01", state: "Redeemed Oct 3", tone: "ok" as const },
+                  { id: "ept_Zz81…0qLe", name: "scratch-box", state: "Expired unused", tone: "neutral" as const },
+                  { id: "ept_Lr0e…3Vtm", name: "staging-01", state: "Redeemed Sep 14", tone: "ok" as const },
+                ].map((t) => (
+                  <div key={t.id} className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3 last:border-0">
+                    <Mono className="text-fg">{t.id}</Mono>
+                    <span className="text-sm text-muted">{t.name}</span>
+                    <Badge tone={t.tone} className="ml-auto">
+                      {t.state}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="notifications" className="scroll-mt-20">
+            <FormCard
+              title="Notification Channels"
+              description="Where alerts are delivered. Each alert is deduplicated per target and rule."
+              action={
+                <Button variant="primary" size="sm">
+                  Save
+                </Button>
+              }
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" type="email" defaultValue="owner@example.com" />
+                </div>
+                <div>
+                  <Label htmlFor="hook" hint="Signed with HMAC-SHA256">
+                    Webhook URL
+                  </Label>
+                  <Input id="hook" className="font-mono" defaultValue="https://hooks.example.com/vpspilot" />
+                </div>
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="storage" className="scroll-mt-20">
+            <FormCard
+              title="Backup Storage"
+              description="Off-host destination for encrypted backups. The encryption key is stored separately from the metadata database."
+              footer={
+                <span>
+                  Key <Mono className="text-fg">v3</Mono> · rotated Sep 1 · recovery kit downloaded
+                </span>
+              }
+              action={
+                <Button variant="primary" size="sm">
+                  Save
+                </Button>
+              }
+            >
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <Label htmlFor="prov">Provider</Label>
+                  <Select id="prov" defaultValue="s3">
+                    <option value="s3">S3-compatible</option>
+                    <option value="sftp">SFTP</option>
+                    <option value="local">Local disk (not recommended)</option>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="bucket">Bucket</Label>
+                  <Input id="bucket" className="font-mono" defaultValue="acme-backups" />
+                </div>
+                <div>
+                  <Label htmlFor="ak" hint="Write-only">
+                    Access key
+                  </Label>
+                  <Input id="ak" type="password" placeholder="••••••••••••" />
+                </div>
+              </div>
+            </FormCard>
+          </div>
+
+          <div id="advanced" className="scroll-mt-20 space-y-8">
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold tracking-tight">Version</h3>
+              <div className="mt-4 flex flex-wrap items-center gap-x-8 gap-y-3 text-sm">
+                <span>
+                  <span className="text-muted">Control plane</span> <Mono className="ml-2 text-fg">1.1.0</Mono>
+                </span>
+                <span>
+                  <span className="text-muted">Latest agent</span> <Mono className="ml-2 text-fg">0.4.2</Mono>
+                </span>
+                <span>
+                  <span className="text-muted">Schema</span> <Mono className="ml-2 text-fg">alembic 0b7f3c21</Mono>
+                </span>
+                <Badge tone="ok">Up to date</Badge>
+              </div>
+            </Card>
+            <FormCard
+              danger
+              title="Reset Control Plane"
+              description="Revokes every agent, deletes all metadata and encrypted credentials, and returns to first-run setup. Managed servers and their applications keep running."
+              action={
+                <Button variant="danger" size="sm">
+                  Reset
+                </Button>
+              }
+            />
+          </div>
+        </div>
+      </Container>
+    </>
+  );
+}
