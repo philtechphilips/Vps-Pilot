@@ -1,0 +1,65 @@
+import Link from "next/link";
+import { Icon } from "@/components/icons";
+import { Logotype } from "@/components/logo";
+import { Dot } from "@/components/ui";
+
+const columns = [
+  { title: "Product", links: ["Servers", "Deployments", "Database Center", "Monitoring", "Domains & TLS", "Backups"] },
+  { title: "Databases", links: ["PostgreSQL", "MySQL", "MariaDB", "Redis", "MongoDB (soon)", "SQLite (soon)"] },
+  { title: "Resources", links: ["Docs", "Install guide", "Agent protocol", "Threat model", "Changelog", "Upgrade notes"] },
+  { title: "Project", links: ["GitHub", "Releases", "Roadmap", "Security policy", "License"] },
+];
+
+export function MarketingFooter() {
+  return (
+    <footer className="border-t border-white/[0.06] bg-black">
+      <div className="mx-auto max-w-[1080px] px-4 py-14 sm:px-6">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(4,1fr)]">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
+            <Link href="/" className="inline-flex" aria-label="VPSPilot home">
+              <Logotype className="text-[22px]" />
+            </Link>
+            <p className="mt-4 max-w-56 text-sm text-muted">Self-hosted control plane for the servers you already own.</p>
+          </div>
+          {columns.map((c) => (
+            <div key={c.title}>
+              <h3 className="text-sm font-medium text-fg">{c.title}</h3>
+              <ul className="mt-4 space-y-2.5 text-sm text-muted">
+                {c.links.map((l) => (
+                  <li key={l}>
+                    <a href="#" className="transition-colors hover:text-fg">
+                      {l}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <a href="#" className="inline-flex w-fit items-center gap-2 rounded-full border border-white/[0.06] bg-[#141414] px-3 py-1.5 text-[13px] text-muted hover:text-fg">
+            <Dot tone="ok" pulse />
+            All systems normal
+          </a>
+          <div className="flex items-center gap-4 text-sm text-subtle">
+            <span>© 2026 VPSPilot</span>
+            <div className="flex items-center rounded-full border border-line p-0.5" role="radiogroup" aria-label="Theme">
+              {(["monitor", "sun", "moon"] as const).map((i) => (
+                <span
+                  key={i}
+                  role="radio"
+                  aria-checked={i === "moon"}
+                  aria-label={i === "monitor" ? "System" : i === "sun" ? "Light" : "Dark"}
+                  className={`flex size-7 items-center justify-center rounded-full ${i === "moon" ? "bg-white/10 text-fg" : ""}`}
+                >
+                  <Icon name={i} size={14} />
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
