@@ -2,14 +2,16 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import type { AuthResponse, Challenge, LoginResult, Message, SessionInfo, User } from "@/lib/api/types";
+import type { AuthResponse, Challenge, LoginResult, Message, SessionInfo, TotpSetup, TwoFactorStatus, User } from "@/lib/api/types";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChallengeStore } from "@/lib/stores/challenge-store";
+import { useRecoveryCodesStore } from "@/lib/stores/recovery-codes-store";
 
 export const authKeys = {
   setupStatus: ["auth", "setup-status"] as const,
   me: ["auth", "me"] as const,
   sessions: ["auth", "sessions"] as const,
+  twoFactor: ["auth", "2fa"] as const,
 };
 
 /* ------------------------------------------------------------------ */
@@ -137,5 +139,56 @@ export function useRevokeOtherSessions() {
   return useMutation({
     mutationFn: () => api<Message>("/auth/sessions/revoke-others", { method: "POST", auth: true }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: authKeys.sessions }),
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Authenticator app and onboarding                                    */
+/* ------------------------------------------------------------------ */
+
+export function useTwoFactorStatus() {
+  const status = useAuthStore((s) => s.status);
+  return useQuery({
+    queryKey: authKeys.twoFactor,
+    queryFn: () => api<TwoFactorStatus>("/auth/2fa/status", { auth: true }),
+    enabled: status === "authenticated",
+  });
+}
+
+/** Creates a pending authenticator secret; nothing changes until confirmed. */
+export function useStartTotpSetup() {
+  return useMutation({
+    mutationFn: () => api<TotpSetup>("/auth/2fa/totp/setup", { method: "POST", auth: true }),
+  });
+}
+
+/** Confirms the authenticator with a code; returns one-time recovery codes. */
+export function useConfirmTotp() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (code: string) =>
+      api<{ recovery_codes: string[] }>("/auth/2fa/totp/confirm", { method: "POST", body: { code }, auth: true }),
+    onSuccess: async (data) => {
+      // Hold the codes before the user flips to "authenticator enabled", so
+      // whichever screen re-renders next can still show them.
+      useRecoveryCodesStore.getState().set(data.recovery_codes);
+      // Pull the updated user (totp_enabled, two_factor_method) into the store
+      // directly; invalidation alone only refetches queries that are mounted.
+      const user = await api<User>("/auth/me", { auth: true });
+      useAuthStore.getState().setUser(user);
+      queryClient.setQueryData(authKeys.me, user);
+      queryClient.invalidateQueries({ queryKey: authKeys.twoFactor });
+    },
+  });
+}
+
+export function useCompleteOnboarding() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<User>("/auth/onboarding/complete", { method: "POST", auth: true }),
+    onSuccess: (user) => {
+      useAuthStore.getState().setUser(user);
+      queryClient.setQueryData(authKeys.me, user);
+    },
   });
 }
