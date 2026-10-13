@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { Button } from "@/components/ui";
 import { ApiError } from "@/lib/api/client";
 import { useResendCode, useVerifyCode } from "@/lib/api/auth";
-import type { AuthResponse } from "@/lib/api/types";
 import { useChallengeStore } from "@/lib/stores/challenge-store";
 import { cn } from "@/lib/utils";
 
@@ -86,43 +85,58 @@ function useCountdown(sentAt: number | null, seconds: number) {
 }
 
 /**
- * "Check your email" step shared by login and owner setup.
- * Verifies the code, offers a rate-limited resend, and reports success.
+ * Second-factor step shared by login and owner setup.
+ *
+ * Email challenges: enter the emailed code, with a rate-limited resend.
+ * Authenticator challenges: enter the app's code or a recovery code, or fall
+ * back to an emailed code.
+ *
+ * Success is reported through the auth store (the verify hook stores the
+ * session), so parents should react to that rather than to a callback that
+ * could be lost if this step unmounts first.
  */
-export function CodeStep({ onVerified, onBack }: { onVerified: (auth: AuthResponse) => void; onBack: () => void }) {
+export function CodeStep({ onBack }: { onBack: () => void }) {
   const challenge = useChallengeStore((s) => s.challenge);
   const sentAt = useChallengeStore((s) => s.sentAt);
   const [code, setCode] = useState("");
+  const [recovery, setRecovery] = useState(false);
   const verify = useVerifyCode();
   const resend = useResendCode();
   const wait = useCountdown(sentAt, challenge?.resend_in ?? 30);
 
   if (!challenge) return null;
+  const isApp = challenge.method === "totp";
 
   const submit = (value: string) => {
-    if (value.length !== LENGTH || verify.isPending) return;
-    verify.mutate(
-      { challenge_id: challenge.challenge_id, code: value },
-      {
-        onSuccess: onVerified,
-        onError: () => setCode(""),
-      },
-    );
+    const ready = recovery ? value.replace(/[^a-z0-9]/gi, "").length === 8 : value.length === LENGTH;
+    if (!ready || verify.isPending) return;
+    verify.mutate({ challenge_id: challenge.challenge_id, code: value.trim() }, { onError: () => setCode("") });
   };
 
   const error = verify.error ?? resend.error;
   const expired = error instanceof ApiError && /expired|no longer valid|Start again/i.test(error.message);
 
+  const heading = isApp ? "Enter your authenticator code" : challenge.purpose === "setup" ? "Verify your email" : "Check your email";
+  const icon: IconName = isApp ? "shield-check" : "inbox";
+
   return (
     <div className="w-full max-w-[400px] animate-fade-up text-center">
       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-white/10 bg-[#141414] text-accent-fg">
-        <Icon name="inbox" size={22} />
+        <Icon name={icon} size={22} />
       </div>
-      <h1 className="mt-6 text-[26px] font-semibold tracking-tight">{challenge.purpose === "setup" ? "Verify your email" : "Check your email"}</h1>
+      <h1 className="mt-6 text-[26px] font-semibold tracking-tight">{recovery ? "Use a recovery code" : heading}</h1>
       <p className="mt-2 text-sm text-muted">
-        We sent a 6-digit code to <span className="font-medium text-fg">{challenge.email_hint}</span>.
-        <br />
-        It expires in {Math.round(challenge.expires_in / 60)} minutes.
+        {recovery ? (
+          "Enter one of the codes you saved when you set up your authenticator. Each works once."
+        ) : isApp ? (
+          "Open your authenticator app and enter the 6-digit code for VPSPilot."
+        ) : (
+          <>
+            We sent a 6-digit code to <span className="font-medium text-fg">{challenge.email_hint}</span>.
+            <br />
+            It expires in {Math.round(challenge.expires_in / 60)} minutes.
+          </>
+        )}
       </p>
 
       <form
@@ -132,23 +146,64 @@ export function CodeStep({ onVerified, onBack }: { onVerified: (auth: AuthRespon
           submit(code);
         }}
       >
-        <OtpInput value={code} onChange={setCode} onComplete={submit} disabled={verify.isPending} invalid={!!verify.error} />
+        {recovery ? (
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            autoFocus
+            autoComplete="off"
+            spellCheck={false}
+            placeholder="xxxx-xxxx"
+            aria-label="Recovery code"
+            className="h-12 w-full rounded-xl border border-white/10 bg-[#0d0d0d] text-center font-mono text-lg tracking-widest outline-none focus:border-accent"
+          />
+        ) : (
+          <OtpInput value={code} onChange={setCode} onComplete={submit} disabled={verify.isPending} invalid={!!verify.error} />
+        )}
 
         <div aria-live="polite" className="mt-4 min-h-5 text-sm">
           {error && <p className="text-err">{error.message}</p>}
-          {resend.isSuccess && !error && <p className="text-ok">A new code is on its way.</p>}
+          {resend.isSuccess && !error && <p className="text-ok">A code is on its way to {challenge.email_hint}.</p>}
         </div>
 
-        <Button type="submit" variant="primary" size="md" className="mt-2 w-full rounded-xl" disabled={code.length !== LENGTH || verify.isPending}>
+        <Button type="submit" variant="primary" size="md" className="mt-2 w-full rounded-xl" disabled={verify.isPending || !code}>
           {verify.isPending ? "Verifying…" : "Verify"}
         </Button>
       </form>
 
-      <div className="mt-6 flex items-center justify-center gap-3 text-sm">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-sm">
         {expired ? (
           <button type="button" onClick={onBack} className="text-accent-fg hover:underline">
             Start again
           </button>
+        ) : isApp ? (
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setRecovery((r) => !r);
+                setCode("");
+                verify.reset();
+              }}
+              className="text-muted transition-colors hover:text-fg"
+            >
+              {recovery ? "Use authenticator code" : "Use a recovery code"}
+            </button>
+            <span className="text-subtle">·</span>
+            <button
+              type="button"
+              disabled={resend.isPending}
+              onClick={() => {
+                verify.reset();
+                setRecovery(false);
+                setCode("");
+                resend.mutate(challenge.challenge_id);
+              }}
+              className="text-muted transition-colors hover:text-fg disabled:opacity-60"
+            >
+              {resend.isPending ? "Sending…" : "Email me a code instead"}
+            </button>
+          </>
         ) : (
           <button
             type="button"

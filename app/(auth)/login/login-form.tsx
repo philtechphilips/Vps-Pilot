@@ -8,6 +8,7 @@ import { Icon } from "@/components/icons";
 import { Button, Input, Label } from "@/components/ui";
 import { useLogin, useSetupStatus } from "@/lib/api/auth";
 import { refreshSession } from "@/lib/api/client";
+import { useAuthStore } from "@/lib/stores/auth-store";
 import { useChallengeStore } from "@/lib/stores/challenge-store";
 
 /** Only allow same-site paths, so ?next= can't send users to another origin. */
@@ -24,16 +25,35 @@ export function LoginForm() {
   const login = useLogin();
   const [show, setShow] = useState(false);
 
+  const authStatus = useAuthStore((s) => s.status);
+  const user = useAuthStore((s) => s.user);
+
   useEffect(() => {
     useChallengeStore.persist.rehydrate();
-    // Already signed in on this device? Skip the form.
-    refreshSession().then((auth) => auth && router.replace(next));
-  }, [router, next]);
+    // Already signed in on this device? The redirect effect below takes over.
+    if (useAuthStore.getState().status === "unknown") refreshSession();
+  }, []);
+
+  // Signed in (from the form, the code step or an existing session): continue
+  // onboarding if it isn't finished, otherwise go where the user was headed.
+  useEffect(() => {
+    if (authStatus === "authenticated" && user) {
+      router.replace(user.onboarding_completed ? next : "/setup");
+    }
+  }, [authStatus, user, next, router]);
+
+  if (authStatus === "authenticated") {
+    return (
+      <div className="flex flex-col items-center gap-3" role="status">
+        <span className="size-6 animate-spin rounded-full border-2 border-white/10 border-t-accent-fg" />
+        <span className="text-sm text-muted">Signing you in…</span>
+      </div>
+    );
+  }
 
   if (challenge?.purpose === "login" || challenge?.purpose === "setup") {
     return (
       <CodeStep
-        onVerified={() => router.replace(next)}
         onBack={() => {
           resetChallenge();
           login.reset();
@@ -63,10 +83,7 @@ export function LoginForm() {
         onSubmit={(e) => {
           e.preventDefault();
           const form = new FormData(e.currentTarget);
-          login.mutate(
-            { email: String(form.get("email")), password: String(form.get("password")) },
-            { onSuccess: (result) => result.status === "authenticated" && router.replace(next) },
-          );
+          login.mutate({ email: String(form.get("email")), password: String(form.get("password")) });
         }}
       >
         <div>
@@ -113,7 +130,7 @@ export function LoginForm() {
 
       <div className="mt-6 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#141414] p-3 text-xs text-muted">
         <Icon name="shield-check" size={14} className="shrink-0 text-accent-fg" />
-        After your password we email a one-time code. Repeated failures lock the account for 15 minutes.
+        After your password you’ll confirm with your authenticator app or an emailed code. Repeated failures lock the account for 15 minutes.
       </div>
     </div>
   );
