@@ -5,6 +5,7 @@ import { MobileNav, SectionCrumb, SectionCrumbFallback, Sidebar, SidebarFallback
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui";
 import { SearchButton } from "@/components/dashboard/search-button";
+import { AuthGate, GateLoading, OwnerName } from "@/components/auth/auth-gate";
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s – VPSPilot" },
@@ -37,8 +38,10 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
           </Suspense>
           <nav aria-label="Breadcrumb" className="no-scrollbar flex min-w-0 items-center gap-1 overflow-x-auto">
             <Crumb>
-              <Avatar name="Pelumi" size={18} />
-              <span className="hidden sm:inline">Pelumi’s Servers</span>
+              <Avatar name="owner" size={18} />
+              <span className="hidden sm:inline">
+                <OwnerName />
+              </span>
               <span className="rounded-full bg-accent px-1.5 py-px text-[10px] font-semibold text-white">Owner</span>
             </Crumb>
             <Slash />
@@ -60,7 +63,11 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
         </header>
 
         <main className="flex flex-1 flex-col lg:pr-2">
-          <div className="flex-1 border-t border-white/[0.06] bg-panel lg:rounded-tl-2xl lg:rounded-tr-2xl lg:border-x">{children}</div>
+          <div className="flex-1 border-t border-white/[0.06] bg-panel lg:rounded-tl-2xl lg:rounded-tr-2xl lg:border-x">
+            <Suspense fallback={<GateLoading />}>
+              <AuthGate>{children}</AuthGate>
+            </Suspense>
+          </div>
         </main>
       </div>
       <CommandMenu />

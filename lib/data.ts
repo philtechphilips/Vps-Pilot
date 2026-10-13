@@ -950,8 +950,6 @@ export const jobs = [
   { id: "job_8807", type: "proxy.reload", target: "nginx · web-prod-01", status: "succeeded", progress: 100, time: "1s" },
 ] as const;
 
-export const owner = { name: "Pelumi", email: "owner@example.com" };
-
 export const overview = {
   deploysPerDay: [6, 9, 4, 11, 7, 3, 2, 8, 12, 9, 5, 7, 10, 14],
   deployLabels: ["Sep 30", "", "", "", "", "", "", "", "", "", "", "", "", "Oct 13"],

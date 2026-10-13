@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SessionsCard } from "@/components/auth/sessions-card";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
 
@@ -69,16 +70,11 @@ export default function SettingsPage() {
           <div id="security" className="scroll-mt-20 space-y-8">
             <FormCard
               title="Two-Factor Authentication"
-              description="Required for the owner account before production use."
+              description="After your password, a single-use 6-digit code is emailed to the owner address. Codes expire after 10 minutes and allow 5 attempts."
               footer={
                 <span className="flex items-center gap-1.5 text-ok">
-                  <Icon name="check-circle" size={14} /> Enabled with an authenticator app · 8 recovery codes remaining
+                  <Icon name="check-circle" size={14} /> Enabled · codes delivered by email
                 </span>
-              }
-              action={
-                <Button variant="secondary" size="sm">
-                  Regenerate Recovery Codes
-                </Button>
               }
             />
             <FormCard
@@ -104,40 +100,7 @@ export default function SettingsPage() {
           </div>
 
           <div id="sessions" className="scroll-mt-20">
-            <FormCard
-              title="Sessions"
-              description="Devices currently signed in to this control plane."
-              action={
-                <Button variant="secondary" size="sm">
-                  Revoke All Others
-                </Button>
-              }
-            >
-              <div className="overflow-hidden rounded-md border border-line">
-                {[
-                  { d: "Chrome on macOS", l: "Lagos, NG · 102.89.4.17", t: "Current session", current: true },
-                  { d: "Safari on iPhone", l: "Lagos, NG · 102.89.8.201", t: "Active 2h ago" },
-                  { d: "Firefox on Ubuntu", l: "Falkenstein, DE · 49.12.188.21", t: "Active 6d ago" },
-                ].map((s) => (
-                  <div key={s.d} className="flex items-center gap-3 border-b border-line px-4 py-3 last:border-0">
-                    <Icon name="monitor" className="text-muted" />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 text-sm">
-                        {s.d} {s.current && <Badge tone="ok">This device</Badge>}
-                      </div>
-                      <div className="truncate text-xs text-subtle">
-                        {s.l} · {s.t}
-                      </div>
-                    </div>
-                    {!s.current && (
-                      <Button variant="ghost" size="xs">
-                        Revoke
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </FormCard>
+            <SessionsCard />
           </div>
 
           <div id="enrollment" className="scroll-mt-20">

@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar, Kbd } from "@/components/ui";
+import { useLogout } from "@/lib/api/auth";
 import { apps, databases, servers } from "@/lib/data";
+import { useAuthStore } from "@/lib/stores/auth-store";
 import { cn } from "@/lib/utils";
 
 export const tabs: { label: string; href: string; icon: IconName }[] = [
@@ -225,11 +227,14 @@ export function MenuItem({ href, icon, children, danger, hint }: { href: string;
 }
 
 export function AccountMenu() {
+  const user = useAuthStore((s) => s.user);
+  const logout = useLogout();
+  const router = useRouter();
   return (
-    <Dropdown label="Account menu" trigger={<Avatar name="owner" size={30} />}>
+    <Dropdown label="Account menu" trigger={<Avatar name={user?.email ?? "owner"} size={30} />}>
       <div className="px-2.5 pt-2 pb-2.5">
-        <p className="text-sm font-medium text-fg">Owner</p>
-        <p className="text-[13px] text-muted">owner@example.com</p>
+        <p className="text-sm font-medium text-fg">{user?.name || "Owner"}</p>
+        <p className="truncate text-[13px] text-muted">{user?.email ?? "—"}</p>
       </div>
       <div className="my-1 h-px bg-line" />
       <MenuItem href="/dashboard" icon="grid">Dashboard</MenuItem>
@@ -238,7 +243,16 @@ export function AccountMenu() {
       <MenuItem href="/dashboard/audit" icon="shield">Audit Log</MenuItem>
       <div className="my-1 h-px bg-line" />
       <MenuItem href="/" icon="external-link">Home Page</MenuItem>
-      <MenuItem href="/login" icon="log-out">Log Out</MenuItem>
+      <button
+        type="button"
+        role="menuitem"
+        disabled={logout.isPending}
+        onClick={() => logout.mutate(undefined, { onSettled: () => router.replace("/login") })}
+        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-60"
+      >
+        <Icon name="log-out" />
+        <span className="flex-1">{logout.isPending ? "Logging out…" : "Log Out"}</span>
+      </button>
     </Dropdown>
   );
 }

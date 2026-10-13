@@ -8,7 +8,7 @@ import { Greeting } from "@/components/dashboard/greeting";
 import { AddNewMenu } from "@/components/dashboard/nav";
 import { Icon, type IconName } from "@/components/icons";
 import { Badge, Card, Container, Dot, SectionTitle } from "@/components/ui";
-import { alerts, apps, databases, deployLabel, deployments, deployTone, getServer, owner, servers } from "@/lib/data";
+import { alerts, apps, databases, deployLabel, deployments, deployTone, getServer, servers } from "@/lib/data";
 
 export default function OverviewPage() {
   const online = servers.filter((s) => s.status !== "offline").length;
@@ -27,7 +27,7 @@ export default function OverviewPage() {
       <div className="grid gap-4 xl:grid-cols-[1fr_minmax(360px,0.55fr)]">
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between gap-4 px-5 pt-5 pb-4">
-            <Greeting name={owner.name} />
+            <Greeting />
             <span className="flex items-center gap-3">
               <Icon name="check-circle" className="text-accent-fg" aria-label="Verified owner" />
               <AddNewMenu />
