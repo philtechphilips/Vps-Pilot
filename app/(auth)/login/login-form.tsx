@@ -1,91 +1,91 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { CodeStep } from "@/components/auth/code-step";
 import { Icon } from "@/components/icons";
 import { Button, Input, Label } from "@/components/ui";
+import { useLogin, useSetupStatus } from "@/lib/api/auth";
+import { refreshSession } from "@/lib/api/client";
+import { useChallengeStore } from "@/lib/stores/challenge-store";
+
+/** Only allow same-site paths, so ?next= can't send users to another origin. */
+export function safeNext(value: string | null) {
+  return value && value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
+}
 
 export function LoginForm() {
   const router = useRouter();
-  const [step, setStep] = useState<"credentials" | "mfa">("credentials");
+  const next = safeNext(useSearchParams().get("next"));
+  const challenge = useChallengeStore((s) => s.challenge);
+  const resetChallenge = useChallengeStore((s) => s.reset);
+  const setup = useSetupStatus();
+  const login = useLogin();
   const [show, setShow] = useState(false);
-  const [code, setCode] = useState<string[]>(Array(6).fill(""));
-  const inputs = useRef<Array<HTMLInputElement | null>>([]);
 
-  if (step === "mfa") {
+  useEffect(() => {
+    useChallengeStore.persist.rehydrate();
+    // Already signed in on this device? Skip the form.
+    refreshSession().then((auth) => auth && router.replace(next));
+  }, [router, next]);
+
+  if (challenge?.purpose === "login" || challenge?.purpose === "setup") {
     return (
-      <div className="w-full max-w-[380px] animate-fade-up text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-line bg-bg-100">
-          <Icon name="shield-check" size={20} />
-        </div>
-        <h1 className="mt-6 text-[28px] font-semibold tracking-tight">Two-factor authentication</h1>
-        <p className="mt-2 text-sm text-muted">Enter the 6-digit code from your authenticator app.</p>
-        <form
-          className="mt-8"
-          onSubmit={(e) => {
-            e.preventDefault();
-            router.push("/dashboard");
-          }}
-        >
-          <div className="flex justify-center gap-2">
-            {code.map((c, i) => (
-              <input
-                key={i}
-                ref={(el) => {
-                  inputs.current[i] = el;
-                }}
-                value={c}
-                inputMode="numeric"
-                maxLength={1}
-                aria-label={`Digit ${i + 1}`}
-                autoFocus={i === 0}
-                onChange={(e) => {
-                  const v = e.target.value.replace(/\D/g, "");
-                  const next = [...code];
-                  next[i] = v;
-                  setCode(next);
-                  if (v && i < 5) inputs.current[i + 1]?.focus();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Backspace" && !code[i] && i > 0) inputs.current[i - 1]?.focus();
-                }}
-                className="size-12 rounded-md border border-line-strong bg-bg text-center font-mono text-lg outline-none focus:border-[#555] focus:shadow-[0_0_0_3px_rgb(255_255_255/0.08)]"
-              />
-            ))}
-          </div>
-          <Button type="submit" variant="primary" size="md" className="mt-6 w-full">
-            Verify
-          </Button>
-        </form>
-        <button type="button" onClick={() => setStep("credentials")} className="mt-6 text-sm text-muted hover:text-fg">
-          Use a recovery code instead
-        </button>
-      </div>
+      <CodeStep
+        onVerified={() => router.replace(next)}
+        onBack={() => {
+          resetChallenge();
+          login.reset();
+        }}
+      />
     );
   }
 
   return (
     <div className="w-full max-w-[380px] animate-fade-up">
       <h1 className="text-center text-[28px] font-semibold tracking-tight">Log in to VPSPilot</h1>
-      <p className="mt-2 text-center text-sm text-muted">Owner access to your control plane at pilot.example.com</p>
+      <p className="mt-2 text-center text-sm text-muted">Owner access to your control plane.</p>
+
+      {setup.data?.needs_setup && (
+        <Link
+          href="/setup"
+          className="mt-6 flex items-center gap-3 rounded-xl border border-accent/30 bg-accent/10 p-3 text-sm text-accent-fg transition-colors hover:bg-accent/15"
+        >
+          <Icon name="sparkles" className="shrink-0" />
+          <span className="flex-1">No owner account yet. Set up this control plane first.</span>
+          <Icon name="arrow-right" size={14} />
+        </Link>
+      )}
+
       <form
         className="mt-8 space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
-          setStep("mfa");
+          const form = new FormData(e.currentTarget);
+          login.mutate(
+            { email: String(form.get("email")), password: String(form.get("password")) },
+            { onSuccess: (result) => result.status === "authenticated" && router.replace(next) },
+          );
         }}
       >
         <div>
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" autoComplete="username" placeholder="you@example.com" required />
+          <Input id="email" name="email" type="email" autoComplete="username" placeholder="you@example.com" required />
         </div>
         <div>
-          <Label htmlFor="password" hint={<a href="#" className="hover:text-fg">Forgot?</a>}>
+          <Label
+            htmlFor="password"
+            hint={
+              <Link href="/forgot-password" className="hover:text-fg">
+                Forgot?
+              </Link>
+            }
+          >
             Password
           </Label>
           <div className="relative">
-            <Input id="password" type={show ? "text" : "password"} autoComplete="current-password" required className="pr-10" />
+            <Input id="password" name="password" type={show ? "text" : "password"} autoComplete="current-password" required className="pr-10" />
             <button
               type="button"
               onClick={() => setShow((s) => !s)}
@@ -96,20 +96,25 @@ export function LoginForm() {
             </button>
           </div>
         </div>
-        <Button type="submit" variant="primary" size="md" className="w-full">
-          Continue
+
+        <div aria-live="polite">
+          {login.error && (
+            <p className="flex items-start gap-2 rounded-lg border border-err/30 bg-err/10 p-3 text-sm text-err">
+              <Icon name="alert" size={15} className="mt-0.5 shrink-0" />
+              {login.error.message}
+            </p>
+          )}
+        </div>
+
+        <Button type="submit" variant="primary" size="md" className="w-full rounded-xl" disabled={login.isPending}>
+          {login.isPending ? "Checking…" : "Continue"}
         </Button>
       </form>
-      <div className="mt-6 flex items-center gap-2 rounded-md border border-line bg-bg-100 p-3 text-xs text-muted">
-        <Icon name="lock" size={14} className="shrink-0" />
-        Login attempts are throttled. Sessions can be revoked from Settings.
+
+      <div className="mt-6 flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#141414] p-3 text-xs text-muted">
+        <Icon name="shield-check" size={14} className="shrink-0 text-accent-fg" />
+        After your password we email a one-time code. Repeated failures lock the account for 15 minutes.
       </div>
-      <p className="mt-8 text-center text-sm text-muted">
-        First time here?{" "}
-        <Link href="/setup" className="text-blue-fg hover:underline">
-          Set up the owner account
-        </Link>
-      </p>
     </div>
   );
 }
