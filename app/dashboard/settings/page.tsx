@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SessionsCard } from "@/components/auth/sessions-card";
+import { TwoFactorCard } from "@/components/auth/two-factor-card";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
 
@@ -68,15 +69,7 @@ export default function SettingsPage() {
           </div>
 
           <div id="security" className="scroll-mt-20 space-y-8">
-            <FormCard
-              title="Two-Factor Authentication"
-              description="After your password, a single-use 6-digit code is emailed to the owner address. Codes expire after 10 minutes and allow 5 attempts."
-              footer={
-                <span className="flex items-center gap-1.5 text-ok">
-                  <Icon name="check-circle" size={14} /> Enabled · codes delivered by email
-                </span>
-              }
-            />
+            <TwoFactorCard />
             <FormCard
               title="Password"
               description="Changing your password signs out every other session."
