@@ -20,8 +20,11 @@ CORS setup is needed. Point it elsewhere with `API_URL`:
 API_URL=https://pilot.example.com npm run dev
 ```
 
-First run: open `/setup` to create the owner account. A code is emailed to
-verify the address.
+First run: open `/setup`. The onboarding wizard creates the owner account,
+verifies the email with an emailed code, sets up two-factor (authenticator
+app with recovery codes, or email codes), and asks about managing this
+server. Until it's finished, the dashboard sends you back to it; logging in
+mid-way resumes where you left off.
 
 ## Auth on the client
 
@@ -29,8 +32,14 @@ verify the address.
   setup, login, code verify/resend, logout, password reset and sessions.
 - **Zustand** holds client state:
   - `lib/stores/auth-store.ts`: the access token (memory only) and user.
-  - `lib/stores/challenge-store.ts`: the pending emailed-code challenge,
-    kept in `sessionStorage` so a reload on the code step doesn't lose it.
+  - `lib/stores/challenge-store.ts`: the pending sign-in challenge (email or
+    authenticator), kept in `sessionStorage` so a reload doesn't lose it.
+  - `lib/stores/onboarding-store.ts`: wizard choices (second factor, this
+    server), also in `sessionStorage`.
+  - `lib/stores/recovery-codes-store.ts`: freshly issued recovery codes,
+    memory only, until the owner confirms saving them.
+- Screens react to store state rather than per-call mutation callbacks, which
+  are dropped if the component that started the call unmounts first.
 - `lib/api/client.ts` adds the bearer token, and on a 401 refreshes once via
   the httpOnly cookie (one shared request, since the cookie rotates) before
   retrying.
