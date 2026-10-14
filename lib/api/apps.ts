@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { useAuthStore } from "@/lib/stores/auth-store";
 
@@ -155,6 +155,26 @@ export function useDeployments(limit = 50) {
     queryFn: () => api<Deployment[]>(`/deployments?limit=${limit}`, { auth: true }),
     enabled: useSignedIn(),
     refetchInterval: (q) => (q.state.data?.some((d) => isDeploying(d.status)) ? 2_000 : 15_000),
+  });
+}
+
+const DEPLOYMENTS_PAGE = 30;
+
+/** All deployments (optionally one app's), newest first, page by page. */
+export function useDeploymentPages(appId: string | null) {
+  return useInfiniteQuery({
+    queryKey: [...appKeys.allDeployments, "pages", appId ?? "all"],
+    enabled: useSignedIn(),
+    initialPageParam: undefined as string | undefined,
+    queryFn: ({ pageParam }) => {
+      const params = new URLSearchParams({ limit: String(DEPLOYMENTS_PAGE) });
+      if (pageParam) params.set("before", pageParam);
+      if (appId) params.set("app_id", appId);
+      return api<Deployment[]>(`/deployments?${params}`, { auth: true });
+    },
+    getNextPageParam: (last) => (last.length === DEPLOYMENTS_PAGE ? last[last.length - 1].id : undefined),
+    // Keep statuses fresh while something is building (first page only).
+    refetchInterval: (q) => (q.state.data?.pages[0]?.some((d) => isDeploying(d.status)) ? 3_000 : 20_000),
   });
 }
 

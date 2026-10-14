@@ -2,22 +2,23 @@
 
 import { useState } from "react";
 import { DeploymentRow } from "@/components/apps/app-ui";
+import { LoadMore } from "@/components/dashboard/load-more";
 import { Card, Container, EmptyState, SearchBar, Select } from "@/components/ui";
-import { type DeploymentStatus, useApps, useDeployments } from "@/lib/api/apps";
+import { type DeploymentStatus, useApps, useDeploymentPages } from "@/lib/api/apps";
 import { useServers } from "@/lib/api/servers";
 
 export function DeploymentList() {
-  const deployments = useDeployments(100);
   const { data: apps } = useApps();
   const { data: servers } = useServers();
   const [app, setApp] = useState("all");
   const [status, setStatus] = useState<"all" | DeploymentStatus>("all");
   const [q, setQ] = useState("");
+  const pages = useDeploymentPages(app === "all" ? null : app);
+  const loaded = pages.data?.pages.flat() ?? [];
 
   const serverName = (id: string) => servers?.find((s) => s.id === id)?.name;
-  const list = (deployments.data ?? []).filter(
+  const list = loaded.filter(
     (d) =>
-      (app === "all" || d.application_id === app) &&
       (status === "all" || d.status === status) &&
       `${d.id} ${d.app_name} ${d.requested_ref} ${d.commit_sha} ${d.commit_message} ${d.image_ref}`.toLowerCase().includes(q.trim().toLowerCase()),
   );
@@ -46,7 +47,7 @@ export function DeploymentList() {
         </div>
       </div>
       <div className="mt-6">
-        {deployments.isLoading ? (
+        {pages.isLoading ? (
           <div className="skeleton h-64 rounded-xl" />
         ) : list.length ? (
           <Card className="overflow-hidden">
@@ -55,9 +56,12 @@ export function DeploymentList() {
             ))}
           </Card>
         ) : (
-          <EmptyState icon="rocket" title={deployments.data?.length ? "No deployments found" : "No deployments yet"}>
-            {deployments.data?.length ? "Nothing matches the current filters." : "Deployments appear here when you create or redeploy an application."}
+          <EmptyState icon="rocket" title={loaded.length ? "No deployments found" : "No deployments yet"}>
+            {loaded.length ? "Nothing matches the current filters." : "Deployments appear here when you create or redeploy an application."}
           </EmptyState>
+        )}
+        {loaded.length > 0 && (
+          <LoadMore hasMore={!!pages.hasNextPage} loading={pages.isFetchingNextPage} onLoad={() => pages.fetchNextPage()} label="deployments" />
         )}
       </div>
     </Container>

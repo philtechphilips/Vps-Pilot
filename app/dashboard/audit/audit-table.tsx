@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar, Badge, Button, Callout, Container, EmptyState, Mono, SearchBar, Select, Table, Td, Th, type Tone } from "@/components/ui";
+import { LoadMore } from "@/components/dashboard/load-more";
+import { Avatar, Badge, Callout, Container, EmptyState, Mono, SearchBar, Select, Table, Td, Th, type Tone } from "@/components/ui";
 import { type AuditEntry, useAuditLog } from "@/lib/api/jobs";
 import { formatDate } from "@/lib/format";
 
@@ -97,12 +98,8 @@ export function AuditTable() {
             </tbody>
           </Table>
         )}
-        {log.hasNextPage && (
-          <div className="mt-4 flex justify-center">
-            <Button variant="secondary" size="sm" disabled={log.isFetchingNextPage} onClick={() => log.fetchNextPage()}>
-              {log.isFetchingNextPage ? "Loading…" : "Load more"}
-            </Button>
-          </div>
+        {!!log.data?.pages[0]?.length && (
+          <LoadMore hasMore={!!log.hasNextPage} loading={log.isFetchingNextPage} onLoad={() => log.fetchNextPage()} label="events" />
         )}
       </div>
     </Container>
