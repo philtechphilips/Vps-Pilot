@@ -1,3 +1,4 @@
+import { TopologyDiagram } from "@/components/docs/diagrams";
 import { A, C, Callout, CardLink, Cards, CodeBlock, H2, H3, Ol, P, Step, Steps, Table, Ul } from "@/components/docs/prose";
 
 export function Introduction() {
@@ -33,20 +34,7 @@ export function Introduction() {
         <strong>privileged helper</strong> that performs a fixed list of operations for it. The agent asks for work; the control plane never
         connects in.
       </P>
-      <CodeBlock
-        lang="text"
-        title="topology"
-        code={`
- Browser ──▶ Dashboard (Next.js) ──/api/*──▶ API (FastAPI) ──▶ PostgreSQL
-                                                 ▲
-                         outbound HTTPS only     │  heartbeat · metrics · jobs
-                ┌────────────────────────────────┼────────────────────────┐
-                │ server-1                       │ server-2               │
-                │ vpspilot-agent  (user vpspilot)│ vpspilot-agent         │
-                │ vpspilot-helper (root, socket) │ vpspilot-helper        │
-                │ Docker · Caddy · your apps     │ Docker · databases     │
-                └────────────────────────────────┴────────────────────────┘`}
-      />
+      <TopologyDiagram />
       <P>
         Read <A href="/docs/concepts/architecture">Architecture</A> for the full picture and{" "}
         <A href="/docs/concepts/security">Security Model</A> for what each part is allowed to do.

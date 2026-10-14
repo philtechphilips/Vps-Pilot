@@ -1,3 +1,4 @@
+import { JobStatesDiagram } from "@/components/docs/diagrams";
 import { A, C, Callout, CodeBlock, H2, H3, Ol, P, Table, Ul } from "@/components/docs/prose";
 
 export function Architecture() {
@@ -96,7 +97,7 @@ export function Jobs() {
       </P>
 
       <H2>Job lifecycle</H2>
-      <CodeBlock lang="text" code={`queued ──▶ running ──▶ succeeded\n   │           └─────▶ failed\n   ├─────────────────▶ canceled\n   └─────────────────▶ expired   (never claimed in time)`} />
+      <JobStatesDiagram />
       <Ul>
         <li>An agent runs one job at a time, in a worker thread, so heartbeats keep flowing during long builds.</li>
         <li>Progress is streamed as events (steps, info, warnings, errors) that the dashboard shows live.</li>
