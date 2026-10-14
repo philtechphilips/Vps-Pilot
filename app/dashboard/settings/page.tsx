@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionsCard } from "@/components/auth/sessions-card";
 import { TwoFactorCard } from "@/components/auth/two-factor-card";
+import { AlertChannelsCard } from "@/components/dashboard/alert-channels";
 import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
 import { EnrollmentTokensCard, PasswordCard, PlatformCards, VersionCard } from "@/components/dashboard/platform-settings";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
@@ -59,8 +60,9 @@ export default function SettingsPage() {
             <GitHubCard />
           </div>
 
-          <div id="notifications" className="scroll-mt-20">
+          <div id="notifications" className="scroll-mt-20 space-y-8">
             <NotificationSettingsCard />
+            <AlertChannelsCard />
           </div>
 
           <div id="storage" className="scroll-mt-20">

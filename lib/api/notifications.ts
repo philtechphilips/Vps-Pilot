@@ -76,3 +76,67 @@ export function useUpdateNotificationSettings() {
     onSuccess: (data) => queryClient.setQueryData(notificationKeys.settings, data),
   });
 }
+
+/* Alert channels (shared by all admins) */
+
+export type ChannelKind = "webhook" | "slack" | "telegram";
+export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded";
+
+export type AlertChannel = {
+  id: string;
+  kind: ChannelKind;
+  name: string;
+  target_label: string;
+  events: ChannelEvent[];
+  enabled: boolean;
+  created_by: string;
+  created_at: string;
+  last_sent_at: string | null;
+  last_error: string | null;
+};
+
+export type ChannelConfig = { url?: string; bot_token?: string; chat_id?: string };
+
+const channelKey = ["notifications", "channels"] as const;
+
+export function useAlertChannels() {
+  return useQuery({
+    queryKey: channelKey,
+    queryFn: () => api<AlertChannel[]>("/notifications/channels", { auth: true }),
+    enabled: useSignedIn(),
+  });
+}
+
+export function useCreateChannel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { kind: ChannelKind; name: string; config: ChannelConfig; events: ChannelEvent[] }) =>
+      api<{ channel: AlertChannel; secret: string | null }>("/notifications/channels", { method: "POST", body, auth: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: channelKey }),
+  });
+}
+
+export function useUpdateChannel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; enabled?: boolean; events?: ChannelEvent[]; name?: string; config?: ChannelConfig }) =>
+      api<AlertChannel>(`/notifications/channels/${id}`, { method: "PATCH", body, auth: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: channelKey }),
+  });
+}
+
+export function useDeleteChannel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/notifications/channels/${id}`, { method: "DELETE", auth: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: channelKey }),
+  });
+}
+
+export function useTestChannel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api<AlertChannel>(`/notifications/channels/${id}/test`, { method: "POST", auth: true }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: channelKey }),
+  });
+}
