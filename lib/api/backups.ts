@@ -46,7 +46,16 @@ export type BackupSettings = {
   prefix: string | null;
   has_credentials: boolean;
   keep_local: boolean;
+  provider: "s3" | "gdrive";
+  gdrive: { client_id: string | null; has_secret: boolean; connected: boolean; account: string | null; folder_id: string | null; redirect_uri: string };
   updated_at: string | null;
+};
+
+export type BackupSettingsInput = Partial<Omit<BackupSettings, "gdrive" | "has_credentials" | "updated_at">> & {
+  access_key?: string;
+  secret_key?: string;
+  gdrive_client_id?: string;
+  gdrive_client_secret?: string;
 };
 
 export type BackupSummary = { size: number; count: number; failed_24h: number; verified: number };
@@ -125,7 +134,20 @@ export function useBackupAction() {
 export function useSaveBackupSettings() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: Partial<BackupSettings> & { access_key?: string; secret_key?: string }) => api<BackupSettings>("/backups/settings", { method: "PUT", body, auth: true }),
+    mutationFn: (body: BackupSettingsInput) => api<BackupSettings>("/backups/settings", { method: "PUT", body, auth: true }),
+    onSuccess: (data) => queryClient.setQueryData(["backups", "settings"], data),
+  });
+}
+
+/** Start Google sign-in: returns the consent URL to open. */
+export function useConnectDrive() {
+  return useMutation({ mutationFn: () => api<{ url: string }>("/backups/gdrive/connect", { method: "POST", auth: true }) });
+}
+
+export function useDisconnectDrive() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<BackupSettings>("/backups/gdrive/connection", { method: "DELETE", auth: true }),
     onSuccess: (data) => queryClient.setQueryData(["backups", "settings"], data),
   });
 }

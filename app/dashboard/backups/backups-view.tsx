@@ -43,7 +43,9 @@ export function BackupsView() {
           {
             k: "Off-host storage",
             v: settings.data?.storage_enabled ? "On" : "Off",
-            sub: settings.data?.storage_enabled ? `${settings.data.bucket} · AES-256` : "only on the server · encrypted",
+            sub: settings.data?.storage_enabled
+              ? `${settings.data.provider === "gdrive" ? "Google Drive" : settings.data.bucket} · AES-256`
+              : "only on the server · encrypted",
           },
         ].map((x) => (
           <Card key={x.k} className="p-4">
@@ -59,9 +61,9 @@ export function BackupsView() {
           <span className="text-muted">
             They&apos;re encrypted, but a lost server takes its backups with it.{" "}
             <Link href="/dashboard/settings#storage" className="text-fg underline underline-offset-2">
-              Add S3-compatible storage
+              Add off-host storage
             </Link>{" "}
-            (AWS S3, Cloudflare R2, Backblaze B2, MinIO…) to keep a copy elsewhere.
+            (Cloudflare R2, AWS S3, Backblaze B2, Google Drive…) to keep a copy elsewhere.
           </span>
         </Callout>
       )}
