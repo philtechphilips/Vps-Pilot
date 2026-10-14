@@ -190,7 +190,11 @@ export function RuntimeLogsView() {
           </div>
         </div>
         <p className="text-xs text-subtle">
-          What the app writes to stdout and stderr, read from its container on {app.data?.server_name ?? "the server"}. Docker keeps the last 30 MB per app.
+          {app.data?.runtime === "systemd"
+            ? `What the app writes to stdout and stderr, read from the systemd journal (vp-${app.data.name}) on ${app.data.server_name ?? "the server"}.`
+            : app.data?.runtime === "compose"
+              ? `What the ${app.data.compose_service ?? "public"} service writes to stdout and stderr on ${app.data.server_name ?? "the server"}. Docker keeps the last 30 MB per container.`
+              : `What the app writes to stdout and stderr, read from its container on ${app.data?.server_name ?? "the server"}. Docker keeps the last 30 MB per app.`}
         </p>
       </Container>
     </>

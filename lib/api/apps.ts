@@ -36,12 +36,17 @@ export type DeploymentDetail = Deployment & {
 
 export type EnvVar = { key: string; secret: boolean; value: string | null };
 
+/** docker: a container; systemd: a native Node.js/Python release; compose: the repo's compose file. */
+export type Runtime = "docker" | "systemd" | "compose";
+
+export const runtimeLabel: Record<Runtime, string> = { docker: "Docker", systemd: "systemd", compose: "Compose" };
+
 export type App = {
   id: string;
   name: string;
   server_id: string;
   server_name: string | null;
-  runtime: string;
+  runtime: Runtime;
   source_type: "git" | "image";
   repo_url: string | null;
   github_repo: string | null;
@@ -52,6 +57,8 @@ export type App = {
   build_context: string;
   build_command: string | null;
   start_command: string | null;
+  compose_file: string | null;
+  compose_service: string | null;
   container_port: number;
   host_port: number;
   health_path: string;
@@ -75,6 +82,9 @@ export type AppCreate = {
     | { type: "git"; branch: string; installation_id: number; repo_id: number }
     | { type: "image"; image: string };
   auto_deploy?: boolean;
+  runtime?: Runtime;
+  compose_file?: string | null;
+  compose_service?: string | null;
   dockerfile?: string;
   build_context?: string;
   build_command?: string | null;
@@ -97,6 +107,8 @@ export type AppUpdate = Partial<
     | "build_context"
     | "build_command"
     | "start_command"
+    | "compose_file"
+    | "compose_service"
     | "container_port"
     | "host_port"
     | "health_path"

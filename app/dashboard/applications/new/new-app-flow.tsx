@@ -7,7 +7,7 @@ import { EnvEditor, type EnvDraft, envPayload, envProblem, repoName } from "@/co
 import { RepoPicker } from "@/components/github/repo-picker";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
-import { useCreateApp } from "@/lib/api/apps";
+import { type Runtime, useCreateApp } from "@/lib/api/apps";
 import type { GitHubRepo } from "@/lib/api/github";
 import { useServers } from "@/lib/api/servers";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,32 @@ type SourceType = "git" | "image";
 const GIT_URL = /^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?\/[A-Za-z0-9._~/-]+$/;
 const IMAGE = /^[a-z0-9][a-z0-9._/:@-]{0,299}$/;
 const NAME = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+
+const SERVICE = /^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,62}$/;
+
+const RUNTIMES: { value: Runtime; title: string; hint: string }[] = [
+  { value: "docker", title: "Docker", hint: "Dockerfile, or a detected stack in a container" },
+  { value: "systemd", title: "systemd", hint: "Node.js or Python on the server, no Docker" },
+  { value: "compose", title: "Compose", hint: "Your compose.yaml, with its services" },
+];
+
+const STEPS: Record<Runtime, string[]> = {
+  docker: [
+    "Build or pull, then start a candidate on a private port.",
+    "Health-check the candidate. If it fails, nothing changes.",
+    "Swap it in on the app’s port. If that fails, the previous version is restored.",
+  ],
+  systemd: [
+    "Build a new release folder as the app’s own user, in a sandbox.",
+    "Start it on a spare port and health-check it. If it fails, nothing changes.",
+    "Switch the service to it. If that fails, the previous release is restored.",
+  ],
+  compose: [
+    "Check the compose file (no privileged or host access) and build its images.",
+    "Start the services and health-check the public one.",
+    "If that fails, the previous release is started again.",
+  ],
+};
 
 const slug = (s: string) =>
   s
@@ -38,6 +64,9 @@ export function NewAppFlow() {
   const create = useCreateApp();
 
   const [source, setSource] = useState<SourceType>("git");
+  const [chosenRuntime, setRuntime] = useState<Runtime>("docker");
+  const [composeFile, setComposeFile] = useState("");
+  const [composeService, setComposeService] = useState("");
   const [repo, setRepo] = useState("");
   const [branch, setBranch] = useState("main");
   const [picked, setPicked] = useState<GitHubRepo | null>(null);
@@ -60,6 +89,7 @@ export function NewAppFlow() {
   const usable = (servers ?? []).filter((s) => s.enrolled_at && s.status !== "revoked");
   const target = serverId || usable.find((s) => s.status === "online")?.id || usable[0]?.id || "";
   const appName = nameTouched ? name : suggestName(source, picked ? picked.clone_url : repo, image);
+  const runtime: Runtime = source === "git" ? chosenRuntime : "docker";
 
   const problem =
     source === "git" && !picked && !GIT_URL.test(repo.trim())
@@ -70,11 +100,13 @@ export function NewAppFlow() {
           ? "Name: lowercase letters, numbers and dashes"
           : !target
             ? "Enroll a server first"
-            : !(Number(port) >= 1 && Number(port) <= 65535)
+            : runtime !== "systemd" && !(Number(port) >= 1 && Number(port) <= 65535)
               ? "Enter the port your app listens on"
               : !healthPath.startsWith("/")
                 ? "The health check path starts with /"
-                : envProblem(env);
+                : runtime === "compose" && composeService.trim() && !SERVICE.test(composeService.trim())
+                  ? "Service names use letters, numbers, dots, dashes and underscores"
+                  : envProblem(env);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,15 +122,18 @@ export function NewAppFlow() {
               ? { type: "git", branch: branch.trim() || picked.default_branch, installation_id: picked.installation_id, repo_id: picked.id }
               : { type: "git", url: repo.trim().replace(/\.git$/, ""), branch: branch.trim() || "main" },
         auto_deploy: !!picked && autoDeploy,
+        runtime,
+        ...(runtime === "compose" ? { compose_file: composeFile.trim() || null, compose_service: composeService.trim() || null } : {}),
         dockerfile: dockerfile.trim() || "Dockerfile",
         build_context: context.trim() || ".",
-        build_command: source === "git" ? buildCommand.trim() || null : null,
-        start_command: source === "git" ? startCommand.trim() || null : null,
-        container_port: Number(port),
+        build_command: source === "git" && runtime !== "compose" ? buildCommand.trim() || null : null,
+        start_command: source === "git" && runtime !== "compose" ? startCommand.trim() || null : null,
+        // Native apps listen on $PORT (their public port); this is unused.
+        container_port: runtime === "systemd" ? 3000 : Number(port),
         health_path: healthPath.trim(),
         health_timeout_seconds: Number(healthTimeout) || 60,
-        cpu_limit: cpu.trim() || null,
-        memory_limit: memory.trim() || null,
+        cpu_limit: runtime === "compose" ? null : cpu.trim() || null,
+        memory_limit: runtime === "compose" ? null : memory.trim() || null,
         env: envPayload(env),
       },
       {
@@ -147,11 +182,40 @@ export function NewAppFlow() {
               autoDeploy={autoDeploy}
               onAutoDeploy={setAutoDeploy}
             />
+            <div>
+              <Label>Run as</Label>
+              <div role="radiogroup" className="grid gap-2 sm:grid-cols-3">
+                {RUNTIMES.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={runtime === r.value}
+                    onClick={() => setRuntime(r.value)}
+                    className={cn(
+                      "rounded-md border px-3 py-2.5 text-left transition-colors",
+                      runtime === r.value ? "border-accent bg-accent/10" : "border-line hover:border-line-strong",
+                    )}
+                  >
+                    <span className="block text-sm font-medium">{r.title}</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-subtle">{r.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="text-xs leading-relaxed text-subtle">
-              No Dockerfile? Node.js, Bun, Python, Go, Rust and static sites are detected and built automatically.{" "}
-              <a href="/#stacks" target="_blank" className="text-muted underline underline-offset-2 hover:text-fg">
-                See supported stacks
-              </a>
+              {runtime === "docker" ? (
+                <>
+                  No Dockerfile? Node.js, Bun, Python, Go, Rust and static sites are detected and built automatically.{" "}
+                  <a href="/#stacks" target="_blank" className="text-muted underline underline-offset-2 hover:text-fg">
+                    See supported stacks
+                  </a>
+                </>
+              ) : runtime === "systemd" ? (
+                "Node.js (npm, pnpm, Yarn) and Python (pip, Poetry, uv, Pipenv) are detected; the right Node.js version is installed if the server lacks it. Your app must listen on $PORT. Needs agent 1.1.0."
+              ) : (
+                "Privileged mode, host networking, devices and mounts outside the repository are refused. Published ports are replaced: VPSPilot publishes the public service. Needs agent 1.1.0."
+              )}
             </p>
           </div>
         ) : (
@@ -171,9 +235,9 @@ export function NewAppFlow() {
             <Icon name="shield-check" size={15} className="text-accent-fg" /> How releases work
           </div>
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed">
-            <li>Build or pull, then start a candidate on a private port.</li>
-            <li>Health-check the candidate. If it fails, nothing changes.</li>
-            <li>Swap it in on the app’s port. If that fails, the previous version is restored.</li>
+            {STEPS[runtime].map((step) => (
+              <li key={step}>{step}</li>
+            ))}
           </ol>
         </div>
       </Card>
@@ -216,12 +280,21 @@ export function NewAppFlow() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label htmlFor="port" hint="inside the container">
-                Port
-              </Label>
-              <Input id="port" inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ""))} className="font-mono" />
-            </div>
+            {runtime === "systemd" ? (
+              <div>
+                <Label>Port</Label>
+                <div className="flex h-10 items-center rounded-md border border-line bg-bg-200 px-3 text-[13px] text-muted">
+                  Your app listens on <span className="ml-1 font-mono text-fg">$PORT</span>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Label htmlFor="port" hint={runtime === "compose" ? "of the public service" : "inside the container"}>
+                  Port
+                </Label>
+                <Input id="port" inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ""))} className="font-mono" />
+              </div>
+            )}
             <div>
               <Label htmlFor="hc" hint="must return 2xx/3xx">
                 Health check
@@ -238,30 +311,51 @@ export function NewAppFlow() {
             <div className="grid gap-4 border-t border-line p-4 sm:grid-cols-2">
               {source === "git" && (
                 <>
-                  <div>
-                    <Label htmlFor="df" hint="used if present">
-                      Dockerfile
-                    </Label>
-                    <Input id="df" className="font-mono" value={dockerfile} onChange={(e) => setDockerfile(e.target.value)} />
-                  </div>
+                  {runtime === "docker" && (
+                    <div>
+                      <Label htmlFor="df" hint="used if present">
+                        Dockerfile
+                      </Label>
+                      <Input id="df" className="font-mono" value={dockerfile} onChange={(e) => setDockerfile(e.target.value)} />
+                    </div>
+                  )}
                   <div>
                     <Label htmlFor="ctx" hint="app folder">
                       Root directory
                     </Label>
                     <Input id="ctx" className="font-mono" value={context} onChange={(e) => setContext(e.target.value)} />
                   </div>
-                  <div>
-                    <Label htmlFor="bc" hint="no Dockerfile only">
-                      Build command
-                    </Label>
-                    <Input id="bc" className="font-mono" placeholder="detected, e.g. npm run build" value={buildCommand} onChange={(e) => setBuildCommand(e.target.value)} />
-                  </div>
-                  <div>
-                    <Label htmlFor="sc" hint="no Dockerfile only">
-                      Start command
-                    </Label>
-                    <Input id="sc" className="font-mono" placeholder="detected, e.g. npm start" value={startCommand} onChange={(e) => setStartCommand(e.target.value)} />
-                  </div>
+                  {runtime === "compose" ? (
+                    <>
+                      <div>
+                        <Label htmlFor="cf" hint="in the root directory">
+                          Compose file
+                        </Label>
+                        <Input id="cf" className="font-mono" placeholder="compose.yaml (found automatically)" value={composeFile} onChange={(e) => setComposeFile(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label htmlFor="cs" hint="receives traffic">
+                          Public service
+                        </Label>
+                        <Input id="cs" className="font-mono" placeholder="needed with 2+ services" value={composeService} onChange={(e) => setComposeService(e.target.value)} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <Label htmlFor="bc" hint={runtime === "docker" ? "no Dockerfile only" : undefined}>
+                          Build command
+                        </Label>
+                        <Input id="bc" className="font-mono" placeholder="detected, e.g. npm run build" value={buildCommand} onChange={(e) => setBuildCommand(e.target.value)} />
+                      </div>
+                      <div>
+                        <Label htmlFor="sc" hint={runtime === "docker" ? "no Dockerfile only" : undefined}>
+                          Start command
+                        </Label>
+                        <Input id="sc" className="font-mono" placeholder="detected, e.g. npm start" value={startCommand} onChange={(e) => setStartCommand(e.target.value)} />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
               <div>
@@ -270,7 +364,7 @@ export function NewAppFlow() {
                 </Label>
                 <Input id="hct" inputMode="numeric" value={healthTimeout} onChange={(e) => setHealthTimeout(e.target.value.replace(/\D/g, ""))} />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className={cn("grid grid-cols-2 gap-2", runtime === "compose" && "hidden")}>
                 <div>
                   <Label htmlFor="cpu">CPUs</Label>
                   <Input id="cpu" placeholder="no limit" value={cpu} onChange={(e) => setCpu(e.target.value)} />

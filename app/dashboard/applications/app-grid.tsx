@@ -5,7 +5,7 @@ import { useState } from "react";
 import { appUrl, DeploymentStatusLabel, shortSha, sourceLabel } from "@/components/apps/app-ui";
 import { Icon } from "@/components/icons";
 import { Badge, ButtonLink, Container, EmptyState, SearchBar } from "@/components/ui";
-import { useApps } from "@/lib/api/apps";
+import { runtimeLabel, useApps } from "@/lib/api/apps";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
 
@@ -90,7 +90,7 @@ export function AppGrid() {
 
                 <div className="mt-4 flex items-center gap-2 border-t border-line pt-3 text-xs text-muted">
                   {latest ? <DeploymentStatusLabel status={latest.status} /> : <span className="text-subtle">Never deployed</span>}
-                  <Badge className="ml-auto">{a.runtime}</Badge>
+                  <Badge className="ml-auto">{runtimeLabel[a.runtime] ?? a.runtime}</Badge>
                   <span className="truncate text-subtle">{a.server_name}</span>
                 </div>
               </Link>

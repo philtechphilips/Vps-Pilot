@@ -7,7 +7,7 @@ import { appUrl, DeploymentStatusLabel, repoName, shortSha, triggerLabel } from 
 import { DetailHeader, InfoGrid } from "@/components/dashboard/detail";
 import { Icon } from "@/components/icons";
 import { Avatar, Badge, Button, buttonClass, Callout, Card, Container, EmptyState, Mono, SectionTitle } from "@/components/ui";
-import { type DeploymentDetail, isDeploying, useApp, useDeploy, useDeployment, useRollback } from "@/lib/api/apps";
+import { type DeploymentDetail, isDeploying, runtimeLabel, useApp, useDeploy, useDeployment, useRollback } from "@/lib/api/apps";
 import { useCancelJob } from "@/lib/api/jobs";
 import { useServers } from "@/lib/api/servers";
 import { formatDate, formatDuration, timeAgo } from "@/lib/format";
@@ -200,7 +200,7 @@ export function DeploymentView() {
                 label: "Target",
                 value: a ? (
                   <Link href={`/dashboard/servers/${d.server_id}`} className="hover:underline">
-                    {a.server_name} · Docker · port {a.host_port}
+                    {a.server_name} · {runtimeLabel[a.runtime] ?? a.runtime} · port {a.host_port}
                   </Link>
                 ) : (
                   "—"

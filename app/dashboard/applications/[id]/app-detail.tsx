@@ -19,7 +19,7 @@ import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import { DetailHeader, InfoGrid } from "@/components/dashboard/detail";
 import { Icon } from "@/components/icons";
 import { Badge, Button, ButtonLink, buttonClass, Callout, Card, Container, EmptyState, FormCard, Input, Label, Mono, SectionTitle } from "@/components/ui";
-import { type App, isDeploying, useApp, useAppDeployments, useDeleteApp, useDeploy, useRollback, useUpdateApp } from "@/lib/api/apps";
+import { type App, isDeploying, runtimeLabel, useApp, useAppDeployments, useDeleteApp, useDeploy, useRollback, useUpdateApp } from "@/lib/api/apps";
 import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
@@ -368,6 +368,8 @@ function SettingsSection({ app }: { app: App }) {
     build_context: app.build_context,
     build_command: app.build_command ?? "",
     start_command: app.start_command ?? "",
+    compose_file: app.compose_file ?? "",
+    compose_service: app.compose_service ?? "",
     container_port: String(app.container_port),
     host_port: String(app.host_port),
     health_path: app.health_path,
@@ -393,6 +395,7 @@ function SettingsSection({ app }: { app: App }) {
               start_command: form.start_command.trim() || null,
             }
           : { image: form.image.trim() }),
+        ...(app.runtime === "compose" ? { compose_file: form.compose_file.trim() || null, compose_service: form.compose_service.trim() || null } : {}),
         container_port: Number(form.container_port),
         host_port: Number(form.host_port),
         health_path: form.health_path.trim(),
@@ -408,7 +411,19 @@ function SettingsSection({ app }: { app: App }) {
     <FormCard
       title="Build & Runtime"
       description="How the next deployment is built and checked. A candidate must pass the health check before it replaces the live version."
-      footer={update.error ? <span className="text-err">{update.error.message}</span> : saved ? "Saved. Changes apply on the next deployment." : `Port ${app.host_port} on ${app.server_name ?? "the server"} forwards to port ${app.container_port} in the container.`}
+      footer={
+        update.error ? (
+          <span className="text-err">{update.error.message}</span>
+        ) : saved ? (
+          "Saved. Changes apply on the next deployment."
+        ) : app.runtime === "systemd" ? (
+          `Runs as the systemd service vp-${app.name} and listens on port ${app.host_port} ($PORT) on ${app.server_name ?? "the server"}.`
+        ) : app.runtime === "compose" ? (
+          `Port ${app.host_port} on ${app.server_name ?? "the server"} forwards to port ${app.container_port} of the ${app.compose_service ?? "public"} service.`
+        ) : (
+          `Port ${app.host_port} on ${app.server_name ?? "the server"} forwards to port ${app.container_port} in the container.`
+        )
+      }
       action={
         <Button variant="primary" size="sm" disabled={update.isPending} onClick={save}>
           Save
@@ -419,24 +434,35 @@ function SettingsSection({ app }: { app: App }) {
         {app.source_type === "git" ? (
           <>
             <Field id="branch" label="Branch" value={form.branch} onChange={set("branch")} mono />
-            <Field id="dockerfile" label="Dockerfile (if present)" value={form.dockerfile} onChange={set("dockerfile")} mono />
+            {app.runtime === "docker" && <Field id="dockerfile" label="Dockerfile (if present)" value={form.dockerfile} onChange={set("dockerfile")} mono />}
             <Field id="context" label="Root directory" value={form.build_context} onChange={set("build_context")} mono />
-            <div className="sm:col-span-3 grid gap-4 sm:grid-cols-2">
-              <Field id="buildcmd" label="Build command (no Dockerfile)" value={form.build_command} onChange={set("build_command")} placeholder="detected automatically" mono />
-              <Field id="startcmd" label="Start command (no Dockerfile)" value={form.start_command} onChange={set("start_command")} placeholder="detected automatically" mono />
-            </div>
+            {app.runtime === "compose" ? (
+              <>
+                <Field id="composefile" label="Compose file" value={form.compose_file} onChange={set("compose_file")} placeholder="compose.yaml" mono />
+                <Field id="composeservice" label="Public service" value={form.compose_service} onChange={set("compose_service")} placeholder="the only service" mono />
+              </>
+            ) : (
+              <div className="sm:col-span-3 grid gap-4 sm:grid-cols-2">
+                <Field id="buildcmd" label={app.runtime === "docker" ? "Build command (no Dockerfile)" : "Build command"} value={form.build_command} onChange={set("build_command")} placeholder="detected automatically" mono />
+                <Field id="startcmd" label={app.runtime === "docker" ? "Start command (no Dockerfile)" : "Start command"} value={form.start_command} onChange={set("start_command")} placeholder="detected automatically" mono />
+              </div>
+            )}
           </>
         ) : (
           <div className="sm:col-span-3">
             <Field id="image" label="Image" value={form.image} onChange={set("image")} mono />
           </div>
         )}
-        <Field id="port" label="Container port" value={form.container_port} onChange={set("container_port")} mono />
+        {app.runtime !== "systemd" && <Field id="port" label={app.runtime === "compose" ? "Service port" : "Container port"} value={form.container_port} onChange={set("container_port")} mono />}
         <Field id="hostport" label="Public port (on the server)" value={form.host_port} onChange={set("host_port")} mono />
         <Field id="hc" label="Health check path" value={form.health_path} onChange={set("health_path")} mono />
         <Field id="hct" label="Health timeout (s)" value={form.health_timeout_seconds} onChange={set("health_timeout_seconds")} />
-        <Field id="cpu" label="CPUs" value={form.cpu_limit} onChange={set("cpu_limit")} placeholder="no limit" />
-        <Field id="mem" label="Memory" value={form.memory_limit} onChange={set("memory_limit")} placeholder="e.g. 512m" />
+        {app.runtime !== "compose" && (
+          <>
+            <Field id="cpu" label="CPUs" value={form.cpu_limit} onChange={set("cpu_limit")} placeholder="no limit" />
+            <Field id="mem" label="Memory" value={form.memory_limit} onChange={set("memory_limit")} placeholder="e.g. 512m" />
+          </>
+        )}
         <div>
           <Label>Source</Label>
           <div className="flex h-10 items-center gap-2 truncate rounded-md border border-line bg-bg-200 px-3 text-[13px] text-muted">
@@ -448,7 +474,7 @@ function SettingsSection({ app }: { app: App }) {
             ) : (
               <span className="truncate">{app.source_type === "git" ? repoName(app.repo_url) : "Container image"}</span>
             )}
-            <Badge className="ml-auto">{app.runtime}</Badge>
+            <Badge className="ml-auto">{runtimeLabel[app.runtime] ?? app.runtime}</Badge>
           </div>
         </div>
         {app.github_repo && (
