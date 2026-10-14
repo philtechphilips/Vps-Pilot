@@ -252,3 +252,21 @@ export function useRollback() {
     onSuccess: invalidate,
   });
 }
+
+export type TrafficRange = "1h" | "24h" | "7d";
+
+export type Traffic = {
+  points: { ts: string; requests: number; s4xx: number; s5xx: number; p95_ms: number; bytes: number }[];
+  totals: { requests: number; s2xx: number; s3xx: number; s4xx: number; s5xx: number; bytes: number; per_minute: number; error_rate: number; p95_ms: number | null };
+  hosts: string[];
+};
+
+/** Requests through the app's domains, from the proxy's access log. */
+export function useAppTraffic(appId: string | undefined, range: TrafficRange) {
+  return useQuery({
+    queryKey: ["applications", appId, "traffic", range],
+    queryFn: () => api<Traffic>(`/applications/${appId}/requests?range=${range}`, { auth: true }),
+    enabled: useSignedIn() && !!appId,
+    refetchInterval: 60_000,
+  });
+}

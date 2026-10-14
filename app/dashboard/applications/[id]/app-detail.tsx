@@ -23,6 +23,7 @@ import { type App, isDeploying, runtimeLabel, useApp, useAppDeployments, useDele
 import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
+import { TrafficSection } from "./traffic";
 
 export function AppDetailView() {
   const { id } = useParams<{ id: string }>();
@@ -266,6 +267,8 @@ export function AppDetailView() {
             )}
           </Card>
         </section>
+
+        <TrafficSection appId={a.id} />
 
         <EnvSection key={`env-${a.id}`} app={a} onRedeploy={() => deploy.mutate(undefined, { onSuccess: (d) => goTo(d.id) })} />
         <SettingsSection key={`settings-${a.id}`} app={a} />
