@@ -24,8 +24,9 @@ import {
 import { formatBytes, timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { dbLabel, dbTone } from "../database-list";
+import { MetricsSection, RedisLoginsTab, TlsCard, TransferTab } from "./extras";
 
-type Tab = "overview" | "connect" | "query" | "users" | "keys" | "settings";
+type Tab = "overview" | "connect" | "query" | "users" | "transfer" | "keys" | "logins" | "settings";
 
 export function DatabaseView() {
   const { id } = useParams<{ id: string }>();
@@ -63,10 +64,14 @@ export function DatabaseView() {
     { id: "overview", label: "Overview", icon: "activity" },
     { id: "connect", label: "Connect", icon: "link" },
     ...(redis
-      ? [{ id: "keys" as Tab, label: "Keys", icon: "key" as IconName }]
+      ? [
+          { id: "keys" as Tab, label: "Keys", icon: "key" as IconName },
+          { id: "logins" as Tab, label: "Logins", icon: "users" as IconName },
+        ]
       : [
           { id: "query" as Tab, label: "Query", icon: "terminal" as IconName },
           { id: "users" as Tab, label: "Users & Databases", icon: "users" as IconName },
+          { id: "transfer" as Tab, label: "Import & Export", icon: "upload" as IconName },
         ]),
     { id: "settings", label: "Settings", icon: "settings" },
   ];
@@ -143,6 +148,8 @@ export function DatabaseView() {
         {tab === "query" && (ready ? <QueryTab d={d} /> : <NotReady />)}
         {tab === "users" && (ready ? <UsersTab d={d} /> : <NotReady />)}
         {tab === "keys" && (ready ? <KeysTab d={d} /> : <NotReady />)}
+        {tab === "logins" && (ready ? <RedisLoginsTab d={d} /> : <NotReady />)}
+        {tab === "transfer" && (ready ? <TransferTab d={d} /> : <NotReady />)}
         {tab === "settings" && <SettingsTab d={d} />}
       </Container>
     </>
@@ -196,6 +203,7 @@ function Overview({ d, ready }: { d: DatabaseInstance; ready: boolean }) {
         {(stats.isLoading || info.isLoading) && ready ? <Loading /> : <InfoGrid className="lg:grid-cols-3" items={items} />}
         {(stats.error || info.error) && <p className="mt-3 text-sm text-err">{(stats.error ?? info.error)?.message}</p>}
       </Card>
+      <MetricsSection d={d} />
       {!redis && <DatabasesList d={d} ready={ready} />}
       <Card className="p-5 sm:p-6">
         <InfoGrid
@@ -884,6 +892,7 @@ function SettingsTab({ d }: { d: DatabaseInstance }) {
 
   return (
     <>
+      {d.mode === "external" && <TlsCard d={d} />}
       {d.mode === "managed" && (
         <FormCard
           title="Container"

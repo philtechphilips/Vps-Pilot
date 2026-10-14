@@ -6,12 +6,15 @@ import { useState } from "react";
 import { BrandChip } from "@/components/brand-chip";
 import { Icon } from "@/components/icons";
 import { Button, Callout, Card, Input, Label, Select } from "@/components/ui";
-import { DEFAULT_PORTS, ENGINE_BRAND, ENGINE_VERSIONS, type Engine, useCreateDatabase } from "@/lib/api/databases";
+import { DEFAULT_PORTS, ENGINE_BRAND, ENGINE_VERSIONS, type Engine, type TlsMode, useCreateDatabase } from "@/lib/api/databases";
+import { CA_PATTERN, TlsFields } from "../[id]/extras";
 import { useServers } from "@/lib/api/servers";
 import { cn } from "@/lib/utils";
 
 const NAME = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
 const IDENT = /^[a-z_][a-z0-9_]{0,62}$/;
+// Traffic to the server's own localhost never leaves it: TLS isn't needed.
+const LOCAL = /^(127\.\d+\.\d+\.\d+|localhost|\[?::1\]?)$/i;
 
 export function RegisterForm() {
   const router = useRouter();
@@ -28,6 +31,9 @@ export function RegisterForm() {
   const [port, setPort] = useState("");
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
+  const [tlsChoice, setTls] = useState<Exclude<TlsMode, "prefer"> | null>(null);
+  const [ca, setCa] = useState("");
+  const tls = tlsChoice ?? (LOCAL.test(host.trim()) ? "disable" : "verify");
 
   const usable = (servers ?? []).filter((s) => s.enrolled_at && s.status !== "revoked");
   const target = serverId || usable.find((s) => s.status === "online")?.id || usable[0]?.id || "";
@@ -42,7 +48,9 @@ export function RegisterForm() {
         ? "Database names use lowercase letters, numbers and _"
         : mode === "external" && !host.trim()
           ? "Enter the host"
-          : null;
+          : mode === "external" && tls === "verify" && ca.trim() && !CA_PATTERN.test(ca.trim())
+            ? "The CA certificate isn't valid PEM"
+            : null;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +75,8 @@ export function RegisterForm() {
             port: Number(port) || DEFAULT_PORTS[engine],
             ...(redis ? {} : { user: user.trim() || (engine === "postgres" ? "postgres" : "root"), database: database || undefined }),
             ...(password ? { password } : {}),
+            tls_mode: tls,
+            ...(tls === "verify" && ca.trim() ? { ca: ca.trim() } : {}),
           };
     create.mutate(body, { onSuccess: (r) => router.push(`/dashboard/databases/${r.database.id}`) });
   };
@@ -204,6 +214,10 @@ export function RegisterForm() {
                 <Input id="db2" value={database} onChange={(e) => setDatabase(e.target.value.toLowerCase())} className="font-mono" />
               </div>
             )}
+            <div className="sm:col-span-2">
+              <Label>Connection security</Label>
+              <TlsFields mode={tls} onMode={setTls} ca={ca} onCa={setCa} />
+            </div>
           </div>
         )}
 

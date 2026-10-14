@@ -6,6 +6,18 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 
 export type Engine = "postgres" | "mysql" | "mariadb" | "redis";
 
+export type TlsMode = "disable" | "prefer" | "require" | "verify";
+
+export type DbMetric = {
+  ts: string;
+  connections: number | null;
+  max_connections: number | null;
+  size_bytes: number | null;
+  memory_bytes: number | null;
+  keys: number | null;
+  ops_per_sec: number | null;
+};
+
 export type DbStatus = "creating" | "running" | "stopped" | "error" | "removing" | "checking";
 
 export type DatabaseInstance = {
@@ -25,6 +37,9 @@ export type DatabaseInstance = {
   status: DbStatus;
   error: string | null;
   server_version: string | null;
+  /** External only: disable | require | verify (null: client default, older registrations). */
+  tls_mode: TlsMode | null;
+  has_ca: boolean;
   created_by: string;
   created_at: string;
   users: number;
@@ -60,7 +75,7 @@ function useSignedIn() {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-type JobReply<T> = { status: string; error: string | null; data: T | null };
+type JobReply<T> = { status: string; error: string | null; data: T | null; result?: Record<string, unknown> | null };
 
 /** Queue a database operation on the agent and wait for its result. */
 export async function runDbJob<T>(instanceId: string, path: string, body: unknown): Promise<T> {
@@ -77,13 +92,13 @@ export async function runDbJob<T>(instanceId: string, path: string, body: unknow
   throw new ApiError(504, "The agent didn't answer in time. Is the server online?");
 }
 
-/** Wait for any queued job (create, admin actions) to finish. */
-export async function waitForJob(instanceId: string, jobId: string, timeoutMs = 20 * 60_000): Promise<void> {
+/** Wait for any queued job (create, admin actions) to finish; returns its result. */
+export async function waitForJob(instanceId: string, jobId: string, timeoutMs = 20 * 60_000): Promise<Record<string, unknown>> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     await sleep(1200);
     const reply = await api<JobReply<unknown>>(`/databases/${instanceId}/jobs/${jobId}`, { auth: true });
-    if (reply.status === "succeeded") return;
+    if (reply.status === "succeeded") return reply.result ?? {};
     if (reply.status !== "queued" && reply.status !== "running") throw new ApiError(400, reply.error ?? `The operation ${reply.status}`);
   }
   throw new ApiError(504, "Still running; check back in a moment.");
@@ -118,6 +133,16 @@ export function useDbRead<T>(instance: DatabaseInstance | undefined, path: "expl
   });
 }
 
+/** Load samples (every 5 minutes) for the last `hours`. */
+export function useDbMetrics(id: string | undefined, hours = 24) {
+  return useQuery({
+    queryKey: ["databases", id, "metrics", hours],
+    queryFn: () => api<DbMetric[]>(`/databases/${id}/metrics?hours=${hours}`, { auth: true }),
+    enabled: useSignedIn() && !!id,
+    refetchInterval: 60_000,
+  });
+}
+
 export function useConnection(id: string | undefined, enabled: boolean) {
   return useQuery({
     queryKey: dbKeys.connection(id ?? ""),
@@ -139,7 +164,7 @@ export function useCreateDatabase() {
 export function useDbAction(instanceId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ method = "POST", path, body }: { method?: "POST" | "DELETE"; path: string; body?: unknown }) => {
+    mutationFn: async ({ method = "POST", path, body }: { method?: "POST" | "PUT" | "DELETE"; path: string; body?: unknown }) => {
       const reply = await api<{ job_id: string | null }>(`/databases/${instanceId}/${path}`, { method, body, auth: true });
       if (reply.job_id) await waitForJob(instanceId, reply.job_id);
       return reply;
