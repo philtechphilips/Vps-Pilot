@@ -354,7 +354,8 @@ sudo -u vpspilot python3 -m vpspilot_agent status --config /etc/vpspilot/agent.j
           ["The container exited", "The process crashed on start. The log includes the container's last output."],
           ["Port … is already used by the container …", "Another container holds the host port. Pick another port in the app's settings, or stop that container."],
           [<>connection to server at &quot;localhost&quot; … refused</>, <>Inside a container, <C key="h">localhost</C> is the container. Point the app at a managed database (<C key="v">vpdb-&lt;name&gt;</C>) or run it as a systemd app.</>],
-          ["does it listen on $PORT? (systemd apps)", <>The app must listen on <C key="p">$PORT</C> on <C key="z">0.0.0.0</C>.</>],
+          ["The app is up but answers HTTP 404 on /", <>Your app has no page at the health check path (common for APIs). Set it in the app&apos;s settings to a route that returns 200, such as <C key="h">/health</C>.</>],
+          ["Health check failed (no response, systemd apps)", <>The app must listen on <C key="p">$PORT</C> on <C key="z">0.0.0.0</C>.</>],
           ["Service … uses privileged mode (Compose)", "The compose file uses a setting VPSPilot refuses. See Applications → Compose apps."],
           ["No space left on device", <>Check <C key="d">df -h</C> and <C key="s">docker system df</C>. Remove old images with <C key="p2">docker image prune</C>; agents 1.1.0+ clean up after failed deployments.</>],
         ]}
