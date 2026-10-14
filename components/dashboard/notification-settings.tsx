@@ -10,6 +10,7 @@ type Key = keyof Omit<NotificationSettings, "email">;
 const OPTIONS: { key: Key; title: string; desc: string }[] = [
   { key: "email_deploy_success", title: "Deployment succeeded", desc: "A new version passed its health check and is live." },
   { key: "email_deploy_failure", title: "Deployment failed", desc: "A build, health check or release failed. The previous version keeps running." },
+  { key: "email_alerts", title: "Alerts", desc: "An alert fires or resolves (agent offline, resource pressure, app down). Each rule can also be muted in Monitoring." },
 ];
 
 export function NotificationSettingsCard() {

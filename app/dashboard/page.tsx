@@ -1,17 +1,16 @@
 import Link from "next/link";
 import { AppCount, OverviewApps, RecentDeployments } from "@/components/apps/overview-apps";
 import { CodeTexture } from "@/components/code-texture";
-import { AlertList } from "@/components/dashboard/cards";
+import { AlertList, FiringBadge } from "@/components/dashboard/cards";
 import { Gauge } from "@/components/dashboard/fleet-map";
 import { AgentsCard, FleetCard, ServerCount } from "@/components/servers/overview-fleet";
 import { Greeting } from "@/components/dashboard/greeting";
 import { AddNewMenu } from "@/components/dashboard/nav";
 import { Icon, type IconName } from "@/components/icons";
-import { Badge, Card, Container, SectionTitle } from "@/components/ui";
-import { alerts, databases } from "@/lib/data";
+import { Card, Container, SectionTitle } from "@/components/ui";
+import { databases } from "@/lib/data";
 
 export default function OverviewPage() {
-  const firing = alerts.filter((a) => a.state === "firing").length;
 
   const stats: { label: string; value: React.ReactNode; of: string; icon: IconName; href: string }[] = [
     { label: "My Servers", value: <ServerCount />, of: "/ 25", icon: "server", href: "/dashboard/servers" },
@@ -113,7 +112,7 @@ export default function OverviewPage() {
           <RecentDeployments />
         </section>
         <section>
-          <SectionTitle action={<Badge tone="err">{firing} firing</Badge>}>Alerts</SectionTitle>
+          <SectionTitle action={<FiringBadge />}>Alerts</SectionTitle>
           <AlertList limit={5} compact />
         </section>
       </div>

@@ -21,6 +21,7 @@ export type NotificationSettings = {
   email: string;
   email_deploy_success: boolean;
   email_deploy_failure: boolean;
+  email_alerts: boolean;
 };
 
 export const notificationKeys = {
