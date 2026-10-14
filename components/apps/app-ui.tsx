@@ -25,7 +25,7 @@ export const deployLabel: Record<DeploymentStatus, string> = {
   canceled: "Canceled",
 };
 
-export const triggerLabel = { create: "First deploy", manual: "Redeploy", rollback: "Rollback" } as const;
+export const triggerLabel = { create: "First deploy", manual: "Redeploy", rollback: "Rollback", push: "Git push" } as const;
 
 export const shortSha = (sha: string | null | undefined) => (sha ? sha.slice(0, 7) : null);
 

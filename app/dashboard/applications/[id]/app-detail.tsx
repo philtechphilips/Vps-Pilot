@@ -348,6 +348,7 @@ function SettingsSection({ app }: { app: App }) {
     health_timeout_seconds: String(app.health_timeout_seconds),
     cpu_limit: app.cpu_limit ?? "",
     memory_limit: app.memory_limit ?? "",
+    auto_deploy: app.auto_deploy,
   });
   const [saved, setSaved] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,6 +372,7 @@ function SettingsSection({ app }: { app: App }) {
         health_timeout_seconds: Number(form.health_timeout_seconds),
         cpu_limit: form.cpu_limit.trim() || null,
         memory_limit: form.memory_limit.trim().toLowerCase() || null,
+        ...(app.github_repo ? { auto_deploy: form.auto_deploy } : {}),
       },
       { onSuccess: () => setSaved(true) },
     );
@@ -411,10 +413,32 @@ function SettingsSection({ app }: { app: App }) {
           <Label>Source</Label>
           <div className="flex h-10 items-center gap-2 truncate rounded-md border border-line bg-bg-200 px-3 text-[13px] text-muted">
             <Icon name={app.source_type === "git" ? "github" : "container"} size={14} />
-            <span className="truncate">{app.source_type === "git" ? repoName(app.repo_url) : "Container image"}</span>
+            {app.github_repo ? (
+              <a href={`https://github.com/${app.github_repo}`} target="_blank" rel="noreferrer" className="truncate hover:text-fg hover:underline">
+                {app.github_repo}
+              </a>
+            ) : (
+              <span className="truncate">{app.source_type === "git" ? repoName(app.repo_url) : "Container image"}</span>
+            )}
             <Badge className="ml-auto">{app.runtime}</Badge>
           </div>
         </div>
+        {app.github_repo && (
+          <label className="flex cursor-pointer items-center gap-3 sm:col-span-3">
+            <input
+              type="checkbox"
+              checked={form.auto_deploy}
+              onChange={(e) => {
+                setSaved(false);
+                setForm((f) => ({ ...f, auto_deploy: e.target.checked }));
+              }}
+              className="accent-[var(--color-accent)]"
+            />
+            <span className="text-sm">
+              Deploy on every push to <span className="font-mono">{form.branch || app.branch}</span>
+            </span>
+          </label>
+        )}
       </div>
     </FormCard>
   );

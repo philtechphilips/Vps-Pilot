@@ -12,7 +12,7 @@ export type Deployment = {
   server_id: string;
   job_id: string | null;
   status: DeploymentStatus;
-  trigger: "create" | "manual" | "rollback";
+  trigger: "create" | "manual" | "rollback" | "push";
   requested_ref: string | null;
   commit_sha: string | null;
   commit_message: string | null;
@@ -44,6 +44,8 @@ export type App = {
   runtime: string;
   source_type: "git" | "image";
   repo_url: string | null;
+  github_repo: string | null;
+  auto_deploy: boolean;
   branch: string | null;
   image: string | null;
   dockerfile: string;
@@ -68,7 +70,11 @@ export type EnvInput = { key: string; value?: string | null; secret: boolean };
 export type AppCreate = {
   name: string;
   server_id: string;
-  source: { type: "git"; url: string; branch: string } | { type: "image"; image: string };
+  source:
+    | { type: "git"; url: string; branch: string }
+    | { type: "git"; branch: string; installation_id: number; repo_id: number }
+    | { type: "image"; image: string };
+  auto_deploy?: boolean;
   dockerfile?: string;
   build_context?: string;
   build_command?: string | null;
@@ -97,7 +103,7 @@ export type AppUpdate = Partial<
     | "cpu_limit"
     | "memory_limit"
   >
-> & { env?: EnvInput[] };
+> & { env?: EnvInput[]; auto_deploy?: boolean };
 
 export const isDeploying = (s: DeploymentStatus | undefined) => s === "queued" || s === "running";
 

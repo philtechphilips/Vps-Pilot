@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionsCard } from "@/components/auth/sessions-card";
 import { TwoFactorCard } from "@/components/auth/two-factor-card";
+import { GitHubCard } from "@/components/github/github-card";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
 
@@ -11,6 +12,7 @@ const sections = [
   { id: "security", label: "Security" },
   { id: "sessions", label: "Sessions" },
   { id: "enrollment", label: "Enrollment Tokens" },
+  { id: "git", label: "Git" },
   { id: "notifications", label: "Notifications" },
   { id: "storage", label: "Backup Storage" },
   { id: "advanced", label: "Advanced" },
@@ -124,6 +126,10 @@ export default function SettingsPage() {
                 ))}
               </div>
             </FormCard>
+          </div>
+
+          <div id="git" className="scroll-mt-20">
+            <GitHubCard />
           </div>
 
           <div id="notifications" className="scroll-mt-20">

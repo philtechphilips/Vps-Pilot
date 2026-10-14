@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EnvEditor, type EnvDraft, envPayload, envProblem, repoName } from "@/components/apps/app-ui";
+import { RepoPicker } from "@/components/github/repo-picker";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
 import { useCreateApp } from "@/lib/api/apps";
+import type { GitHubRepo } from "@/lib/api/github";
 import { useServers } from "@/lib/api/servers";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +40,8 @@ export function NewAppFlow() {
   const [source, setSource] = useState<SourceType>("git");
   const [repo, setRepo] = useState("");
   const [branch, setBranch] = useState("main");
+  const [picked, setPicked] = useState<GitHubRepo | null>(null);
+  const [autoDeploy, setAutoDeploy] = useState(true);
   const [image, setImage] = useState("");
   const [name, setName] = useState("");
   const [nameTouched, setNameTouched] = useState(false);
@@ -55,11 +59,11 @@ export function NewAppFlow() {
 
   const usable = (servers ?? []).filter((s) => s.enrolled_at && s.status !== "revoked");
   const target = serverId || usable.find((s) => s.status === "online")?.id || usable[0]?.id || "";
-  const appName = nameTouched ? name : suggestName(source, repo, image);
+  const appName = nameTouched ? name : suggestName(source, picked ? picked.clone_url : repo, image);
 
   const problem =
-    source === "git" && !GIT_URL.test(repo.trim())
-      ? "Enter the repository's https:// URL"
+    source === "git" && !picked && !GIT_URL.test(repo.trim())
+      ? "Pick a repository or enter its https:// URL"
       : source === "image" && !IMAGE.test(image.trim())
         ? "Enter an image like nginx:1.27 or ghcr.io/acme/api:v2"
         : !NAME.test(appName)
@@ -79,7 +83,13 @@ export function NewAppFlow() {
       {
         name: appName,
         server_id: target,
-        source: source === "git" ? { type: "git", url: repo.trim().replace(/\.git$/, ""), branch: branch.trim() || "main" } : { type: "image", image: image.trim() },
+        source:
+          source === "image"
+            ? { type: "image", image: image.trim() }
+            : picked
+              ? { type: "git", branch: branch.trim() || picked.default_branch, installation_id: picked.installation_id, repo_id: picked.id }
+              : { type: "git", url: repo.trim().replace(/\.git$/, ""), branch: branch.trim() || "main" },
+        auto_deploy: !!picked && autoDeploy,
         dockerfile: dockerfile.trim() || "Dockerfile",
         build_context: context.trim() || ".",
         build_command: source === "git" ? buildCommand.trim() || null : null,
@@ -127,21 +137,19 @@ export function NewAppFlow() {
 
         {source === "git" ? (
           <div className="mt-5 space-y-4">
-            <div>
-              <Label htmlFor="repo" hint="https only">
-                Repository URL
-              </Label>
-              <Input id="repo" icon="github" placeholder="https://github.com/acme/web" value={repo} onChange={(e) => setRepo(e.target.value)} autoFocus />
-            </div>
-            <div>
-              <Label htmlFor="branch" hint="or a tag / commit">
-                Branch
-              </Label>
-              <Input id="branch" icon="git-branch" value={branch} onChange={(e) => setBranch(e.target.value)} className="font-mono" />
-            </div>
+            <RepoPicker
+              picked={picked}
+              onPick={setPicked}
+              branch={branch}
+              onBranch={setBranch}
+              url={repo}
+              onUrl={setRepo}
+              autoDeploy={autoDeploy}
+              onAutoDeploy={setAutoDeploy}
+            />
             <p className="text-xs leading-relaxed text-subtle">
-              The server clones the repository and builds it with your Dockerfile. No Dockerfile? VPSPilot detects Node.js, Bun, Python, Go, Rust and static sites and
-              builds them for you. Public repositories work today; private repository access is coming with deploy keys.
+              The server clones the repository and builds it with its Dockerfile. No Dockerfile? VPSPilot detects Node.js, Bun, Python, Go, Rust and static sites and builds
+              them for you.
             </p>
           </div>
         ) : (
