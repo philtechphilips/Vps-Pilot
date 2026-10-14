@@ -20,6 +20,7 @@ import { DetailHeader, InfoGrid } from "@/components/dashboard/detail";
 import { Icon } from "@/components/icons";
 import { Badge, Button, ButtonLink, buttonClass, Callout, Card, Container, EmptyState, FormCard, Input, Label, Mono, SectionTitle } from "@/components/ui";
 import { type App, isDeploying, useApp, useAppDeployments, useDeleteApp, useDeploy, useRollback, useUpdateApp } from "@/lib/api/apps";
+import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
 
@@ -29,6 +30,7 @@ export function AppDetailView() {
   const app = useApp(id);
   const deployments = useAppDeployments(id);
   const { data: servers } = useServers();
+  const appDomains = useDomains(id);
   const deploy = useDeploy(id);
   const rollback = useRollback();
   const remove = useDeleteApp();
@@ -61,7 +63,10 @@ export function AppDetailView() {
   const a = app.data;
   const current = a.current_deployment;
   const latest = a.latest_deployment;
-  const url = appUrl(a, servers);
+  const direct = appUrl(a, servers);
+  // Prefer the app's own domain once it's live on the proxy.
+  const primary = appDomains.data?.find((dm) => !dm.redirect_to && dm.status === "active");
+  const url = primary ? domainUrl(primary) : direct;
   const deploying = isDeploying(latest?.status);
   // The most recent successful release that isn't live: the rollback target.
   const previous = deployments.data?.find((d) => d.status === "succeeded" && !d.is_current && d.image_ref);
@@ -160,12 +165,26 @@ export function AppDetailView() {
                     },
                     {
                       label: "Address",
-                      value: url ? (
-                        <a href={url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
-                          {url.replace("http://", "")} <Icon name="external-link" size={12} className="text-subtle" />
-                        </a>
-                      ) : (
-                        <span className="text-muted">port {a.host_port}</span>
+                      value: (
+                        <span className="flex flex-col gap-0.5">
+                          {(appDomains.data ?? [])
+                            .filter((dm) => !dm.redirect_to)
+                            .map((dm) => (
+                              <a key={dm.id} href={domainUrl(dm)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:underline">
+                                {dm.hostname} <Icon name="external-link" size={12} className="text-subtle" />
+                              </a>
+                            ))}
+                          {direct ? (
+                            <a href={direct} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-muted hover:underline">
+                              {direct.replace("http://", "")} <Icon name="external-link" size={12} className="text-subtle" />
+                            </a>
+                          ) : (
+                            <span className="text-muted">port {a.host_port}</span>
+                          )}
+                          <Link href="/dashboard/domains" className="text-xs text-subtle hover:text-fg">
+                            {appDomains.data?.length ? "Manage domains" : "Add a domain"}
+                          </Link>
+                        </span>
                       ),
                     },
                     {
