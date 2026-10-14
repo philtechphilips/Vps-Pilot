@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Badge, Button, Card, FormCard, Input, Label, Mono, type Tone } from "@/components/ui";
+import { ApiError, refreshSession } from "@/lib/api/client";
 import { type Platform, useChangePassword, useEnrollmentTokens, usePlatform, useRevokeEnrollmentToken, useSavePlatform } from "@/lib/api/platform";
 import { timeAgo } from "@/lib/format";
+import { useAuthStore } from "@/lib/stores/auth-store";
 
 export function PlatformCards() {
   const platform = usePlatform();
@@ -163,5 +165,76 @@ export function VersionCard() {
         Upgrade the control plane with <Mono>vpspilot upgrade</Mono> on its server; servers whose agent is older show an upgrade hint on their page.
       </p>
     </Card>
+  );
+}
+
+/** POST the password; save the returned text file. */
+async function downloadKit(password: string): Promise<void> {
+  const send = (token: string | null) =>
+    fetch("/api/v1/platform/recovery-kit", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ password }),
+    });
+  let response = await send(useAuthStore.getState().accessToken);
+  if (response.status === 401 && (await refreshSession())) response = await send(useAuthStore.getState().accessToken);
+  if (!response.ok) {
+    const detail = await response.json().then((b) => b?.detail, () => null);
+    throw new ApiError(response.status, typeof detail === "string" ? detail : "Couldn't create the kit");
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "vpspilot-recovery-kit.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function RecoveryKitCard() {
+  const { data, refetch } = usePlatform();
+  const [password, setPassword] = useState("");
+  const [state, setState] = useState<{ busy: boolean; error?: string; done?: boolean }>({ busy: false });
+
+  const run = async () => {
+    setState({ busy: true });
+    try {
+      await downloadKit(password);
+      setPassword("");
+      setState({ busy: false, done: true });
+      void refetch();
+    } catch (error) {
+      setState({ busy: false, error: (error as Error).message });
+    }
+  };
+
+  return (
+    <FormCard
+      title="Recovery kit"
+      description="The keys that decrypt stored secrets and your database backups, with instructions for restoring without this control plane. If the server is lost and you don't have these, encrypted backups can't be read."
+      footer={
+        state.error ? (
+          <span className="text-err">{state.error}</span>
+        ) : state.done ? (
+          <span className="text-ok">Downloaded. Keep it offline, e.g. in a password manager.</span>
+        ) : data?.recovery_kit_at ? (
+          `Last downloaded ${timeAgo(data.recovery_kit_at)}. Download a new one after rotating keys.`
+        ) : (
+          <span className="text-warn">Never downloaded. Do it once and keep it safe.</span>
+        )
+      }
+      action={
+        <Button variant="primary" size="sm" icon="download" disabled={!password || state.busy} onClick={() => void run()}>
+          {state.busy ? "Preparing…" : "Download kit"}
+        </Button>
+      }
+    >
+      <div className="max-w-sm">
+        <Label htmlFor="kitpw" hint="confirms it's you">
+          Your password
+        </Label>
+        <Input id="kitpw" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && password && void run()} />
+      </div>
+    </FormCard>
   );
 }

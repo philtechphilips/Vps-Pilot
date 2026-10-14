@@ -3,7 +3,7 @@ import { SessionsCard } from "@/components/auth/sessions-card";
 import { TwoFactorCard } from "@/components/auth/two-factor-card";
 import { AlertChannelsCard } from "@/components/dashboard/alert-channels";
 import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
-import { EnrollmentTokensCard, PasswordCard, PlatformCards, VersionCard } from "@/components/dashboard/platform-settings";
+import { EnrollmentTokensCard, PasswordCard, PlatformCards, RecoveryKitCard, VersionCard } from "@/components/dashboard/platform-settings";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
 import { GitHubCard } from "@/components/github/github-card";
 import { Container, PageHeader } from "@/components/ui";
@@ -46,6 +46,7 @@ export default function SettingsPage() {
           <div id="security" className="scroll-mt-20 space-y-8">
             <TwoFactorCard />
             <PasswordCard />
+            <RecoveryKitCard />
           </div>
 
           <div id="sessions" className="scroll-mt-20">

@@ -13,6 +13,7 @@ export type Platform = {
   agent_version: string;
   schema: string | null;
   updated_at: string | null;
+  recovery_kit_at: string | null;
 };
 
 export type EnrollmentTokenRow = {
