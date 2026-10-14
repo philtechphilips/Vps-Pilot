@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { AppCount, DatabaseCount, OverviewApps, RecentDeployments } from "@/components/apps/overview-apps";
+import { AppCount, BackupSize, BackupsCard, DatabaseCount, OverviewApps, RecentDeployments } from "@/components/apps/overview-apps";
 import { CodeTexture } from "@/components/code-texture";
 import { AlertList, FiringBadge } from "@/components/dashboard/cards";
-import { Gauge } from "@/components/dashboard/fleet-map";
 import { AgentsCard, FleetCard, ServerCount } from "@/components/servers/overview-fleet";
 import { Greeting } from "@/components/dashboard/greeting";
 import { AddNewMenu } from "@/components/dashboard/nav";
@@ -15,7 +14,7 @@ export default function OverviewPage() {
     { label: "My Servers", value: <ServerCount />, of: "/ 25", icon: "server", href: "/dashboard/servers" },
     { label: "Applications", value: <AppCount />, of: "/ 200", icon: "box", href: "/dashboard/applications" },
     { label: "My Databases", value: <DatabaseCount />, of: "on your servers", icon: "database", href: "/dashboard/databases" },
-    { label: "Backups", value: "184 GB", of: "/ 500 GB", icon: "archive", href: "/dashboard/backups" },
+    { label: "Backups", value: <BackupSize />, of: "encrypted", icon: "archive", href: "/dashboard/backups" },
   ];
 
   return (
@@ -74,26 +73,7 @@ export default function OverviewPage() {
       {/* Map + gauge */}
       <div className="grid gap-4 xl:grid-cols-[1fr_minmax(360px,0.48fr)]">
         <FleetCard />
-        <Card className="flex flex-col p-5">
-          <h2 className="text-[11px] text-muted">Backup Storage</h2>
-          <div className="flex flex-1 items-center justify-center py-6">
-            <Gauge value={36.8} label="Backup storage used" sub="184.0 GB / 500.00 GB" />
-          </div>
-          <div className="grid grid-cols-3 gap-2 border-t border-line pt-4 text-[11px]">
-            <div>
-              <div className="text-subtle">Verified</div>
-              <div className="mt-0.5 text-fg">3 restores</div>
-            </div>
-            <div>
-              <div className="text-subtle">Failed</div>
-              <div className="mt-0.5 text-err">1 today</div>
-            </div>
-            <div>
-              <div className="text-subtle">Encrypted</div>
-              <div className="mt-0.5 text-fg">7 of 8</div>
-            </div>
-          </div>
-        </Card>
+        <BackupsCard />
       </div>
 
       {/* Activity */}

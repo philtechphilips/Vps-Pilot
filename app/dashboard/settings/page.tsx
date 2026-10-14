@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { SessionsCard } from "@/components/auth/sessions-card";
 import { TwoFactorCard } from "@/components/auth/two-factor-card";
+import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
 import { GitHubCard } from "@/components/github/github-card";
 import { Icon } from "@/components/icons";
-import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
+import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -138,41 +139,7 @@ export default function SettingsPage() {
           </div>
 
           <div id="storage" className="scroll-mt-20">
-            <FormCard
-              title="Backup Storage"
-              description="Off-host destination for encrypted backups. The encryption key is stored separately from the metadata database."
-              footer={
-                <span>
-                  Key <Mono className="text-fg">v3</Mono> · rotated Sep 1 · recovery kit downloaded
-                </span>
-              }
-              action={
-                <Button variant="primary" size="sm">
-                  Save
-                </Button>
-              }
-            >
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <Label htmlFor="prov">Provider</Label>
-                  <Select id="prov" defaultValue="s3">
-                    <option value="s3">S3-compatible</option>
-                    <option value="sftp">SFTP</option>
-                    <option value="local">Local disk (not recommended)</option>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="bucket">Bucket</Label>
-                  <Input id="bucket" className="font-mono" defaultValue="acme-backups" />
-                </div>
-                <div>
-                  <Label htmlFor="ak" hint="Write-only">
-                    Access key
-                  </Label>
-                  <Input id="ak" type="password" placeholder="••••••••••••" />
-                </div>
-              </div>
-            </FormCard>
+            <BackupStorageCard />
           </div>
 
           <div id="advanced" className="scroll-mt-20 space-y-8">

@@ -5,7 +5,10 @@ import { DeploymentRow, deployLabel, deployTone, sourceLabel } from "@/component
 import { Icon } from "@/components/icons";
 import { Card, Dot } from "@/components/ui";
 import { useApps, useDeployments } from "@/lib/api/apps";
+import { useBackupSummary } from "@/lib/api/backups";
 import { useDatabases } from "@/lib/api/databases";
+import { Gauge } from "@/components/dashboard/fleet-map";
+import { formatBytes } from "@/lib/format";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
 
@@ -82,6 +85,39 @@ export function RecentDeployments() {
       ) : (
         <p className="p-4 text-sm text-subtle">No deployments yet.</p>
       )}
+    </Card>
+  );
+}
+
+export function BackupSize() {
+  const { data } = useBackupSummary();
+  return <>{data ? formatBytes(data.size) : "–"}</>;
+}
+
+/** Overview card: how much is backed up and how much of it is proven. */
+export function BackupsCard() {
+  const { data } = useBackupSummary();
+  const verified = data && data.count ? Math.round((data.verified / data.count) * 1000) / 10 : 0;
+  return (
+    <Card className="flex flex-col p-5">
+      <h2 className="text-[11px] text-muted">Backups</h2>
+      <div className="flex flex-1 items-center justify-center py-6">
+        <Gauge value={verified} label="Backups restore-verified" sub={data ? `${data.verified} of ${data.count} verified · ${formatBytes(data.size)}` : "…"} />
+      </div>
+      <div className="grid grid-cols-3 gap-2 border-t border-line pt-4 text-[11px]">
+        <div>
+          <div className="text-subtle">Kept</div>
+          <div className="mt-0.5 text-fg">{data?.count ?? "–"}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Failed</div>
+          <div className={data?.failed_24h ? "mt-0.5 text-err" : "mt-0.5 text-fg"}>{data ? `${data.failed_24h} in 24 h` : "–"}</div>
+        </div>
+        <div>
+          <div className="text-subtle">Encrypted</div>
+          <div className="mt-0.5 text-fg">{data ? "All" : "–"}</div>
+        </div>
+      </div>
     </Card>
   );
 }
