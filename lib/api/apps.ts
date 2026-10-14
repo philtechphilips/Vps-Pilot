@@ -48,6 +48,8 @@ export type App = {
   image: string | null;
   dockerfile: string;
   build_context: string;
+  build_command: string | null;
+  start_command: string | null;
   container_port: number;
   host_port: number;
   health_path: string;
@@ -69,6 +71,8 @@ export type AppCreate = {
   source: { type: "git"; url: string; branch: string } | { type: "image"; image: string };
   dockerfile?: string;
   build_context?: string;
+  build_command?: string | null;
+  start_command?: string | null;
   container_port: number;
   host_port?: number | null;
   health_path?: string;
@@ -85,6 +89,8 @@ export type AppUpdate = Partial<
     | "image"
     | "dockerfile"
     | "build_context"
+    | "build_command"
+    | "start_command"
     | "container_port"
     | "health_path"
     | "health_timeout_seconds"

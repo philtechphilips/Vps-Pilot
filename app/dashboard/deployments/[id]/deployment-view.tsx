@@ -239,7 +239,19 @@ export function DeploymentView() {
               a?.source_type === "git"
                 ? { label: "Commit message", value: <span className="text-muted">{d.commit_message ?? repoName(a.repo_url)}</span> }
                 : { label: "Health check", value: <Mono className="text-muted">GET {String(d.spec.health_path ?? "/")}</Mono> },
-              { label: "Image", value: d.image_ref ? <Mono className="text-muted">{d.image_ref}</Mono> : <span className="text-subtle">Not built</span> },
+              {
+                label: "Built with",
+                value: d.spec.build_plan ? (
+                  <span className="flex min-w-0 flex-col gap-0.5">
+                    <span>{String(d.spec.build_plan)}</span>
+                    {d.image_ref && <Mono className="truncate text-[12px] text-subtle">{d.image_ref}</Mono>}
+                  </span>
+                ) : d.image_ref ? (
+                  <Mono className="text-muted">{d.image_ref}</Mono>
+                ) : (
+                  <span className="text-subtle">{running ? "Building…" : "Not built"}</span>
+                ),
+              },
               {
                 label: "Created by",
                 value: (

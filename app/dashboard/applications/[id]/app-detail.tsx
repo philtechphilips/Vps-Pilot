@@ -341,6 +341,8 @@ function SettingsSection({ app }: { app: App }) {
     image: app.image ?? "",
     dockerfile: app.dockerfile,
     build_context: app.build_context,
+    build_command: app.build_command ?? "",
+    start_command: app.start_command ?? "",
     container_port: String(app.container_port),
     health_path: app.health_path,
     health_timeout_seconds: String(app.health_timeout_seconds),
@@ -356,7 +358,13 @@ function SettingsSection({ app }: { app: App }) {
     update.mutate(
       {
         ...(app.source_type === "git"
-          ? { branch: form.branch.trim(), dockerfile: form.dockerfile.trim(), build_context: form.build_context.trim() }
+          ? {
+              branch: form.branch.trim(),
+              dockerfile: form.dockerfile.trim(),
+              build_context: form.build_context.trim(),
+              build_command: form.build_command.trim() || null,
+              start_command: form.start_command.trim() || null,
+            }
           : { image: form.image.trim() }),
         container_port: Number(form.container_port),
         health_path: form.health_path.trim(),
@@ -382,8 +390,12 @@ function SettingsSection({ app }: { app: App }) {
         {app.source_type === "git" ? (
           <>
             <Field id="branch" label="Branch" value={form.branch} onChange={set("branch")} mono />
-            <Field id="dockerfile" label="Dockerfile" value={form.dockerfile} onChange={set("dockerfile")} mono />
-            <Field id="context" label="Build context" value={form.build_context} onChange={set("build_context")} mono />
+            <Field id="dockerfile" label="Dockerfile (if present)" value={form.dockerfile} onChange={set("dockerfile")} mono />
+            <Field id="context" label="Root directory" value={form.build_context} onChange={set("build_context")} mono />
+            <div className="sm:col-span-3 grid gap-4 sm:grid-cols-2">
+              <Field id="buildcmd" label="Build command (no Dockerfile)" value={form.build_command} onChange={set("build_command")} placeholder="detected automatically" mono />
+              <Field id="startcmd" label="Start command (no Dockerfile)" value={form.start_command} onChange={set("start_command")} placeholder="detected automatically" mono />
+            </div>
           </>
         ) : (
           <div className="sm:col-span-3">

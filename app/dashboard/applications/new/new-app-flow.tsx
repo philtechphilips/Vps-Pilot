@@ -45,6 +45,8 @@ export function NewAppFlow() {
   const [port, setPort] = useState("3000");
   const [dockerfile, setDockerfile] = useState("Dockerfile");
   const [context, setContext] = useState(".");
+  const [buildCommand, setBuildCommand] = useState("");
+  const [startCommand, setStartCommand] = useState("");
   const [healthPath, setHealthPath] = useState("/");
   const [healthTimeout, setHealthTimeout] = useState("60");
   const [cpu, setCpu] = useState("");
@@ -80,6 +82,8 @@ export function NewAppFlow() {
         source: source === "git" ? { type: "git", url: repo.trim().replace(/\.git$/, ""), branch: branch.trim() || "main" } : { type: "image", image: image.trim() },
         dockerfile: dockerfile.trim() || "Dockerfile",
         build_context: context.trim() || ".",
+        build_command: source === "git" ? buildCommand.trim() || null : null,
+        start_command: source === "git" ? startCommand.trim() || null : null,
         container_port: Number(port),
         health_path: healthPath.trim(),
         health_timeout_seconds: Number(healthTimeout) || 60,
@@ -136,7 +140,8 @@ export function NewAppFlow() {
               <Input id="branch" icon="git-branch" value={branch} onChange={(e) => setBranch(e.target.value)} className="font-mono" />
             </div>
             <p className="text-xs leading-relaxed text-subtle">
-              The server clones the repository and builds it with your Dockerfile. Public repositories work today; private repository access is coming with deploy keys.
+              The server clones the repository and builds it with your Dockerfile. No Dockerfile? VPSPilot detects Node.js, Bun, Python, Go, Rust and static sites and
+              builds them for you. Public repositories work today; private repository access is coming with deploy keys.
             </p>
           </div>
         ) : (
@@ -224,12 +229,28 @@ export function NewAppFlow() {
               {source === "git" && (
                 <>
                   <div>
-                    <Label htmlFor="df">Dockerfile</Label>
+                    <Label htmlFor="df" hint="used if present">
+                      Dockerfile
+                    </Label>
                     <Input id="df" className="font-mono" value={dockerfile} onChange={(e) => setDockerfile(e.target.value)} />
                   </div>
                   <div>
-                    <Label htmlFor="ctx">Build context</Label>
+                    <Label htmlFor="ctx" hint="app folder">
+                      Root directory
+                    </Label>
                     <Input id="ctx" className="font-mono" value={context} onChange={(e) => setContext(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="bc" hint="no Dockerfile only">
+                      Build command
+                    </Label>
+                    <Input id="bc" className="font-mono" placeholder="detected, e.g. npm run build" value={buildCommand} onChange={(e) => setBuildCommand(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="sc" hint="no Dockerfile only">
+                      Start command
+                    </Label>
+                    <Input id="sc" className="font-mono" placeholder="detected, e.g. npm start" value={startCommand} onChange={(e) => setStartCommand(e.target.value)} />
                   </div>
                 </>
               )}
