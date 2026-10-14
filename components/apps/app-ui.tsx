@@ -169,7 +169,10 @@ export function EnvEditor({ rows, onChange }: { rows: EnvDraft[]; onChange: (row
     <div className="space-y-2">
       {rows.length === 0 && <p className="text-[13px] text-subtle">No variables yet. Paste a .env file into a name field to add many at once.</p>}
       {rows.map((r) => {
-        const masked = r.secret && !shown.has(r.id);
+        // Saved values and secrets are masked until you reveal them; stored
+        // secrets can't be revealed at all (the API never returns them).
+        const masked = (r.stored || r.secret) && !shown.has(r.id);
+        const revealable = !(r.secret && r.stored && !r.value);
         return (
           <div key={r.id} className="grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto]">
             <Input
@@ -199,7 +202,7 @@ export function EnvEditor({ rows, onChange }: { rows: EnvDraft[]; onChange: (row
                 className="flex-1 font-mono"
                 onChange={(e) => update(r.id, { value: e.target.value })}
               />
-              {r.secret && (
+              {(r.stored || r.secret) && revealable && (
                 <button
                   type="button"
                   aria-label={masked ? "Show value" : "Hide value"}

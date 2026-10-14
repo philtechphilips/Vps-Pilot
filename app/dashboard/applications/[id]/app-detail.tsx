@@ -80,6 +80,9 @@ export function AppDetailView() {
         }
         actions={
           <>
+            <ButtonLink href={`/dashboard/applications/${a.id}/logs`} variant="secondary" size="md" icon="terminal">
+              Logs
+            </ButtonLink>
             {previous && (
               <Button variant="secondary" size="md" icon="rollback" disabled={rollback.isPending || deploying} onClick={() => setConfirm("rollback")}>
                 Instant Rollback
@@ -215,6 +218,9 @@ export function AppDetailView() {
                     Build Logs
                   </ButtonLink>
                 )}
+                <ButtonLink href={`/dashboard/applications/${a.id}/logs`} variant="secondary" size="sm" icon="terminal">
+                  Runtime Logs
+                </ButtonLink>
                 <ButtonLink href={`/dashboard/servers/${a.server_id}`} variant="secondary" size="sm" icon="server">
                   Server
                 </ButtonLink>
