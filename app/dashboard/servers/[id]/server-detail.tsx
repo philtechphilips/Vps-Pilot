@@ -9,6 +9,7 @@ import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
 import { ChartCard, DetailHeader, InfoGrid } from "@/components/dashboard/detail";
 import { FilterTabs } from "@/components/dashboard/filter-tabs";
 import { Icon } from "@/components/icons";
+import { JobPanel, jobTitle, jobTone } from "@/components/servers/job-panel";
 import { osLabel, StatusPill } from "@/components/servers/server-ui";
 import { Badge, Button, Callout, Card, Container, Dot, EmptyState, FormCard, Meter, Mono, SectionTitle, Table, Td, Th } from "@/components/ui";
 import {
@@ -19,7 +20,26 @@ import {
   useServer,
   useServerMetrics,
 } from "@/lib/api/servers";
+import { isActive, type JobType, useRunAction, useServerJobs } from "@/lib/api/jobs";
 import { formatBytes, formatDate, formatRate, formatUptime, timeAgo } from "@/lib/format";
+
+const PROTECTED = new Set(["vpspilot-agent.service", "vpspilot-helper.service"]);
+const NO_STOP = new Set(["ssh.service", "sshd.service"]);
+
+function ActionButton({ icon, label, onClick, disabled }: { icon: "refresh" | "play" | "stop" | "file-text"; label: string; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className="inline-flex size-7 items-center justify-center rounded text-subtle transition-colors hover:bg-white/10 hover:text-fg disabled:pointer-events-none disabled:opacity-30"
+    >
+      <Icon name={icon} size={14} />
+    </button>
+  );
+}
 
 const serviceTone = (s: { active: string; sub: string }) =>
   s.active === "active" ? "ok" : s.active === "failed" ? "err" : s.sub === "exited" || s.active === "inactive" ? "neutral" : "warn";
@@ -35,6 +55,12 @@ export function ServerDetailView() {
   const reissue = useReissueEnrollment();
   const [confirm, setConfirm] = useState<"revoke" | "delete" | null>(null);
   const [serviceFilter, setServiceFilter] = useState<"running" | "failed" | "all">("running");
+  const run = useRunAction(id);
+  const jobs = useServerJobs(server.data && server.data.status !== "pending" ? id : undefined);
+  const [openJob, setOpenJob] = useState<string | null>(null);
+  const [pendingStop, setPendingStop] = useState<{ type: JobType; payload: Record<string, unknown>; name: string } | null>(null);
+  const action = (type: JobType, payload: Record<string, unknown>) =>
+    run.mutate({ type, payload }, { onSuccess: (job) => setOpenJob(job.id) });
 
   if (server.isLoading) {
     return (
@@ -64,6 +90,7 @@ export function ServerDetailView() {
 
   const s = server.data;
   const latest = s.latest;
+  const live = s.status === "online";
   const points = metrics.data ?? [];
   const labels = points.map((p) => new Date(p.ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }));
   const netMax = Math.max(1, ...points.flatMap((p) => [p.net_rx_bps, p.net_tx_bps]));
@@ -267,6 +294,7 @@ export function ServerDetailView() {
                       <Th>Service</Th>
                       <Th>State</Th>
                       <Th>Description</Th>
+                      <Th className="w-36 text-right">Actions</Th>
                     </tr>
                   </thead>
                   <tbody>
@@ -279,6 +307,28 @@ export function ServerDetailView() {
                           </span>
                         </Td>
                         <Td className="h-11 max-w-[420px] truncate text-[13px] text-muted">{v.description}</Td>
+                        <Td className="h-11 text-right">
+                          <span className="inline-flex gap-0.5">
+                            <ActionButton icon="file-text" label={`Logs for ${v.name}`} disabled={!live} onClick={() => action("service.logs", { unit: v.name, lines: 200 })} />
+                            {!PROTECTED.has(v.name) && (
+                              <>
+                                <ActionButton icon="refresh" label={`Restart ${v.name}`} disabled={!live} onClick={() => action("service.restart", { unit: v.name })} />
+                                {v.active === "active" ? (
+                                  !NO_STOP.has(v.name) && (
+                                    <ActionButton
+                                      icon="stop"
+                                      label={`Stop ${v.name}`}
+                                      disabled={!live}
+                                      onClick={() => setPendingStop({ type: "service.stop", payload: { unit: v.name }, name: v.name })}
+                                    />
+                                  )
+                                ) : (
+                                  <ActionButton icon="play" label={`Start ${v.name}`} disabled={!live} onClick={() => action("service.start", { unit: v.name })} />
+                                )}
+                              </>
+                            )}
+                          </span>
+                        </Td>
                       </tr>
                     ))}
                   </tbody>
@@ -295,7 +345,7 @@ export function ServerDetailView() {
                       <Icon name="lock" className="mt-0.5 shrink-0" />
                       <span>
                         {s.capabilities.docker
-                          ? "Docker is installed, but the agent runs unprivileged and can’t read it yet. Container management arrives with the privileged helper."
+                          ? "Docker is installed but the privileged helper isn’t reporting containers. Re-run the install command to update the agent."
                           : "Docker isn’t installed on this server."}
                       </span>
                     </div>
@@ -309,7 +359,21 @@ export function ServerDetailView() {
                           <div className="truncate text-sm">{c.name}</div>
                           <div className="truncate font-mono text-xs text-subtle">{c.image}</div>
                         </div>
-                        <span className="text-xs text-muted">{c.status}</span>
+                        <span className="hidden text-xs text-muted sm:inline">{c.status}</span>
+                        <span className="inline-flex gap-0.5">
+                          <ActionButton icon="file-text" label={`Logs for ${c.name}`} disabled={!live} onClick={() => action("container.logs", { container: c.name, lines: 200 })} />
+                          <ActionButton icon="refresh" label={`Restart ${c.name}`} disabled={!live} onClick={() => action("container.restart", { container: c.name })} />
+                          {c.state === "running" ? (
+                            <ActionButton
+                              icon="stop"
+                              label={`Stop ${c.name}`}
+                              disabled={!live}
+                              onClick={() => setPendingStop({ type: "container.stop", payload: { container: c.name }, name: c.name })}
+                            />
+                          ) : (
+                            <ActionButton icon="play" label={`Start ${c.name}`} disabled={!live} onClick={() => action("container.start", { container: c.name })} />
+                          )}
+                        </span>
                       </div>
                     ))
                   )}
@@ -333,6 +397,31 @@ export function ServerDetailView() {
               </section>
             </div>
 
+            <section>
+              <SectionTitle>Recent activity</SectionTitle>
+              <Card className="overflow-hidden">
+                {run.error && <p className="border-b border-line px-4 py-3 text-sm text-err">{run.error.message}</p>}
+                {(jobs.data ?? []).length === 0 ? (
+                  <p className="p-4 text-sm text-muted">Actions you run on this server show up here, with their output.</p>
+                ) : (
+                  jobs.data!.map((j) => (
+                    <button
+                      key={j.id}
+                      type="button"
+                      onClick={() => setOpenJob(j.id)}
+                      className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left last:border-0 hover:bg-white/[0.02]"
+                    >
+                      <Dot tone={jobTone[j.status]} pulse={isActive(j.status)} />
+                      <span className="min-w-0 flex-1 truncate text-sm">{jobTitle(j)}</span>
+                      <span className="text-xs text-muted capitalize">{j.status}</span>
+                      <span className="w-20 text-right text-xs text-subtle">{timeAgo(j.created_at)}</span>
+                      <Icon name="chevron-right" size={14} className="text-subtle" />
+                    </button>
+                  ))
+                )}
+              </Card>
+            </section>
+
             <FormCard
               title="Agent identity"
               description="The agent authenticates with a per-agent credential issued at enrollment and stored only as a hash here. It connects out over HTTPS; no inbound port is open."
@@ -351,6 +440,20 @@ export function ServerDetailView() {
         )}
       </Container>
 
+      <JobPanel jobId={openJob} onClose={() => setOpenJob(null)} />
+      <ConfirmDialog
+        open={!!pendingStop}
+        onClose={() => setPendingStop(null)}
+        onConfirm={() => {
+          if (pendingStop) action(pendingStop.type, pendingStop.payload);
+          setPendingStop(null);
+        }}
+        title={pendingStop?.type === "container.stop" ? "Stop container" : "Stop service"}
+        confirmText={pendingStop?.name ?? ""}
+        action="Stop"
+      >
+        <span className="text-fg">{pendingStop?.name}</span> on <span className="text-fg">{s.name}</span> stops until you start it again.
+      </ConfirmDialog>
       <ConfirmDialog
         open={confirm === "revoke"}
         onClose={() => setConfirm(null)}
