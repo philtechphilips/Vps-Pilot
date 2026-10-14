@@ -1,22 +1,21 @@
 import Link from "next/link";
-import { BrandChip } from "@/components/brand-chip";
-import { Sparkline } from "@/components/charts";
+import { AppCount, OverviewApps, RecentDeployments } from "@/components/apps/overview-apps";
 import { CodeTexture } from "@/components/code-texture";
-import { AlertList, DeploymentRow } from "@/components/dashboard/cards";
+import { AlertList } from "@/components/dashboard/cards";
 import { Gauge } from "@/components/dashboard/fleet-map";
 import { AgentsCard, FleetCard, ServerCount } from "@/components/servers/overview-fleet";
 import { Greeting } from "@/components/dashboard/greeting";
 import { AddNewMenu } from "@/components/dashboard/nav";
 import { Icon, type IconName } from "@/components/icons";
-import { Badge, Card, Container, Dot, SectionTitle } from "@/components/ui";
-import { alerts, apps, databases, deployLabel, deployments, deployTone, getServer } from "@/lib/data";
+import { Badge, Card, Container, SectionTitle } from "@/components/ui";
+import { alerts, databases } from "@/lib/data";
 
 export default function OverviewPage() {
   const firing = alerts.filter((a) => a.state === "firing").length;
 
   const stats: { label: string; value: React.ReactNode; of: string; icon: IconName; href: string }[] = [
     { label: "My Servers", value: <ServerCount />, of: "/ 25", icon: "server", href: "/dashboard/servers" },
-    { label: "Applications", value: String(apps.length), of: "/ 200", icon: "box", href: "/dashboard/applications" },
+    { label: "Applications", value: <AppCount />, of: "/ 200", icon: "box", href: "/dashboard/applications" },
     { label: "My Databases", value: String(databases.length), of: "registered", icon: "database", href: "/dashboard/databases" },
     { label: "Backups", value: "184 GB", of: "/ 500 GB", icon: "archive", href: "/dashboard/backups" },
   ];
@@ -70,29 +69,7 @@ export default function OverviewPage() {
               View all
             </Link>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {apps.map((a) => (
-              <Link
-                key={a.id}
-                href={`/dashboard/applications/${a.id}`}
-                className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-[#141414]/90 p-3 backdrop-blur transition-colors hover:border-white/15"
-              >
-                <BrandChip name={a.framework} size={34} className="rounded-xl" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm">{a.name}</span>
-                    <Dot tone={deployTone[a.status]} pulse={a.status === "building"} />
-                  </div>
-                  <div className="truncate text-xs text-subtle">
-                    {deployLabel[a.status]} · {a.updated} · {getServer(a.serverId)?.name}
-                  </div>
-                </div>
-                <div className="hidden w-20 sm:block">
-                  <Sparkline data={a.requests} height={24} color={a.status === "error" ? "err" : "violet"} />
-                </div>
-              </Link>
-            ))}
-          </div>
+          <OverviewApps />
         </div>
       </section>
 
@@ -133,11 +110,7 @@ export default function OverviewPage() {
           >
             Recent Deployments
           </SectionTitle>
-          <Card className="overflow-hidden">
-            {deployments.slice(0, 5).map((d) => (
-              <DeploymentRow key={d.id} d={d} />
-            ))}
-          </Card>
+          <RecentDeployments />
         </section>
         <section>
           <SectionTitle action={<Badge tone="err">{firing} firing</Badge>}>Alerts</SectionTitle>

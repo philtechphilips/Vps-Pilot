@@ -1,176 +1,282 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BrandChip, type Brand } from "@/components/brand-chip";
+import { EnvEditor, type EnvDraft, envPayload, envProblem, repoName } from "@/components/apps/app-ui";
 import { Icon } from "@/components/icons";
-import { Badge, Button, Card, Input, Label, Select } from "@/components/ui";
-import { servers } from "@/lib/data";
+import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
+import { useCreateApp } from "@/lib/api/apps";
+import { useServers } from "@/lib/api/servers";
 import { cn } from "@/lib/utils";
 
-const repos: { name: string; fw: Brand; updated: string }[] = [
-  { name: "billing-service", fw: "FastAPI", updated: "2h ago" },
-  { name: "docs", fw: "Next.js", updated: "1d ago" },
-  { name: "image-resizer", fw: "Go", updated: "3d ago" },
-  { name: "admin-panel", fw: "Node.js", updated: "5d ago" },
-  { name: "ml-scoring", fw: "Python", updated: "1w ago" },
-];
+type SourceType = "git" | "image";
 
-const runtimes = [
-  { id: "Docker", title: "Docker", desc: "Build from Dockerfile or Compose, or pull a pinned image." },
-  { id: "systemd", title: "Native · systemd", desc: "Versioned release directories for Node.js and Python." },
-  { id: "PM2", title: "Native · PM2", desc: "Optional compatibility for existing PM2 setups." },
-] as const;
+const GIT_URL = /^https:\/\/[A-Za-z0-9.-]+(:[0-9]+)?\/[A-Za-z0-9._~/-]+$/;
+const IMAGE = /^[a-z0-9][a-z0-9._/:@-]{0,299}$/;
+const NAME = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+
+const slug = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40)
+    .replace(/-+$/, "");
+
+/** A sensible default app name from the repo or image. */
+function suggestName(source: SourceType, repo: string, image: string) {
+  if (source === "git") return slug(repoName(repo).split("/").pop() ?? "");
+  return slug(image.split("/").pop()?.split(/[:@]/)[0] ?? "");
+}
 
 export function NewAppFlow() {
   const router = useRouter();
-  const [repo, setRepo] = useState<string | null>("billing-service");
-  const [runtime, setRuntime] = useState<(typeof runtimes)[number]["id"]>("Docker");
-  const [deploying, setDeploying] = useState(false);
-  const selected = repos.find((r) => r.name === repo);
+  const { data: servers, isLoading: loadingServers } = useServers();
+  const create = useCreateApp();
+
+  const [source, setSource] = useState<SourceType>("git");
+  const [repo, setRepo] = useState("");
+  const [branch, setBranch] = useState("main");
+  const [image, setImage] = useState("");
+  const [name, setName] = useState("");
+  const [nameTouched, setNameTouched] = useState(false);
+  const [serverId, setServerId] = useState("");
+  const [port, setPort] = useState("3000");
+  const [dockerfile, setDockerfile] = useState("Dockerfile");
+  const [context, setContext] = useState(".");
+  const [healthPath, setHealthPath] = useState("/");
+  const [healthTimeout, setHealthTimeout] = useState("60");
+  const [cpu, setCpu] = useState("");
+  const [memory, setMemory] = useState("");
+  const [env, setEnv] = useState<EnvDraft[]>([]);
+
+  const usable = (servers ?? []).filter((s) => s.enrolled_at && s.status !== "revoked");
+  const target = serverId || usable.find((s) => s.status === "online")?.id || usable[0]?.id || "";
+  const appName = nameTouched ? name : suggestName(source, repo, image);
+
+  const problem =
+    source === "git" && !GIT_URL.test(repo.trim())
+      ? "Enter the repository's https:// URL"
+      : source === "image" && !IMAGE.test(image.trim())
+        ? "Enter an image like nginx:1.27 or ghcr.io/acme/api:v2"
+        : !NAME.test(appName)
+          ? "Name: lowercase letters, numbers and dashes"
+          : !target
+            ? "Enroll a server first"
+            : !(Number(port) >= 1 && Number(port) <= 65535)
+              ? "Enter the port your app listens on"
+              : !healthPath.startsWith("/")
+                ? "The health check path starts with /"
+                : envProblem(env);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (problem) return;
+    create.mutate(
+      {
+        name: appName,
+        server_id: target,
+        source: source === "git" ? { type: "git", url: repo.trim().replace(/\.git$/, ""), branch: branch.trim() || "main" } : { type: "image", image: image.trim() },
+        dockerfile: dockerfile.trim() || "Dockerfile",
+        build_context: context.trim() || ".",
+        container_port: Number(port),
+        health_path: healthPath.trim(),
+        health_timeout_seconds: Number(healthTimeout) || 60,
+        cpu_limit: cpu.trim() || null,
+        memory_limit: memory.trim() || null,
+        env: envPayload(env),
+      },
+      {
+        onSuccess: (app) =>
+          router.push(app.latest_deployment ? `/dashboard/deployments/${app.latest_deployment.id}` : `/dashboard/applications/${app.id}`),
+      },
+    );
+  };
 
   return (
-    <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.15fr]">
+    <form onSubmit={submit} className="mt-6 grid gap-6 lg:grid-cols-[1fr_1.15fr]">
       <Card className="h-fit p-5 sm:p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Import Git Repository</h2>
-        <div className="mt-5 flex gap-2">
-          <button type="button" className="flex h-10 items-center gap-2 rounded-md border border-line-strong bg-bg px-3 text-sm">
-            <Icon name="github" /> acme <Icon name="chevron-down" size={14} className="text-subtle" />
-          </button>
-          <Input icon="search" placeholder="Search…" className="flex-1" />
-        </div>
-        <div className="mt-4 overflow-hidden rounded-md border border-line">
-          {repos.map((r) => (
-            <div key={r.name} className={cn("flex items-center gap-3 border-b border-line px-4 py-3 last:border-0", repo === r.name && "bg-white/[0.03]")}>
-              <BrandChip name={r.fw} size={24} className="rounded-full" />
-              <span className="min-w-0 flex-1 truncate text-sm">
-                {r.name} <span className="text-subtle">· {r.updated}</span>
-              </span>
-              <Button variant={repo === r.name ? "primary" : "secondary"} size="xs" onClick={() => setRepo(r.name)}>
-                {repo === r.name ? "Selected" : "Import"}
-              </Button>
-            </div>
+        <h2 className="text-xl font-semibold tracking-tight">Source</h2>
+        <div role="tablist" className="mt-5 grid grid-cols-2 gap-1 rounded-lg border border-line bg-bg p-1">
+          {(
+            [
+              ["git", "github", "Git repository"],
+              ["image", "container", "Container image"],
+            ] as const
+          ).map(([value, icon, label]) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={source === value}
+              onClick={() => setSource(value)}
+              className={cn(
+                "flex h-9 items-center justify-center gap-2 rounded-md text-sm transition-colors",
+                source === value ? "bg-white/[0.08] text-fg" : "text-muted hover:text-fg",
+              )}
+            >
+              <Icon name={icon} size={15} /> {label}
+            </button>
           ))}
         </div>
-        <div className="mt-5 flex items-center gap-3 rounded-md border border-dashed border-line-strong p-4 text-sm text-muted">
-          <Icon name="container" />
-          <span className="flex-1">Deploy a container image by digest instead</span>
-          <Icon name="arrow-right" size={14} />
+
+        {source === "git" ? (
+          <div className="mt-5 space-y-4">
+            <div>
+              <Label htmlFor="repo" hint="https only">
+                Repository URL
+              </Label>
+              <Input id="repo" icon="github" placeholder="https://github.com/acme/web" value={repo} onChange={(e) => setRepo(e.target.value)} autoFocus />
+            </div>
+            <div>
+              <Label htmlFor="branch" hint="or a tag / commit">
+                Branch
+              </Label>
+              <Input id="branch" icon="git-branch" value={branch} onChange={(e) => setBranch(e.target.value)} className="font-mono" />
+            </div>
+            <p className="text-xs leading-relaxed text-subtle">
+              The server clones the repository and builds it with your Dockerfile. Public repositories work today; private repository access is coming with deploy keys.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-5 space-y-4">
+            <div>
+              <Label htmlFor="image" hint="pin a tag or digest">
+                Image
+              </Label>
+              <Input id="image" icon="container" placeholder="ghcr.io/acme/api:1.4.2" value={image} onChange={(e) => setImage(e.target.value)} className="font-mono" autoFocus />
+            </div>
+            <p className="text-xs leading-relaxed text-subtle">The server pulls this image on every deploy. Pin a version so each deployment is reproducible and rollbacks are meaningful.</p>
+          </div>
+        )}
+
+        <div className="mt-6 rounded-lg border border-line bg-bg p-4 text-[13px] text-muted">
+          <div className="flex items-center gap-2 text-fg">
+            <Icon name="shield-check" size={15} className="text-accent-fg" /> How releases work
+          </div>
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed">
+            <li>Build or pull, then start a candidate on a private port.</li>
+            <li>Health-check the candidate. If it fails, nothing changes.</li>
+            <li>Swap it in on the app’s port. If that fails, the previous version is restored.</li>
+          </ol>
         </div>
       </Card>
 
       <Card className="p-5 sm:p-6">
         <h2 className="text-xl font-semibold tracking-tight">Configure</h2>
-        {selected ? (
-          <form
-            className="mt-5 space-y-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setDeploying(true);
-              setTimeout(() => router.push("/dashboard/deployments/dpl_7Hq2kPz9"), 900);
-            }}
-          >
-            <div className="flex items-center gap-2 rounded-md bg-bg-200 px-3 py-2.5 text-sm">
-              <Icon name="github" />
-              acme/{selected.name}
-              <Icon name="git-branch" size={14} className="ml-2 text-subtle" />
-              <span className="text-muted">main</span>
+        <div className="mt-5 space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="appname">Application name</Label>
+              <Input
+                id="appname"
+                placeholder="my-app"
+                value={appName}
+                className="font-mono"
+                onChange={(e) => {
+                  setNameTouched(true);
+                  setName(e.target.value.toLowerCase());
+                }}
+              />
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="appname">Application name</Label>
-                <Input id="appname" defaultValue={selected.name} />
-              </div>
-              <div>
-                <Label htmlFor="server">Target server</Label>
-                <Select id="server" defaultValue="web-prod-02">
-                  {servers
-                    .filter((s) => s.status !== "offline")
-                    .map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} — {s.region}
-                      </option>
-                    ))}
+            <div>
+              <Label htmlFor="server">Target server</Label>
+              {loadingServers ? (
+                <div className="skeleton h-10 rounded-md" />
+              ) : usable.length ? (
+                <Select id="server" value={target} onChange={(e) => setServerId(e.target.value)}>
+                  {usable.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} {s.status === "online" ? "" : `(${s.status})`}
+                    </option>
+                  ))}
                 </Select>
+              ) : (
+                <Link href="/dashboard/servers/new" className="flex h-10 items-center gap-2 rounded-md border border-dashed border-line-strong px-3 text-sm text-muted hover:text-fg">
+                  <Icon name="plus" size={14} /> Enroll a server
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="port" hint="inside the container">
+                Port
+              </Label>
+              <Input id="port" inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ""))} className="font-mono" />
+            </div>
+            <div>
+              <Label htmlFor="hc" hint="must return 2xx/3xx">
+                Health check
+              </Label>
+              <Input id="hc" value={healthPath} onChange={(e) => setHealthPath(e.target.value)} className="font-mono" />
+            </div>
+          </div>
+
+          <details className="group rounded-md border border-line">
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
+              {source === "git" ? "Build & Runtime Settings" : "Runtime Settings"}
+              <Icon name="chevron-down" size={14} className="transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="grid gap-4 border-t border-line p-4 sm:grid-cols-2">
+              {source === "git" && (
+                <>
+                  <div>
+                    <Label htmlFor="df">Dockerfile</Label>
+                    <Input id="df" className="font-mono" value={dockerfile} onChange={(e) => setDockerfile(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label htmlFor="ctx">Build context</Label>
+                    <Input id="ctx" className="font-mono" value={context} onChange={(e) => setContext(e.target.value)} />
+                  </div>
+                </>
+              )}
+              <div>
+                <Label htmlFor="hct" hint="seconds">
+                  Health check timeout
+                </Label>
+                <Input id="hct" inputMode="numeric" value={healthTimeout} onChange={(e) => setHealthTimeout(e.target.value.replace(/\D/g, ""))} />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="cpu">CPUs</Label>
+                  <Input id="cpu" placeholder="no limit" value={cpu} onChange={(e) => setCpu(e.target.value)} />
+                </div>
+                <div>
+                  <Label htmlFor="mem">Memory</Label>
+                  <Input id="mem" placeholder="e.g. 512m" value={memory} onChange={(e) => setMemory(e.target.value.toLowerCase())} />
+                </div>
               </div>
             </div>
+          </details>
 
-            <fieldset>
-              <legend className="mb-2 text-[13px] text-muted">Runtime</legend>
-              <div className="grid gap-2 sm:grid-cols-3">
-                {runtimes.map((r) => (
-                  <label
-                    key={r.id}
-                    className={cn(
-                      "cursor-pointer rounded-md border p-3 transition-colors",
-                      runtime === r.id ? "border-fg bg-white/[0.04]" : "border-line hover:border-line-strong",
-                    )}
-                  >
-                    <input type="radio" name="runtime" value={r.id} checked={runtime === r.id} onChange={() => setRuntime(r.id)} className="sr-only" />
-                    <span className="flex items-center gap-2 text-sm font-medium">
-                      <BrandChip name={r.id} size={18} />
-                      {r.title}
-                    </span>
-                    <span className="mt-1.5 block text-xs text-muted">{r.desc}</span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+          <details className="group rounded-md border border-line" open={env.length > 0 || undefined}>
+            <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
+              <span className="flex items-center gap-2">
+                Environment Variables {env.length > 0 && <Badge>{env.length}</Badge>}
+              </span>
+              <Icon name="chevron-down" size={14} className="transition-transform group-open:rotate-180" />
+            </summary>
+            <div className="border-t border-line p-4">
+              <EnvEditor rows={env} onChange={setEnv} />
+              <p className="mt-3 text-xs text-subtle">Values are encrypted at rest. Secrets are never shown again after saving and are masked in build logs. PORT is set for you.</p>
+            </div>
+          </details>
 
-            <details className="group rounded-md border border-line" open>
-              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
-                Build and Output Settings
-                <Icon name="chevron-down" size={14} className="transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="grid gap-4 border-t border-line p-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="ctx">{runtime === "Docker" ? "Dockerfile" : "Build command"}</Label>
-                  <Input id="ctx" className="font-mono" defaultValue={runtime === "Docker" ? "./Dockerfile" : "pip install -r requirements.txt"} />
-                </div>
-                <div>
-                  <Label htmlFor="start">{runtime === "Docker" ? "Exposed port" : "Start command"}</Label>
-                  <Input id="start" className="font-mono" defaultValue={runtime === "Docker" ? "8000" : "uvicorn app.main:app --port 8000"} />
-                </div>
-                <div>
-                  <Label htmlFor="hc">Health check</Label>
-                  <Input id="hc" className="font-mono" defaultValue="GET /healthz" />
-                </div>
-                <div>
-                  <Label htmlFor="lim">Limits</Label>
-                  <Input id="lim" defaultValue="1 vCPU · 512 MB" />
-                </div>
-              </div>
-            </details>
+          {create.error && (
+            <Callout tone="err" icon="x-circle">
+              {create.error.message}
+            </Callout>
+          )}
 
-            <details className="group rounded-md border border-line">
-              <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
-                <span className="flex items-center gap-2">
-                  Environment Variables <Badge>2</Badge>
-                </span>
-                <Icon name="chevron-down" size={14} className="transition-transform group-open:rotate-180" />
-              </summary>
-              <div className="space-y-2 border-t border-line p-4">
-                {[
-                  ["DATABASE_URL", "Reference: pg-main / billing_app"],
-                  ["SENTRY_DSN", "••••••••••••"],
-                ].map(([k, v]) => (
-                  <div key={k} className="grid grid-cols-2 gap-2">
-                    <Input defaultValue={k} className="font-mono" aria-label="Key" />
-                    <Input defaultValue={v} aria-label="Value" type={v.startsWith("•") ? "password" : "text"} />
-                  </div>
-                ))}
-              </div>
-            </details>
-
-            <Button type="submit" variant="primary" size="md" className="w-full" disabled={deploying}>
-              {deploying ? "Queuing deployment…" : "Deploy"}
-            </Button>
-          </form>
-        ) : (
-          <p className="mt-4 text-sm text-muted">Select a repository to continue.</p>
-        )}
+          <Button type="submit" variant="primary" size="md" className="w-full" disabled={!!problem || create.isPending}>
+            {create.isPending ? "Queuing deployment…" : "Deploy"}
+          </Button>
+          {problem && (repo || image || nameTouched) && <p className="-mt-2 text-center text-xs text-subtle">{problem}</p>}
+        </div>
       </Card>
-    </div>
+    </form>
   );
 }

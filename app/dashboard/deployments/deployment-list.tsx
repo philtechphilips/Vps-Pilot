@@ -1,69 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { DeploymentRow } from "@/components/dashboard/cards";
-import { FilterTabs } from "@/components/dashboard/filter-tabs";
+import { DeploymentRow } from "@/components/apps/app-ui";
 import { Card, Container, EmptyState, SearchBar, Select } from "@/components/ui";
-import { apps, deployments, type DeployStatus } from "@/lib/data";
-
-type Env = "all" | "Production" | "Staging";
+import { type DeploymentStatus, useApps, useDeployments } from "@/lib/api/apps";
+import { useServers } from "@/lib/api/servers";
 
 export function DeploymentList() {
-  const [env, setEnv] = useState<Env>("all");
+  const deployments = useDeployments(100);
+  const { data: apps } = useApps();
+  const { data: servers } = useServers();
   const [app, setApp] = useState("all");
-  const [status, setStatus] = useState<"all" | DeployStatus>("all");
+  const [status, setStatus] = useState<"all" | DeploymentStatus>("all");
   const [q, setQ] = useState("");
 
-  const list = deployments.filter(
+  const serverName = (id: string) => servers?.find((s) => s.id === id)?.name;
+  const list = (deployments.data ?? []).filter(
     (d) =>
-      (env === "all" || d.env === env) &&
-      (app === "all" || d.appId === app) &&
+      (app === "all" || d.application_id === app) &&
       (status === "all" || d.status === status) &&
-      `${d.id} ${d.branch} ${d.commit} ${d.message}`.toLowerCase().includes(q.toLowerCase()),
+      `${d.id} ${d.app_name} ${d.requested_ref} ${d.commit_sha} ${d.commit_message} ${d.image_ref}`.toLowerCase().includes(q.trim().toLowerCase()),
   );
 
   return (
     <Container>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <SearchBar placeholder="Search deployments by ID, branch or commit…" value={q} onChange={(e) => setQ(e.target.value)} className="flex-1" />
+        <SearchBar placeholder="Search by ID, branch, commit or image…" value={q} onChange={(e) => setQ(e.target.value)} className="flex-1" />
         <div className="flex flex-wrap gap-2">
-          <FilterTabs<Env>
-            value={env}
-            onChange={setEnv}
-            options={[
-              { value: "all", label: "All Environments" },
-              { value: "Production", label: "Production" },
-              { value: "Staging", label: "Staging" },
-            ]}
-          />
-          <Select value={app} onChange={(e) => setApp(e.target.value)} className="w-40" aria-label="Application">
+          <Select value={app} onChange={(e) => setApp(e.target.value)} className="w-44" aria-label="Application">
             <option value="all">All Apps</option>
-            {apps.map((a) => (
+            {apps?.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name}
               </option>
             ))}
           </Select>
-          <Select value={status} onChange={(e) => setStatus(e.target.value as "all" | DeployStatus)} className="w-36" aria-label="Status">
-            <option value="all">Status</option>
-            <option value="ready">Ready</option>
-            <option value="building">Building</option>
-            <option value="error">Error</option>
+          <Select value={status} onChange={(e) => setStatus(e.target.value as "all" | DeploymentStatus)} className="w-36" aria-label="Status">
+            <option value="all">Any status</option>
+            <option value="succeeded">Ready</option>
+            <option value="running">Building</option>
+            <option value="queued">Queued</option>
+            <option value="failed">Error</option>
             <option value="canceled">Canceled</option>
-            <option value="rolled-back">Rolled back</option>
           </Select>
         </div>
       </div>
       <div className="mt-6">
-        {list.length ? (
+        {deployments.isLoading ? (
+          <div className="skeleton h-64 rounded-xl" />
+        ) : list.length ? (
           <Card className="overflow-hidden">
             {list.map((d) => (
-              <DeploymentRow key={d.id} d={d} />
+              <DeploymentRow key={d.id} d={d} serverName={serverName(d.server_id)} />
             ))}
           </Card>
         ) : (
-          <EmptyState icon="rocket" title="No deployments found">
-            Nothing matches the current filters.
+          <EmptyState icon="rocket" title={deployments.data?.length ? "No deployments found" : "No deployments yet"}>
+            {deployments.data?.length ? "Nothing matches the current filters." : "Deployments appear here when you create or redeploy an application."}
           </EmptyState>
         )}
       </div>
