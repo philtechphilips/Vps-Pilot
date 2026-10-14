@@ -12,7 +12,7 @@ export type AlertState = "firing" | "acknowledged" | "resolved";
 export type Alert = {
   id: string;
   rule_id: string;
-  target_type: "server" | "application";
+  target_type: "server" | "application" | "domain" | "database";
   target_id: string;
   target_label: string;
   severity: Severity;
@@ -27,7 +27,7 @@ export type Alert = {
   resolved_at: string | null;
 };
 
-export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down";
+export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "tls_expiring" | "backup_stale";
 
 export type AlertRule = {
   id: string;
@@ -39,7 +39,7 @@ export type AlertRule = {
   enabled: boolean;
   notify_email: boolean;
   server_id: string | null;
-  target: "server" | "application";
+  target: "server" | "application" | "domain" | "database";
   metric: boolean;
 };
 
@@ -142,4 +142,20 @@ export const KIND_INFO: Record<RuleKind, { label: string; describe: (r: Pick<Ale
   inode_high: { label: "Inodes", describe: (r) => `Inodes above ${r.threshold}% for ${r.duration_minutes} min` },
   swap_high: { label: "Swap", describe: (r) => `Swap above ${r.threshold}% for ${r.duration_minutes} min` },
   app_down: { label: "Application down", describe: (r) => `Container not running for ${r.duration_minutes} min` },
+  tls_expiring: { label: "Certificate expiring", describe: (r) => `Certificate valid for less than ${r.threshold} days, or renewal failing` },
+  backup_stale: { label: "Backups stale or failing", describe: (r) => `No good backup for ${r.threshold} hours, or the last one failed` },
 };
+
+/** Kinds checked once (no duration): the threshold is days or hours, not %. */
+export const KIND_UNIT: Partial<Record<RuleKind, { label: string; hint: string; default: number }>> = {
+  tls_expiring: { label: "Days left below", hint: "days", default: 14 },
+  backup_stale: { label: "No good backup for", hint: "hours", default: 36 },
+};
+
+/** Who a rule watches, for the rules table. */
+export function ruleScope(r: Pick<AlertRule, "target" | "server_id">, serverName: (id: string) => string): string {
+  if (r.target === "application") return "All applications";
+  if (r.target === "domain") return "Domains with automatic HTTPS";
+  if (r.target === "database") return "Databases with a backup schedule";
+  return r.server_id ? serverName(r.server_id) : "All servers";
+}

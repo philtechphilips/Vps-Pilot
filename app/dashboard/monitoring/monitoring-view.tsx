@@ -13,7 +13,9 @@ import {
   type AlertRule,
   type Fleet,
   KIND_INFO,
+  KIND_UNIT,
   type RuleKind,
+  ruleScope,
   type Severity,
   useAcknowledge,
   useAlertRules,
@@ -229,6 +231,8 @@ function ServerHealth({ fleet }: { fleet: Fleet }) {
 }
 
 function targetHref(a: Alert) {
+  if (a.target_type === "domain") return "/dashboard/domains";
+  if (a.target_type === "database") return `/dashboard/databases/${a.target_id}`;
   return a.target_type === "server" ? `/dashboard/servers/${a.target_id}` : `/dashboard/applications/${a.target_id}`;
 }
 
@@ -342,8 +346,8 @@ function Rules() {
             {(rules.data ?? []).map((r) => (
               <tr key={r.id} className={cn("border-b border-line last:border-0 hover:bg-white/[0.02]", !r.enabled && "text-muted")}>
                 <td className="px-4 py-3 font-medium">{r.name}</td>
-                <td className="px-4 py-3 text-muted">{KIND_INFO[r.kind].describe(r)}</td>
-                <td className="px-4 py-3 text-muted">{r.target === "application" ? "All applications" : r.server_id ? serverName(r.server_id) : "All servers"}</td>
+                <td className="px-4 py-3 text-muted">{KIND_INFO[r.kind]?.describe(r) ?? r.kind}</td>
+                <td className="px-4 py-3 text-muted">{ruleScope(r, serverName)}</td>
                 <td className="px-4 py-3">
                   <Badge tone={sevTone[r.severity]}>{r.severity}</Badge>
                 </td>
@@ -400,19 +404,23 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   const [duration, setDuration] = useState(String(rule?.duration_minutes ?? 10));
   const [severity, setSeverity] = useState<Severity>(rule?.severity ?? "warning");
   const [serverId, setServerId] = useState(rule?.server_id ?? "");
+  const unit = KIND_UNIT[kind];
   const metric = !["agent_offline", "app_down"].includes(kind);
+  // Certificate and backup rules are checked once; they have no duration.
+  const timed = !unit;
+  const scoped = timed && kind !== "app_down";
   const error = create.error ?? update.error;
   const busy = create.isPending || update.isPending;
 
   const save = () => {
     const common = {
       name: name.trim() || KIND_INFO[kind].label,
-      duration_minutes: Number(duration),
+      ...(timed ? { duration_minutes: Number(duration) } : {}),
       severity,
       ...(metric ? { threshold: Number(threshold) } : {}),
     };
     if (rule) update.mutate({ id: rule.id, ...common }, { onSuccess: onClose });
-    else create.mutate({ kind, ...common, server_id: kind !== "app_down" && serverId ? serverId : null }, { onSuccess: onClose });
+    else create.mutate({ kind, ...common, server_id: scoped && serverId ? serverId : null }, { onSuccess: onClose });
   };
 
   return (
@@ -429,7 +437,15 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
           {!rule && (
             <div>
               <Label htmlFor="rk">Watch</Label>
-              <Select id="rk" value={kind} onChange={(e) => setKind(e.target.value as RuleKind)}>
+              <Select
+                id="rk"
+                value={kind}
+                onChange={(e) => {
+                  const next = e.target.value as RuleKind;
+                  setKind(next);
+                  if (KIND_UNIT[next]) setThreshold(String(KIND_UNIT[next]!.default));
+                }}
+              >
                 {(Object.keys(KIND_INFO) as RuleKind[]).map((k) => (
                   <option key={k} value={k}>
                     {KIND_INFO[k].label}
@@ -444,19 +460,21 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
           </div>
           <div className="grid grid-cols-2 gap-3">
             {metric && (
-              <div>
-                <Label htmlFor="rt" hint="%">
-                  Above
+              <div className={timed ? "" : "col-span-2"}>
+                <Label htmlFor="rt" hint={unit?.hint ?? "%"}>
+                  {unit?.label ?? "Above"}
                 </Label>
                 <Input id="rt" inputMode="decimal" value={threshold} onChange={(e) => setThreshold(e.target.value.replace(/[^\d.]/g, ""))} />
               </div>
             )}
-            <div className={metric ? "" : "col-span-2"}>
-              <Label htmlFor="rd" hint="minutes">
-                For at least
-              </Label>
-              <Input id="rd" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))} />
-            </div>
+            {timed && (
+              <div className={metric ? "" : "col-span-2"}>
+                <Label htmlFor="rd" hint="minutes">
+                  For at least
+                </Label>
+                <Input id="rd" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))} />
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -467,7 +485,7 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
                 <option value="info">Info</option>
               </Select>
             </div>
-            {!rule && kind !== "app_down" && (
+            {!rule && scoped && (
               <div>
                 <Label htmlFor="rsv">Servers</Label>
                 <Select id="rsv" value={serverId} onChange={(e) => setServerId(e.target.value)}>
