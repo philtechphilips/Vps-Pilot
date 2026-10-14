@@ -7,6 +7,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { FleetIllustration, HeroWordmark, PipelineIllustration, TopologyIllustration } from "@/components/marketing/illustrations";
 import { TerminalMock } from "@/components/marketing/mocks";
 import { ProductTour } from "@/components/marketing/product-tour";
+import { Stacks } from "@/components/marketing/stacks";
 import { Logotype } from "@/components/logo";
 import { ButtonLink } from "@/components/ui";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function HomePage() {
         >
           <Features />
           <RunsOn />
+          <Stacks />
           <ProductTour />
           <Foundation />
           <Security />
@@ -263,7 +265,24 @@ function IllustratedCard({ title, desc, illo, icon, seed, i }: { title: string; 
   );
 }
 
-const runsOn: Brand[] = ["Ubuntu", "Debian", "Docker", "systemd", "PM2", "Nginx", "Caddy", "PostgreSQL", "MySQL", "MariaDB", "Redis"];
+const runsOn: Brand[] = [
+  "Ubuntu",
+  "Debian",
+  "Docker",
+  "Node.js",
+  "Next.js",
+  "Python",
+  "Django",
+  "FastAPI",
+  "Go",
+  "Bun",
+  "Rust",
+  "Nginx",
+  "PostgreSQL",
+  "MySQL",
+  "MariaDB",
+  "Redis",
+];
 
 function RunsOn() {
   return (

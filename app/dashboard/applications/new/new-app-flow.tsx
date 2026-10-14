@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EnvEditor, type EnvDraft, envPayload, envProblem, repoName } from "@/components/apps/app-ui";
-import { SupportedStacks } from "@/components/apps/supported-stacks";
 import { RepoPicker } from "@/components/github/repo-picker";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
@@ -148,7 +147,12 @@ export function NewAppFlow() {
               autoDeploy={autoDeploy}
               onAutoDeploy={setAutoDeploy}
             />
-            <SupportedStacks />
+            <p className="text-xs leading-relaxed text-subtle">
+              No Dockerfile? Node.js, Bun, Python, Go, Rust and static sites are detected and built automatically.{" "}
+              <a href="/#stacks" target="_blank" className="text-muted underline underline-offset-2 hover:text-fg">
+                See supported stacks
+              </a>
+            </p>
           </div>
         ) : (
           <div className="mt-5 space-y-4">
