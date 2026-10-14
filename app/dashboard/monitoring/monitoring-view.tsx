@@ -29,7 +29,7 @@ import { formatDuration, timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const COLORS: ChartColor[] = ["blue", "teal", "violet", "warn", "ok", "gray", "err"];
-const SPAN_MS: Record<MetricsRange, number> = { "1h": 3_600_000, "24h": 86_400_000, "7d": 604_800_000 };
+const SPAN_MS: Record<MetricsRange, number> = { "1h": 3_600_000, "24h": 86_400_000, "7d": 604_800_000, "30d": 2_592_000_000, "90d": 7_776_000_000 };
 const BUCKETS = 60;
 const sevTone: Record<Severity, Tone> = { critical: "err", warning: "warn", info: "blue" };
 
@@ -40,7 +40,11 @@ function align(fleet: Fleet | undefined, range: MetricsRange, field: "cpu_percen
   const start = now - span;
   const labels = Array.from({ length: BUCKETS }, (_, i) => {
     const t = new Date(start + ((i + 1) * span) / BUCKETS);
-    return range === "7d" ? t.toLocaleDateString(undefined, { weekday: "short", hour: "2-digit" }) : t.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    return range === "7d"
+      ? t.toLocaleDateString(undefined, { weekday: "short", hour: "2-digit" })
+      : range === "30d" || range === "90d"
+        ? t.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+        : t.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
   });
   const series = (fleet?.servers ?? [])
     .filter((s) => s.points.length)
@@ -103,6 +107,8 @@ export function MonitoringView() {
                   { value: "1h", label: "1h" },
                   { value: "24h", label: "24h" },
                   { value: "7d", label: "7d" },
+                  { value: "30d", label: "30d" },
+                  { value: "90d", label: "90d" },
                 ]}
               />
             }

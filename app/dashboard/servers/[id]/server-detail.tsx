@@ -92,7 +92,11 @@ export function ServerDetailView() {
   const latest = s.latest;
   const live = s.status === "online";
   const points = metrics.data ?? [];
-  const labels = points.map((p) => new Date(p.ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }));
+  const labels = points.map((p) =>
+    range === "1h" || range === "24h"
+      ? new Date(p.ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+      : new Date(p.ts).toLocaleDateString(undefined, range === "7d" ? { weekday: "short", hour: "2-digit" } : { month: "short", day: "numeric" }),
+  );
   const netMax = Math.max(1, ...points.flatMap((p) => [p.net_rx_bps, p.net_tx_bps]));
   const netUnit = netMax > 1_048_576 ? { div: 1_048_576, label: " MB/s" } : { div: 1024, label: " KB/s" };
   const services = s.inventory.services ?? [];
@@ -195,6 +199,8 @@ export function ServerDetailView() {
                       { value: "1h", label: "1h" },
                       { value: "24h", label: "24h" },
                       { value: "7d", label: "7d" },
+                      { value: "30d", label: "30d" },
+                      { value: "90d", label: "90d" },
                     ]}
                   />
                 }

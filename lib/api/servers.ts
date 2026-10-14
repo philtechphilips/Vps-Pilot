@@ -74,7 +74,7 @@ export type MetricPoint = {
   net_tx_bps: number;
 };
 
-export type MetricsRange = "1h" | "24h" | "7d";
+export type MetricsRange = "1h" | "24h" | "7d" | "30d" | "90d";
 
 export const serverKeys = {
   all: ["servers"] as const,
