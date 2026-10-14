@@ -12,7 +12,9 @@ import { Logotype } from "@/components/logo";
 import { ButtonLink } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
-const INSTALL = "curl -fsSL https://get.vpspilot.dev | sh";
+// Installs the control plane (dashboard, API, database, HTTPS) on Ubuntu/Debian.
+const INSTALL =
+  "curl -fsSL https://raw.githubusercontent.com/philtechphilips/VPS-PIlot-BE/main/deploy/install.sh | sudo bash -s -- --domain pilot.example.com";
 
 /** Stagger delay for reveal / keyframe animations. */
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;

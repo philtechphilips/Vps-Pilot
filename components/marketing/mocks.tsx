@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const lines: { text: string; className?: string; typed?: boolean; pause?: number }[] = [
-  { text: "curl -fsSL https://get.vpspilot.dev/agent | sudo sh -s -- \\", typed: true },
+  { text: "curl -fsSL https://pilot.example.com/agent/install.sh | sudo bash -s -- \\", typed: true },
   { text: "    --token ept_••••••••••••3f9a", typed: true, className: "text-muted", pause: 500 },
-  { text: "VPSPilot Agent 0.4.2", className: "text-subtle", pause: 350 },
+  { text: "VPSPilot Agent 1.1.0", className: "text-subtle", pause: 350 },
   { text: "✓ Detected Debian 12 (bookworm) · arm64", className: "text-ok", pause: 450 },
   { text: "✓ Enrollment token redeemed (single-use)", className: "text-ok", pause: 450 },
   { text: "✓ Agent identity issued · SHA256:aP4r…Kk1z", className: "text-ok", pause: 450 },
