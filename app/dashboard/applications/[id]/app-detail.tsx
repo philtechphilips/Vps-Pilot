@@ -344,6 +344,7 @@ function SettingsSection({ app }: { app: App }) {
     build_command: app.build_command ?? "",
     start_command: app.start_command ?? "",
     container_port: String(app.container_port),
+    host_port: String(app.host_port),
     health_path: app.health_path,
     health_timeout_seconds: String(app.health_timeout_seconds),
     cpu_limit: app.cpu_limit ?? "",
@@ -368,6 +369,7 @@ function SettingsSection({ app }: { app: App }) {
             }
           : { image: form.image.trim() }),
         container_port: Number(form.container_port),
+        host_port: Number(form.host_port),
         health_path: form.health_path.trim(),
         health_timeout_seconds: Number(form.health_timeout_seconds),
         cpu_limit: form.cpu_limit.trim() || null,
@@ -381,7 +383,7 @@ function SettingsSection({ app }: { app: App }) {
     <FormCard
       title="Build & Runtime"
       description="How the next deployment is built and checked. A candidate must pass the health check before it replaces the live version."
-      footer={update.error ? <span className="text-err">{update.error.message}</span> : saved ? "Saved. Changes apply on the next deployment." : `Published on port ${app.host_port} of the server.`}
+      footer={update.error ? <span className="text-err">{update.error.message}</span> : saved ? "Saved. Changes apply on the next deployment." : `Port ${app.host_port} on ${app.server_name ?? "the server"} forwards to port ${app.container_port} in the container.`}
       action={
         <Button variant="primary" size="sm" disabled={update.isPending} onClick={save}>
           Save
@@ -405,6 +407,7 @@ function SettingsSection({ app }: { app: App }) {
           </div>
         )}
         <Field id="port" label="Container port" value={form.container_port} onChange={set("container_port")} mono />
+        <Field id="hostport" label="Public port (on the server)" value={form.host_port} onChange={set("host_port")} mono />
         <Field id="hc" label="Health check path" value={form.health_path} onChange={set("health_path")} mono />
         <Field id="hct" label="Health timeout (s)" value={form.health_timeout_seconds} onChange={set("health_timeout_seconds")} />
         <Field id="cpu" label="CPUs" value={form.cpu_limit} onChange={set("cpu_limit")} placeholder="no limit" />

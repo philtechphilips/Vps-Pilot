@@ -98,6 +98,7 @@ export type AppUpdate = Partial<
     | "build_command"
     | "start_command"
     | "container_port"
+    | "host_port"
     | "health_path"
     | "health_timeout_seconds"
     | "cpu_limit"

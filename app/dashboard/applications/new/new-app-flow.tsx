@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { EnvEditor, type EnvDraft, envPayload, envProblem, repoName } from "@/components/apps/app-ui";
+import { SupportedStacks } from "@/components/apps/supported-stacks";
 import { RepoPicker } from "@/components/github/repo-picker";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
@@ -147,10 +148,7 @@ export function NewAppFlow() {
               autoDeploy={autoDeploy}
               onAutoDeploy={setAutoDeploy}
             />
-            <p className="text-xs leading-relaxed text-subtle">
-              The server clones the repository and builds it with its Dockerfile. No Dockerfile? VPSPilot detects Node.js, Bun, Python, Go, Rust and static sites and builds
-              them for you.
-            </p>
+            <SupportedStacks />
           </div>
         ) : (
           <div className="mt-5 space-y-4">
