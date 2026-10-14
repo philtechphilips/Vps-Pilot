@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { tabs } from "@/components/dashboard/nav";
+import { useServers } from "@/lib/api/servers";
 import { Icon } from "@/components/icons";
 import { Logotype } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -46,19 +47,39 @@ function SidebarLinks({ pathname, onNavigate }: { pathname: string | null; onNav
   );
 }
 
+/** Live control-plane health: API reachability and agents reporting. */
+function ControlPlaneStatus() {
+  const servers = useServers();
+  const list = servers.data ?? [];
+  const enrolled = list.filter((s) => s.status === "online" || s.status === "offline");
+  const online = enrolled.filter((s) => s.status === "online").length;
+  const healthy = !servers.error;
+  return (
+    <div className="mx-1 rounded-xl border border-white/[0.06] bg-[#0d0d0d] p-3">
+      <div className="flex items-center gap-2 text-xs">
+        <span className="relative flex size-2">
+          {healthy && <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-50" />}
+          <span className={cn("relative inline-flex size-2 rounded-full", healthy ? "bg-ok" : "bg-err")} />
+        </span>
+        <span className="text-fg">{healthy ? "Control plane healthy" : "Can’t reach the API"}</span>
+      </div>
+      <p className="mt-1.5 text-[11px] leading-relaxed text-subtle">
+        {!servers.data
+          ? healthy
+            ? "Checking agents…"
+            : servers.error?.message
+          : enrolled.length === 0
+            ? "No agents enrolled yet"
+            : `${online} of ${enrolled.length} agent${enrolled.length === 1 ? "" : "s"} reporting`}
+      </p>
+    </div>
+  );
+}
+
 function SidebarFooter() {
   return (
     <div className="mt-auto space-y-3 px-2 pb-4">
-      <div className="mx-1 rounded-xl border border-white/[0.06] bg-[#0d0d0d] p-3">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-50" />
-            <span className="relative inline-flex size-2 rounded-full bg-ok" />
-          </span>
-          <span className="text-fg">Control plane healthy</span>
-        </div>
-        <p className="mt-1.5 text-[11px] leading-relaxed text-subtle">v1.1.0 · 5 of 6 agents reporting · last job 48s ago</p>
-      </div>
+      <ControlPlaneStatus />
       <div className="flex flex-col gap-0.5">
         <Link href="/#changelog" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-white/[0.04] hover:text-fg">
           <Icon name="file-text" className="text-subtle" /> Changelog
