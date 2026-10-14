@@ -5,8 +5,14 @@ import { DeploymentRow, deployLabel, deployTone, sourceLabel } from "@/component
 import { Icon } from "@/components/icons";
 import { Card, Dot } from "@/components/ui";
 import { useApps, useDeployments } from "@/lib/api/apps";
+import { useDatabases } from "@/lib/api/databases";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
+
+export function DatabaseCount() {
+  const { data } = useDatabases();
+  return <>{data ? data.length : "–"}</>;
+}
 
 export function AppCount() {
   const { data } = useApps();

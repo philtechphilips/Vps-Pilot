@@ -6,8 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar, Kbd } from "@/components/ui";
 import { useLogout } from "@/lib/api/auth";
-import { databases } from "@/lib/data";
 import { useApps } from "@/lib/api/apps";
+import { useDatabases } from "@/lib/api/databases";
 import { useServers } from "@/lib/api/servers";
 import { useInbox, useMarkRead } from "@/lib/api/notifications";
 import { timeAgo } from "@/lib/format";
@@ -42,6 +42,7 @@ export function CommandMenu() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { data: liveServers } = useServers();
   const { data: liveApps } = useApps();
+  const { data: liveDatabases } = useDatabases();
 
   const all = useMemo<Cmd[]>(
     () => [
@@ -51,9 +52,9 @@ export function CommandMenu() {
       ...tabs.map((t) => ({ group: "Navigation", label: t.label, href: t.href, icon: t.icon })),
       ...(liveServers ?? []).map((s) => ({ group: "Servers", label: s.name, href: `/dashboard/servers/${s.id}`, icon: "server" as const, hint: s.ip_addresses[0] ?? s.status })),
       ...(liveApps ?? []).map((a) => ({ group: "Applications", label: a.name, href: `/dashboard/applications/${a.id}`, icon: "box" as const, hint: a.server_name ?? a.runtime })),
-      ...databases.map((d) => ({ group: "Databases", label: d.name, href: `/dashboard/databases/${d.id}`, icon: "database" as const, hint: d.engine })),
+      ...(liveDatabases ?? []).map((d) => ({ group: "Databases", label: d.name, href: `/dashboard/databases/${d.id}`, icon: "database" as const, hint: d.engine_label })),
     ],
-    [liveServers, liveApps],
+    [liveServers, liveApps, liveDatabases],
   );
 
   const results = useMemo(() => {

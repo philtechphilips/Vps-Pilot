@@ -3,7 +3,7 @@ import { DetailHeader } from "@/components/dashboard/detail";
 import { Container } from "@/components/ui";
 import { RegisterForm } from "./register-form";
 
-export const metadata: Metadata = { title: "Register Database" };
+export const metadata: Metadata = { title: "New Database" };
 
 export default function RegisterDatabasePage() {
   return (
@@ -11,8 +11,8 @@ export default function RegisterDatabasePage() {
       <DetailHeader
         back="/dashboard/databases"
         backLabel="Databases"
-        title="Register a database"
-        meta={<span>Connect an existing instance. VPSPilot never installs a duplicate database.</span>}
+        title="New database"
+        meta={<span>Run a new database on your server, or connect one you already have.</span>}
       />
       <Container className="max-w-[920px]">
         <RegisterForm />

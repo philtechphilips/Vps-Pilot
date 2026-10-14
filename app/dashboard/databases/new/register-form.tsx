@@ -1,243 +1,239 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BrandChip, type Brand } from "@/components/brand-chip";
+import { BrandChip } from "@/components/brand-chip";
 import { Icon } from "@/components/icons";
-import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components/ui";
-import { servers } from "@/lib/data";
+import { Button, Callout, Card, Input, Label, Select } from "@/components/ui";
+import { DEFAULT_PORTS, ENGINE_BRAND, ENGINE_VERSIONS, type Engine, useCreateDatabase } from "@/lib/api/databases";
+import { useServers } from "@/lib/api/servers";
 import { cn } from "@/lib/utils";
 
-const engines: { name: Brand; port: string; planned?: boolean }[] = [
-  { name: "PostgreSQL", port: "5432" },
-  { name: "MySQL", port: "3306" },
-  { name: "MariaDB", port: "3306" },
-  { name: "Redis", port: "6379" },
-  { name: "MongoDB", port: "27017", planned: true },
-  { name: "SQLite", port: "", planned: true },
-  { name: "SQL Server", port: "1433", planned: true },
-];
-
-const modes = [
-  { id: "local", title: "Local service", desc: "Installed on an enrolled server (systemd).", icon: "server" },
-  { id: "docker", title: "Docker container", desc: "Running in a container on an enrolled server.", icon: "container" },
-  { id: "remote", title: "Remote endpoint", desc: "Managed or external host, reached over TLS.", icon: "globe" },
-] as const;
-
-type TestState = "idle" | "testing" | "ok";
+const NAME = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+const IDENT = /^[a-z_][a-z0-9_]{0,62}$/;
 
 export function RegisterForm() {
   const router = useRouter();
-  const [engine, setEngine] = useState<Brand>("PostgreSQL");
-  const [mode, setMode] = useState<(typeof modes)[number]["id"]>("local");
-  const [test, setTest] = useState<TestState>("idle");
-  const port = engines.find((e) => e.name === engine)?.port ?? "";
-  const isRedis = engine === "Redis";
+  const { data: servers } = useServers();
+  const create = useCreateDatabase();
+  const [mode, setMode] = useState<"managed" | "external">("managed");
+  const [engine, setEngine] = useState<Engine>("postgres");
+  const [name, setName] = useState("main");
+  const [serverId, setServerId] = useState("");
+  const [version, setVersion] = useState("");
+  const [database, setDatabase] = useState("");
+  const [localPort, setLocalPort] = useState("");
+  const [host, setHost] = useState("127.0.0.1");
+  const [port, setPort] = useState("");
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
+
+  const usable = (servers ?? []).filter((s) => s.enrolled_at && s.status !== "revoked");
+  const target = serverId || usable.find((s) => s.status === "online")?.id || usable[0]?.id || "";
+  const redis = engine === "redis";
+  const defaultDb = name.replace(/-/g, "_");
+
+  const problem = !NAME.test(name)
+    ? "Name: lowercase letters, numbers and dashes"
+    : !target
+      ? "Enroll a server first"
+      : mode === "managed" && !redis && database && !IDENT.test(database)
+        ? "Database names use lowercase letters, numbers and _"
+        : mode === "external" && !host.trim()
+          ? "Enter the host"
+          : null;
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (problem) return;
+    const body =
+      mode === "managed"
+        ? {
+            mode,
+            name,
+            server_id: target,
+            engine,
+            version: version || ENGINE_VERSIONS[engine][0],
+            ...(redis ? {} : { database: database || defaultDb }),
+            ...(localPort ? { local_port: Number(localPort) } : {}),
+          }
+        : {
+            mode,
+            name,
+            server_id: target,
+            engine,
+            host: host.trim(),
+            port: Number(port) || DEFAULT_PORTS[engine],
+            ...(redis ? {} : { user: user.trim() || (engine === "postgres" ? "postgres" : "root"), database: database || undefined }),
+            ...(password ? { password } : {}),
+          };
+    create.mutate(body, { onSuccess: (r) => router.push(`/dashboard/databases/${r.database.id}`) });
+  };
 
   return (
-    <form
-      className="space-y-6"
-      onSubmit={(e) => {
-        e.preventDefault();
-        router.push("/dashboard/databases/pg-main");
-      }}
-    >
+    <form className="space-y-6" onSubmit={submit}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {(
+          [
+            ["managed", "sparkles", "Create a new database", "VPSPilot runs it in Docker on your server, private by default, and gives your apps their connection details."],
+            ["external", "link", "Connect an existing one", "A database you already run on a server (installed with apt, in Docker, or elsewhere it can reach)."],
+          ] as const
+        ).map(([value, icon, title, desc]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setMode(value)}
+            className={cn(
+              "rounded-xl border p-4 text-left transition-colors",
+              mode === value ? "border-accent/60 bg-accent/10" : "border-line bg-bg-100 hover:border-line-strong",
+            )}
+          >
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <Icon name={icon} size={15} className="text-accent-fg" /> {title}
+            </span>
+            <span className="mt-1.5 block text-xs leading-relaxed text-muted">{desc}</span>
+          </button>
+        ))}
+      </div>
+
       <Card className="p-5 sm:p-6">
         <h2 className="font-medium">Engine</h2>
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {engines.map((e) => (
+          {(Object.keys(ENGINE_BRAND) as Engine[]).map((e) => (
             <button
-              key={e.name}
+              key={e}
               type="button"
-              disabled={e.planned}
               onClick={() => {
-                setEngine(e.name);
-                setTest("idle");
+                setEngine(e);
+                setVersion("");
               }}
               className={cn(
-                "flex items-center gap-3 rounded-md border p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-                engine === e.name ? "border-fg bg-white/[0.04]" : "border-line hover:border-line-strong",
+                "flex items-center gap-3 rounded-md border p-3 text-left transition-colors",
+                engine === e ? "border-fg bg-white/[0.04]" : "border-line hover:border-line-strong",
               )}
             >
-              <BrandChip name={e.name} size={26} />
-              <span className="min-w-0">
-                <span className="block truncate text-sm">{e.name}</span>
-                {e.planned && <span className="block text-[11px] text-subtle">Later release</span>}
-              </span>
+              <BrandChip name={ENGINE_BRAND[e]} size={26} />
+              <span className="text-sm">{ENGINE_BRAND[e]}</span>
             </button>
           ))}
         </div>
       </Card>
 
-      <Card className="p-5 sm:p-6">
-        <h2 className="font-medium">Connection mode</h2>
-        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          {modes.map((m) => (
-            <label
-              key={m.id}
-              className={cn("cursor-pointer rounded-md border p-4 transition-colors", mode === m.id ? "border-fg bg-white/[0.04]" : "border-line hover:border-line-strong")}
-            >
-              <input type="radio" name="mode" className="sr-only" checked={mode === m.id} onChange={() => setMode(m.id)} />
-              <Icon name={m.icon} />
-              <span className="mt-3 block text-sm font-medium">{m.title}</span>
-              <span className="mt-1 block text-xs text-muted">{m.desc}</span>
-            </label>
-          ))}
+      <Card className="space-y-5 p-5 sm:p-6">
+        <h2 className="font-medium">{mode === "managed" ? "Details" : "Connection"}</h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label htmlFor="dbname" hint="shown in VPSPilot">
+              Name
+            </Label>
+            <Input id="dbname" value={name} onChange={(e) => setName(e.target.value.toLowerCase())} className="font-mono" />
+          </div>
+          <div>
+            <Label htmlFor="server">{mode === "managed" ? "Run it on" : "Reach it from"}</Label>
+            {usable.length ? (
+              <Select id="server" value={target} onChange={(e) => setServerId(e.target.value)}>
+                {usable.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} {s.status === "online" ? "" : `(${s.status})`}
+                  </option>
+                ))}
+              </Select>
+            ) : (
+              <Link href="/dashboard/servers/new" className="flex h-10 items-center gap-2 rounded-md border border-dashed border-line-strong px-3 text-sm text-muted hover:text-fg">
+                <Icon name="plus" size={14} /> Enroll a server
+              </Link>
+            )}
+          </div>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="dbname">Display name</Label>
-            <Input id="dbname" placeholder={isRedis ? "redis-sessions" : "pg-orders"} required />
+        {mode === "managed" ? (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="ver">Version</Label>
+              <Select id="ver" value={version || ENGINE_VERSIONS[engine][0]} onChange={(e) => setVersion(e.target.value)}>
+                {ENGINE_VERSIONS[engine].map((v) => (
+                  <option key={v} value={v}>
+                    {ENGINE_BRAND[engine]} {v}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            {!redis && (
+              <div>
+                <Label htmlFor="defdb">First database</Label>
+                <Input id="defdb" placeholder={defaultDb} value={database} onChange={(e) => setDatabase(e.target.value.toLowerCase())} className="font-mono" />
+              </div>
+            )}
+            <div>
+              <Label htmlFor="lp" hint="optional">
+                Port on the server
+              </Label>
+              <Input id="lp" inputMode="numeric" placeholder="none" value={localPort} onChange={(e) => setLocalPort(e.target.value.replace(/\D/g, ""))} />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="env">Environment</Label>
-            <Select id="env" defaultValue="production">
-              <option value="production">Production</option>
-              <option value="staging">Staging</option>
-              <option value="internal">Internal</option>
-            </Select>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="host" hint="as seen from the server">
+                Host
+              </Label>
+              <Input id="host" value={host} onChange={(e) => setHost(e.target.value)} className="font-mono" />
+            </div>
+            <div>
+              <Label htmlFor="port">Port</Label>
+              <Input id="port" inputMode="numeric" placeholder={String(DEFAULT_PORTS[engine])} value={port} onChange={(e) => setPort(e.target.value.replace(/\D/g, ""))} className="font-mono" />
+            </div>
+            {!redis && (
+              <div>
+                <Label htmlFor="user">User</Label>
+                <Input id="user" placeholder={engine === "postgres" ? "postgres" : "root"} value={user} onChange={(e) => setUser(e.target.value)} className="font-mono" />
+              </div>
+            )}
+            <div>
+              <Label htmlFor="pw" hint="encrypted, never shown again in logs">
+                Password
+              </Label>
+              <Input id="pw" type="password" autoComplete="off" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            {!redis && (
+              <div>
+                <Label htmlFor="db2" hint="optional">
+                  Database
+                </Label>
+                <Input id="db2" value={database} onChange={(e) => setDatabase(e.target.value.toLowerCase())} className="font-mono" />
+              </div>
+            )}
           </div>
-          {mode !== "remote" ? (
+        )}
+
+        <div className="rounded-md border border-line bg-bg p-3 text-xs leading-relaxed text-muted">
+          {mode === "managed" ? (
             <>
-              <div>
-                <Label htmlFor="srv">Server</Label>
-                <Select id="srv" defaultValue="db-primary">
-                  {servers
-                    .filter((s) => s.status !== "offline")
-                    .map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name}
-                      </option>
-                    ))}
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="target">{mode === "docker" ? "Container" : "Socket or local address"}</Label>
-                <Input id="target" className="font-mono" defaultValue={mode === "docker" ? "" : `127.0.0.1:${port}`} placeholder={mode === "docker" ? "postgres-main" : ""} />
-              </div>
+              <span className="text-fg">Private by default.</span> It runs as the container <span className="font-mono text-fg">vpdb-{name || "name"}</span> on a private network.
+              Apps on the same server reach it by that name; nothing is exposed to the internet.
+              {localPort && " The port above is opened on 127.0.0.1 only, for SSH tunnels and tools on the server."}
             </>
           ) : (
             <>
-              <div>
-                <Label htmlFor="host">Host</Label>
-                <Input id="host" className="font-mono" placeholder="db.example.net" />
-              </div>
-              <div>
-                <Label htmlFor="port">Port</Label>
-                <Input id="port" className="font-mono" defaultValue={port} />
-              </div>
+              VPSPilot connects from the server, using a short-lived client container, so nothing needs installing. For a database installed on the server itself,
+              use <span className="font-mono text-fg">127.0.0.1</span>. It tests the connection right away.
             </>
           )}
         </div>
 
-        {mode === "remote" && (
-          <div className="mt-4">
-            <Callout tone="warn" icon="shield" title="Trusted target registration">
-              Remote endpoints must resolve to a public address or an explicitly trusted private range. TLS certificates are validated; plaintext connections are refused.
-            </Callout>
-          </div>
+        {create.error && (
+          <Callout tone="err" icon="x-circle">
+            {create.error.message}
+          </Callout>
         )}
-      </Card>
-
-      <Card className="p-5 sm:p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-medium">Credentials</h2>
-          <Badge tone="ok">
-            <Icon name="lock" size={11} /> Encrypted at rest
-          </Badge>
-        </div>
-        <p className="mt-1 text-sm text-muted">Use a dedicated least-privileged account. Superuser credentials are not required for monitoring or browsing.</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
-          {!isRedis && (
-            <div>
-              <Label htmlFor="user">Username</Label>
-              <Input id="user" className="font-mono" defaultValue="vpspilot_monitor" autoComplete="off" />
-            </div>
-          )}
-          {isRedis && (
-            <div>
-              <Label htmlFor="acl">ACL user</Label>
-              <Input id="acl" className="font-mono" defaultValue="vpspilot-ro" autoComplete="off" />
-            </div>
-          )}
-          <div>
-            <Label htmlFor="secret" hint="Write-only">
-              Password
-            </Label>
-            <Input id="secret" type="password" autoComplete="new-password" placeholder="••••••••••••" />
-          </div>
-          {!isRedis && (
-            <div>
-              <Label htmlFor="defaultdb">Default database</Label>
-              <Input id="defaultdb" className="font-mono" placeholder={engine === "PostgreSQL" ? "postgres" : "mysql"} />
-            </div>
-          )}
-          <div>
-            <Label htmlFor="tls">TLS</Label>
-            <Select id="tls" defaultValue={mode === "remote" ? "verify-full" : "prefer"}>
-              <option value="verify-full">Require & verify certificate</option>
-              <option value="require">Require</option>
-              <option value="prefer" disabled={mode === "remote"}>
-                Prefer (local only)
-              </option>
-            </Select>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-3 text-xs sm:grid-cols-3">
-          {[
-            ["Query timeout", "30 seconds"],
-            ["Result limit", "1,000 rows · 5 MB"],
-            ["Default access", "Read-only"],
-          ].map(([k, v]) => (
-            <div key={k} className="rounded-md border border-line bg-bg p-3">
-              <div className="text-subtle">{k}</div>
-              <div className="mt-0.5 text-fg">{v}</div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      <div className="flex flex-col gap-3 rounded-lg border border-line bg-bg p-4 sm:flex-row sm:items-center">
-        <div className="flex flex-1 items-center gap-3 text-sm">
-          {test === "idle" && (
-            <>
-              <Icon name="info" className="text-subtle" />
-              <span className="text-muted">Test the connection through the agent before saving.</span>
-            </>
-          )}
-          {test === "testing" && (
-            <>
-              <span className="size-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-              <span className="text-muted">Connecting via agent on db-primary…</span>
-            </>
-          )}
-          {test === "ok" && (
-            <>
-              <Icon name="check-circle" className="text-ok" />
-              <span>
-                Connected · {engine} {isRedis ? "7.4.1" : engine === "PostgreSQL" ? "16.4" : "8.0.39"} · 12 ms · TLS 1.3
-              </span>
-            </>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="md"
-            icon="zap"
-            onClick={() => {
-              setTest("testing");
-              setTimeout(() => setTest("ok"), 1200);
-            }}
-          >
-            Test Connection
-          </Button>
-          <Button type="submit" variant="primary" size="md" disabled={test !== "ok"}>
-            Register
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-subtle">{problem}</span>
+          <Button type="submit" variant="primary" size="md" disabled={!!problem || create.isPending}>
+            {create.isPending ? "Working…" : mode === "managed" ? `Create ${ENGINE_BRAND[engine]}` : "Connect"}
           </Button>
         </div>
-      </div>
+      </Card>
     </form>
   );
 }
