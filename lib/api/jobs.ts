@@ -13,7 +13,9 @@ export type JobType =
   | "container.restart"
   | "container.start"
   | "container.stop"
-  | "container.logs";
+  | "container.logs"
+  | "app.deploy"
+  | "app.remove";
 
 export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "expired" | "canceled";
 

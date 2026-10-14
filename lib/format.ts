@@ -39,3 +39,12 @@ export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }
+
+export function formatDuration(fromIso: string | null | undefined, toIso?: string | null, now = Date.now()): string {
+  if (!fromIso) return "—";
+  const end = toIso ? new Date(toIso).getTime() : now;
+  const s = Math.max(0, Math.round((end - new Date(fromIso).getTime()) / 1000));
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s`;
+  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m`;
+}

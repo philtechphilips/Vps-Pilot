@@ -17,6 +17,8 @@ export const jobTone: Record<JobStatus, Tone> = {
 };
 
 export function jobTitle(job: Pick<Job, "type" | "payload">) {
+  if (job.type === "app.deploy") return `Deploy ${String(job.payload.app)}`;
+  if (job.type === "app.remove") return `Remove app ${String(job.payload.app)}`;
   const target = String(job.payload.unit ?? job.payload.container ?? "").replace(/\.service$/, "");
   const [kind, verb] = job.type.split(".");
   const label = verb === "logs" ? "Logs" : verb[0].toUpperCase() + verb.slice(1);
