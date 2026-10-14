@@ -9,6 +9,8 @@ import { useLogout } from "@/lib/api/auth";
 import { databases } from "@/lib/data";
 import { useApps } from "@/lib/api/apps";
 import { useServers } from "@/lib/api/servers";
+import { useInbox, useMarkRead } from "@/lib/api/notifications";
+import { timeAgo } from "@/lib/format";
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { cn } from "@/lib/utils";
 
@@ -281,38 +283,68 @@ export function AddNewMenu() {
   );
 }
 
+const levelDot = { ok: "bg-ok", err: "bg-err", warn: "bg-warn", info: "bg-blue-fg" } as const;
+
 export function NotificationsMenu() {
+  const router = useRouter();
+  const { data } = useInbox();
+  const markRead = useMarkRead();
+  const unread = data?.unread ?? 0;
+  const items = data?.items ?? [];
+
   return (
     <Dropdown
-      label="Notifications"
-      width="w-[340px]"
+      label={unread ? `Notifications (${unread} unread)` : "Notifications"}
+      width="w-[360px]"
       trigger={
         <span className="relative inline-flex size-8 items-center justify-center rounded-full border border-line text-muted transition-colors hover:text-fg">
           <Icon name="bell" />
-          <span className="absolute top-1 right-1 size-2 rounded-full border-2 border-bg bg-blue-fg" />
+          {unread > 0 && <span className="absolute top-1 right-1 size-2 rounded-full border-2 border-bg bg-accent-fg" />}
         </span>
       }
     >
       <div className="flex items-center justify-between px-2.5 py-2">
-        <p className="text-sm font-medium">Inbox</p>
-        <Link href="/dashboard/monitoring" className="text-xs text-muted hover:text-fg">
-          View all
-        </Link>
+        <p className="text-sm font-medium">
+          Inbox {unread > 0 && <span className="ml-1 text-xs font-normal text-subtle">{unread} unread</span>}
+        </p>
+        <span className="flex items-center gap-3 text-xs">
+          {unread > 0 && (
+            <button type="button" onClick={() => markRead.mutate(undefined)} className="text-muted hover:text-fg">
+              Mark all read
+            </button>
+          )}
+          <Link href="/dashboard/settings#notifications" className="text-muted hover:text-fg">
+            Settings
+          </Link>
+        </span>
       </div>
-      {[
-        { t: "staging-01 agent is offline", s: "18m ago", tone: "bg-err" },
-        { t: "metabase deployment failed health check", s: "26m ago", tone: "bg-err" },
-        { t: "db-primary memory above 85%", s: "42m ago", tone: "bg-warn" },
-        { t: "pg-main restore verified on pg-restore-test", s: "11m ago", tone: "bg-ok" },
-      ].map((n) => (
-        <Link key={n.t} href="/dashboard/monitoring" className="flex gap-3 rounded-md px-2.5 py-2.5 hover:bg-white/[0.05]">
-          <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", n.tone)} />
-          <span className="min-w-0">
-            <span className="block text-[13px] text-fg">{n.t}</span>
-            <span className="block text-xs text-subtle">{n.s}</span>
-          </span>
-        </Link>
-      ))}
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 px-4 py-8 text-center text-[13px] text-subtle">
+          <Icon name="inbox" size={20} />
+          Nothing yet. Finished deployments show up here.
+        </div>
+      ) : (
+        <div className="thin-scrollbar max-h-[420px] overflow-y-auto">
+          {items.map((n) => (
+            <button
+              key={n.id}
+              type="button"
+              onClick={() => {
+                if (!n.read_at) markRead.mutate([n.id]);
+                if (n.link) router.push(n.link);
+              }}
+              className="flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left hover:bg-white/[0.05]"
+            >
+              <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", levelDot[n.level] ?? "bg-blue-fg", n.read_at && "opacity-30")} />
+              <span className="min-w-0 flex-1">
+                <span className={cn("block truncate text-[13px]", n.read_at ? "text-muted" : "text-fg")}>{n.title}</span>
+                {n.body && <span className="block truncate text-xs text-subtle">{n.body}</span>}
+                <span className="block text-[11px] text-subtle">{timeAgo(n.created_at)}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </Dropdown>
   );
 }

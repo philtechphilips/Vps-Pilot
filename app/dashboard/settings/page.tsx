@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SessionsCard } from "@/components/auth/sessions-card";
 import { TwoFactorCard } from "@/components/auth/two-factor-card";
+import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
 import { GitHubCard } from "@/components/github/github-card";
 import { Icon } from "@/components/icons";
 import { Badge, Button, Card, Container, FormCard, Input, Label, Mono, PageHeader, Select } from "@/components/ui";
@@ -133,28 +134,7 @@ export default function SettingsPage() {
           </div>
 
           <div id="notifications" className="scroll-mt-20">
-            <FormCard
-              title="Notification Channels"
-              description="Where alerts are delivered. Each alert is deduplicated per target and rule."
-              action={
-                <Button variant="primary" size="sm">
-                  Save
-                </Button>
-              }
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="owner@example.com" />
-                </div>
-                <div>
-                  <Label htmlFor="hook" hint="Signed with HMAC-SHA256">
-                    Webhook URL
-                  </Label>
-                  <Input id="hook" className="font-mono" defaultValue="https://hooks.example.com/vpspilot" />
-                </div>
-              </div>
-            </FormCard>
+            <NotificationSettingsCard />
           </div>
 
           <div id="storage" className="scroll-mt-20">
