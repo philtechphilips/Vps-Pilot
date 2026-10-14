@@ -148,7 +148,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <span className="word-in w-full sm:w-auto" style={d(1080)}>
-              <ButtonLink href="/setup" variant="primary" size="lg" className="w-full rounded-xl sm:w-auto" iconRight="arrow-right">
+              <ButtonLink href="/docs/getting-started/install" variant="primary" size="lg" className="w-full rounded-xl sm:w-auto" iconRight="arrow-right">
                 Get started
               </ButtonLink>
             </span>
@@ -503,7 +503,7 @@ function GetStarted() {
         <div>
           <SectionHead eyebrow="Get started" icon="zap" title="Enroll a server in seconds" desc="Start with the host the control plane runs on, then add every other VPS you own." />
           <div data-reveal style={d(240)} className="mt-6 flex gap-2">
-            <ButtonLink href="/setup" variant="primary" size="md" className="rounded-xl" iconRight="arrow-right">
+            <ButtonLink href="/docs/getting-started/install" variant="primary" size="md" className="rounded-xl" iconRight="arrow-right">
               Get started
             </ButtonLink>
             <ButtonLink href="/dashboard/servers/new" variant="secondary" size="md" className="rounded-xl border-white/10 bg-[#141414]">
@@ -562,7 +562,7 @@ function FinalCta() {
           Open source and self-hosted. Nothing leaves your infrastructure unless you send it.
         </p>
         <div data-reveal style={d(320)} className="mt-8 flex flex-col items-center gap-3 sm:flex-row">
-          <ButtonLink href="/setup" variant="primary" size="md" className="h-11 rounded-xl px-5" iconRight="arrow-right">
+          <ButtonLink href="/docs/getting-started/install" variant="primary" size="md" className="h-11 rounded-xl px-5" iconRight="arrow-right">
             Deploy VPSPilot
           </ButtonLink>
           <CommandPill command={INSTALL} className="rounded-xl border-white/10 bg-[#0d0d0d]" />

@@ -16,7 +16,7 @@ const product = [
 ] as const;
 
 const links = [
-  { label: "Docs", href: "#docs" },
+  { label: "Docs", href: "/docs" },
   { label: "Security", href: "#security" },
   { label: "Changelog", href: "#changelog" },
 ];
@@ -94,7 +94,7 @@ export function MarketingHeader() {
             Log in
           </Link>
           <Link
-            href="/setup"
+            href="/docs/getting-started/install"
             className="btn-primary group flex h-9 items-center gap-1.5 rounded-xl pr-3 pl-4 text-[13px] font-medium"
           >
             Get started
@@ -134,7 +134,7 @@ export function MarketingHeader() {
             <Link href="/login" className="flex h-11 items-center justify-center rounded-xl border border-white/10 text-sm">
               Log in
             </Link>
-            <Link href="/setup" className="btn-primary flex h-11 items-center justify-center rounded-xl text-sm font-medium">
+            <Link href="/docs/getting-started/install" className="btn-primary flex h-11 items-center justify-center rounded-xl text-sm font-medium">
               Get started
             </Link>
           </div>

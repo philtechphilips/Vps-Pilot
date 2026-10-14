@@ -10,6 +10,13 @@ const columns = [
   { title: "Project", links: ["GitHub", "Releases", "Roadmap", "Security policy", "License"] },
 ];
 
+const docLinks: Record<string, string> = {
+  Docs: "/docs",
+  "Install guide": "/docs/getting-started/install",
+  "Agent protocol": "/docs/reference/agent#agent-protocol",
+  "Threat model": "/docs/concepts/security",
+};
+
 export function MarketingFooter() {
   return (
     <footer className="border-t border-white/[0.06] bg-black">
@@ -27,7 +34,7 @@ export function MarketingFooter() {
               <ul className="mt-4 space-y-2.5 text-sm text-muted">
                 {c.links.map((l) => (
                   <li key={l}>
-                    <a href="#" className="transition-colors hover:text-fg">
+                    <a href={docLinks[l] ?? "#"} className="transition-colors hover:text-fg">
                       {l}
                     </a>
                   </li>

@@ -311,6 +311,11 @@ body {
     transform: translateY(-16px);
   }
 }
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
 
 /* Scroll reveal: MotionRoot flips data-reveal to "in" when the element enters the viewport. */
 [data-reveal] {
