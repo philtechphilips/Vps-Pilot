@@ -5,6 +5,9 @@ import type { NextConfig } from "next";
 const API_URL = process.env.API_URL ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
+  // The Docker image (deploy/) builds a self-contained server; local dev and
+  // `next start` are unaffected.
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
