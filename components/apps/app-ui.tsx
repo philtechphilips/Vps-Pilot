@@ -123,6 +123,10 @@ export const draftFrom = (env: EnvVar[]): EnvDraft[] =>
 export const emptyDraft = (): EnvDraft => ({ id: nextId++, key: "", value: "", secret: false, stored: false });
 
 const KEY_RE = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/;
+// Bundled into browser code at build time, so never secret, and they must
+// reach the build (secrets are runtime-only).
+const PUBLIC_RE = /^(NEXT_PUBLIC_|NUXT_PUBLIC_|EXPO_PUBLIC_|VITE_|REACT_APP_|VUE_APP_|GATSBY_|PUBLIC_)/;
+const looksSecret = (key: string) => !PUBLIC_RE.test(key) && /SECRET|TOKEN|PASSWORD|KEY|DATABASE_URL|DSN/i.test(key);
 
 /** Validation message for the draft, or null when it can be saved. */
 export function envProblem(rows: EnvDraft[]): string | null {
@@ -157,7 +161,7 @@ function parseDotenv(text: string): EnvDraft[] {
       let value = rest.join("=").trim();
       if (/^(["']).*\1$/.test(value)) value = value.slice(1, -1);
       const key = rawKey.trim();
-      return { id: nextId++, key, value, secret: /SECRET|TOKEN|PASSWORD|KEY|DATABASE_URL|DSN/i.test(key), stored: false };
+      return { id: nextId++, key, value, secret: looksSecret(key), stored: false };
     });
 }
 
@@ -224,7 +228,13 @@ export function EnvEditor({ rows, onChange }: { rows: EnvDraft[]; onChange: (row
               <button
                 type="button"
                 aria-pressed={r.secret}
-                title={r.secret ? "Secret: encrypted and never shown again" : "Mark as secret"}
+                title={
+                  r.secret && PUBLIC_RE.test(r.key)
+                    ? "Secrets are runtime-only: this browser variable won't exist during the build"
+                    : r.secret
+                      ? "Secret: encrypted and never shown again"
+                      : "Mark as secret"
+                }
                 onClick={() => update(r.id, { secret: !r.secret })}
                 className={cn(
                   "inline-flex h-10 items-center gap-1.5 rounded-md border px-2.5 text-xs transition-colors",
