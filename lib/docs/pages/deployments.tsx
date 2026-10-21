@@ -190,6 +190,12 @@ export function Builds() {
         ]}
       />
       <P>Recognised frameworks: Next.js, Nuxt, Remix, SvelteKit, Astro, NestJS, Angular, Create React App, Vite, Fastify, Hono, Express and Koa.</P>
+      <Callout type="security" title="Security releases">
+        <p>
+          Every build fetches the newest base image (<C>node:22</C>, <C>python:3.12</C>…), and systemd apps get the newest release of
+          their Node.js major from nodejs.org, so redeploying picks up runtime security fixes. Needs agent 1.1.1 or later.
+        </p>
+      </Callout>
 
       <H2>Python</H2>
       <Table
