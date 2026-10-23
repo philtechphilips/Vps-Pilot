@@ -46,6 +46,14 @@ export type ServerSummary = {
 export type InventoryService = { name: string; active: string; sub: string; description: string };
 export type InventoryContainer = { id: string; name: string; image: string; state: string; status: string; ports: string };
 
+export type ServerUpdates = {
+  total: number;
+  security: number;
+  packages: { name: string; version: string; security: boolean }[];
+  reboot_required: boolean;
+  checked_at: number;
+};
+
 export type ServerDetail = ServerSummary & {
   kernel: string | null;
   uptime_seconds: number | null;
@@ -55,6 +63,7 @@ export type ServerDetail = ServerSummary & {
     containers?: InventoryContainer[];
     runtimes?: Record<string, string | null>;
     docker_access?: boolean;
+    updates?: ServerUpdates | null;
   };
   inventory_at: string | null;
   agent_token_rotated_at: string | null;

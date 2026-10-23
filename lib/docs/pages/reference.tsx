@@ -311,6 +311,8 @@ POST /api/v1/servers/{id}/actions
           ["service.logs", "{ unit, lines? }", "Last 1–500 lines, 200 by default."],
           ["container.start · container.stop · container.restart", "{ container }", "A container name."],
           ["container.logs", "{ container, lines? }", "Last 1–500 lines, 200 by default."],
+          ["os.upgrade", "{ mode }", <><C>security</C> (unattended-upgrades) or <C>all</C> (apt-get upgrade). Agent 1.1.4+.</>],
+          ["os.reboot", "{}", "Reboot the server in 10 seconds. Agent 1.1.4+."],
         ]}
       />
 
@@ -388,6 +390,16 @@ POST /api/v1/applications
           ["POST", "/api/v1/applications/{id}/logs", <>Request container logs: <C>lines</C> (1–1000), optional <C>since</C> to follow.</>],
           ["GET", "/api/v1/applications/{id}/logs/{job_id}", "Read the result: lines, container state, start time and restarts."],
           ["GET", "/api/v1/applications/{id}/requests?range=", <>Traffic through the app&apos;s domains: <C>1h</C>, <C>24h</C> or <C>7d</C>.</>],
+        ]}
+      />
+      <H2>Scheduled jobs</H2>
+      <Endpoints
+        routes={[
+          ["GET", "/api/v1/applications/{id}/cron", "The app's scheduled jobs."],
+          ["POST", "/api/v1/applications/{id}/cron", <><C>name</C>, <C>schedule</C> (cron or @daily…), <C>timezone</C>, <C>command</C>, <C>timeout_minutes</C>, <C>enabled</C>.</>],
+          ["PATCH", "/api/v1/applications/{id}/cron/{cron_id}", "Change any of those."],
+          ["POST", "/api/v1/applications/{id}/cron/{cron_id}/run", "Run now; returns the job."],
+          ["DELETE", "/api/v1/applications/{id}/cron/{cron_id}", "Delete it."],
         ]}
       />
 
@@ -474,6 +486,9 @@ POST /api/v1/databases
           ["POST", "/api/v1/backups/settings/test?server_id=", "Test storage from a server."],
           ["POST", "/api/v1/backups/gdrive/connect", "Start Google sign-in; returns the consent URL."],
           ["DELETE", "/api/v1/backups/gdrive/connection", "Disconnect Google Drive and revoke access."],
+          ["GET", "/api/v1/backups/apps/{app_id}/policy", "An app's file backup schedule."],
+          ["PUT", "/api/v1/backups/apps/{app_id}/policy", <><C>enabled</C>, <C>every_hours</C>, <C>keep</C>.</>],
+          ["POST", "/api/v1/backups/apps/{app_id}/run", "Back up the app's files now."],
         ]}
       />
     </>
@@ -491,6 +506,7 @@ export function DomainsApi() {
           ["PATCH", "/api/v1/domains/{id}", <>Change <C>tls_mode</C>.</>],
           ["DELETE", "/api/v1/domains/{id}", "Remove a domain and re-apply the proxy."],
           ["POST", "/api/v1/domains/{id}/check", "Re-check DNS and refresh certificate status."],
+          ["GET", "/api/v1/domains/{id}/uptime?range=", <>Uptime checks: availability, response times and recent failures for <C>24h</C>, <C>7d</C> or <C>30d</C>.</>],
           ["POST", "/api/v1/domains/servers/{server_id}/apply", "Re-apply the whole proxy config on a server."],
         ]}
       />
@@ -502,6 +518,10 @@ export function DomainsApi() {
           ["GET", "/api/v1/monitoring/fleet?range=1h", <>Metric series for every server, plus a summary. <C>range</C>: 1h, 24h, 7d, 30d or 90d.</>],
           ["GET", "/api/v1/monitoring/alerts?state=open", <>Alerts: <C>open</C>, <C>resolved</C> or <C>all</C>.</>],
           ["POST", "/api/v1/monitoring/alerts/{id}/acknowledge", "Acknowledge an open alert."],
+          ["POST", "/api/v1/monitoring/alerts/{id}/snooze", <><C>{`{"minutes": 60}`}</C> holds back its notifications; <C>null</C> wakes it.</>],
+          ["GET", "/api/v1/monitoring/maintenance", "Maintenance windows on now or coming up."],
+          ["POST", "/api/v1/monitoring/maintenance", <><C>minutes</C>, optional <C>server_id</C> or <C>application_id</C>, <C>reason</C>.</>],
+          ["DELETE", "/api/v1/monitoring/maintenance/{id}", "End a window now."],
           ["POST", "/api/v1/monitoring/evaluate", "Evaluate all rules now."],
           ["GET", "/api/v1/monitoring/rules", "Alert rules."],
           ["POST", "/api/v1/monitoring/rules", <>Create a rule of a given <C>kind</C>.</>],
@@ -511,7 +531,8 @@ export function DomainsApi() {
       />
       <P>
         Rule kinds: <C>agent_offline</C>, <C>cpu_high</C>, <C>memory_high</C>, <C>disk_high</C>, <C>inode_high</C>, <C>swap_high</C>,{" "}
-        <C>app_down</C>, <C>tls_expiring</C>, <C>backup_stale</C>.
+        <C>updates_pending</C>, <C>app_down</C>, <C>app_errors</C>, <C>error_rate</C>, <C>site_down</C>, <C>tls_expiring</C>,{" "}
+        <C>backup_stale</C>. App rules take an optional <C>application_id</C>.
       </P>
 
       <H2>Logs</H2>

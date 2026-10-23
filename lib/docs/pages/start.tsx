@@ -287,12 +287,20 @@ export function FirstRun() {
         ]}
       />
 
-      <H2>More administrators</H2>
+      <H2>More people</H2>
       <P>
-        There is no public sign-up. Add administrators on the control plane&apos;s server; you&apos;re asked for their password. Everyone with
-        an account can manage every enrolled server.
+        There is no public sign-up. Add people on the control plane&apos;s server; you&apos;re asked for their password.{" "}
+        <strong>Admins</strong> can manage every enrolled server. <strong>Viewers</strong> see everything except secrets (database
+        passwords, exports, query results), can read logs, and change nothing: useful for a teammate or a client.
       </P>
-      <CodeBlock code={`sudo vpspilot admin teammate@example.com`} />
+      <CodeBlock
+        code={`
+sudo vpspilot admin teammate@example.com
+sudo vpspilot viewer client@example.com`}
+      />
+      <P>
+        Switch someone between admin and viewer in <strong>Settings → Team</strong>.
+      </P>
       <P>
         On a manual install, run <C>uv run poe createadmin teammate@example.com</C> in the API directory instead.
       </P>
@@ -385,6 +393,14 @@ export function ConnectServer() {
           [<C key="6">/var/lib/vpspilot-proxy</C>, "Generated Caddyfile and certificates"],
         ]}
       />
+
+      <H2>System updates</H2>
+      <P>
+        The server&apos;s page lists pending package updates (security ones first) and whether a reboot is needed, with buttons to install
+        security updates, all updates, or reboot. apt runs in its own systemd unit, so it finishes even if VPSPilot restarts mid-way. An
+        update to Docker restarts every container for a few seconds. See{" "}
+        <A href="/docs/operations/monitoring">Security updates pending</A> for the alert.
+      </P>
 
       <H2>Upgrade the agent</H2>
       <P>Run the installer again without a token. It replaces the code in place and restarts both services; the enrollment is kept.</P>

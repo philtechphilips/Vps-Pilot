@@ -29,9 +29,10 @@ const EVENTS: { value: ChannelEvent; label: string }[] = [
   { value: "alert.resolved", label: "Alert resolved" },
   { value: "deployment.failed", label: "Deployment failed" },
   { value: "deployment.succeeded", label: "Deployment succeeded" },
+  { value: "job.failed", label: "Scheduled job failed" },
 ];
 
-const DEFAULT_EVENTS: ChannelEvent[] = ["alert.firing", "alert.resolved", "deployment.failed"];
+const DEFAULT_EVENTS: ChannelEvent[] = ["alert.firing", "alert.resolved", "deployment.failed", "job.failed"];
 
 export function AlertChannelsCard() {
   const channels = useAlertChannels();
@@ -98,6 +99,12 @@ function ChannelRow({ channel: c }: { channel: AlertChannel }) {
         <span className="text-sm font-medium">{c.name}</span>
         <Badge>{kind?.label}</Badge>
         <span className="font-mono text-xs text-subtle">{c.target_label}</span>
+        {c.kind === "telegram" && (
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted" title="The bot answers /status, /apps and /alerts in this chat">
+            <input type="checkbox" checked={c.commands} onChange={(e) => update.mutate({ id: c.id, commands: e.target.checked })} className="accent-[var(--color-accent)]" />
+            Commands
+          </label>
+        )}
         <span className="ml-auto flex items-center gap-1">
           <Button variant="secondary" size="xs" icon="zap" disabled={test.isPending || !c.enabled} onClick={() => test.mutate(c.id)}>
             {test.isPending ? "Sending…" : "Send test"}
@@ -159,6 +166,7 @@ function NewChannel({ onDone, onCancel }: { onDone: (secret: string | null) => v
   const [token, setToken] = useState("");
   const [chat, setChat] = useState("");
   const [events, setEvents] = useState<ChannelEvent[]>(DEFAULT_EVENTS);
+  const [commands, setCommands] = useState(true);
   const hint = KINDS.find((k) => k.value === kind)?.hint;
   const valid = (kind === "telegram" ? /^\d{5,12}:[A-Za-z0-9_-]{30,50}$/.test(token.trim()) && /^(-?\d{1,20}|@[A-Za-z0-9_]{5,32})$/.test(chat.trim()) : /^https?:\/\/\S+$/.test(url.trim())) && events.length > 0;
 
@@ -204,6 +212,13 @@ function NewChannel({ onDone, onCancel }: { onDone: (secret: string | null) => v
         )}
       </div>
       <p className="mt-3 text-xs text-subtle">{hint}</p>
+      {kind === "telegram" && (
+        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
+          <input type="checkbox" checked={commands} onChange={(e) => setCommands(e.target.checked)} className="accent-[var(--color-accent)]" />
+          Answer <span className="font-mono text-xs">/status</span>, <span className="font-mono text-xs">/apps</span> and <span className="font-mono text-xs">/alerts</span>{" "}
+          in this chat
+        </label>
+      )}
       <div className="mt-4 flex flex-wrap gap-1.5">
         {EVENTS.map((e) => (
           <button
@@ -228,7 +243,13 @@ function NewChannel({ onDone, onCancel }: { onDone: (secret: string | null) => v
           disabled={!valid || create.isPending}
           onClick={() =>
             create.mutate(
-              { kind, name: name.trim(), events, config: kind === "telegram" ? { bot_token: token.trim(), chat_id: chat.trim() } : { url: url.trim() } },
+              {
+                kind,
+                name: name.trim(),
+                events,
+                commands: kind === "telegram" && commands,
+                config: kind === "telegram" ? { bot_token: token.trim(), chat_id: chat.trim() } : { url: url.trim() },
+              },
               { onSuccess: (r) => onDone(r.secret) },
             )
           }

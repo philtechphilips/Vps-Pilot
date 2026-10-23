@@ -101,6 +101,8 @@ export function Applications() {
           ["build_command / start_command", "string", <>Override what the buildpack detected. Ignored when a Dockerfile is used.</>],
           ["health_path", "path · /", "Requested on the candidate container before release. Any status below 400 passes."],
           ["health_timeout_seconds", "5–600 · 60", "How long the candidate has to become healthy."],
+          ["data_path", "path", <>Docker apps: a folder inside the container kept across deploys, such as <C key="d">/app/uploads</C>. See below.</>],
+          ["error_ignore", "list of text", <>Error lines containing any of these aren&apos;t counted for the <A key="a" href="/docs/operations/monitoring#app-errors">App logging errors</A> alert.</>],
           ["cpu_limit", "e.g. 0.5, 2", "CPU cores the container may use."],
           ["memory_limit", "e.g. 512m, 2g", "Hard memory limit."],
           ["auto_deploy", "bool · true", "Deploy on every push to the branch (GitHub apps only)."],
@@ -124,6 +126,43 @@ export function Applications() {
         systemd apps listen directly on their public port on the server; the domain proxy reaches them through the private network&apos;s
         gateway (and VPSPilot opens that path in <C>ufw</C> if it&apos;s on).
       </P>
+
+      <H2 id="data-folder">Files that survive deploys</H2>
+      <P>
+        Every deploy starts the app fresh, so anything it writes inside its container or release folder is gone after the next one. Keep
+        uploads, SQLite files and the like where VPSPilot keeps them:
+      </P>
+      <Table
+        head={["Runtime", "Kept folder", "Backed up"]}
+        rows={[
+          ["Docker", <>Set a <strong key="d">data folder</strong> in the app&apos;s settings (e.g. <C key="p">/app/uploads</C>): it&apos;s the volume <C key="v">vp-&lt;app&gt;-data</C>, mounted there on every deploy.</>, "Yes"],
+          ["systemd", <><C key="s">$VPSPILOT_SHARED_DIR</C>, in <C key="f">/srv/vpspilot/&lt;app&gt;/shared</C>.</>, "Yes"],
+          ["Compose", "The project's named volumes.", "Yes"],
+        ]}
+      />
+      <P>
+        Removing an app keeps its data volume; delete it with <C>docker volume rm</C> when you&apos;re sure. See{" "}
+        <A href="/docs/backups/database-backups#app-files">app file backups</A>.
+      </P>
+
+      <H2 id="scheduled-jobs">Scheduled jobs</H2>
+      <P>
+        Run a command inside an app on a schedule, such as <C>npm run cleanup</C> every night, from the app&apos;s{" "}
+        <strong>Scheduled Jobs</strong> section. It runs where the app does: in its container (Docker), its public service (Compose), or as
+        the app&apos;s own user in its live release with its environment (systemd), never on the server as root.
+      </P>
+      <Ul>
+        <li>
+          Schedules are cron expressions (<C>0 2 * * *</C>) or <C>@hourly</C>, <C>@daily</C>, <C>@weekly</C>, <C>@monthly</C>, in the
+          timezone you pick.
+        </li>
+        <li>A run is skipped while the previous one is still going, and stops after its time limit (1 hour by default, up to 6).</li>
+        <li>
+          Failed runs notify the inbox and alert channels that subscribe to <strong>Scheduled job failed</strong>. Each run&apos;s output is
+          kept like any job&apos;s; <strong>Run now</strong> starts one straight away.
+        </li>
+      </Ul>
+      <P>Needs agent 1.1.4 or later.</P>
 
       <H2>Apps keep running</H2>
       <P>
@@ -373,6 +412,14 @@ verify     if it fails, bring the previous release back up`}
       <P>
         Compose apps have no candidate stage, so changed services restart in place during the release. The previous release is restored if
         the health check fails.
+      </P>
+
+      <H3 id="zero-downtime">No gap for visitors</H3>
+      <P>
+        For Docker apps, the healthy candidate starts answering to the app&apos;s name on the private network before the live container
+        stops, so the proxy always has somewhere to send requests through the app&apos;s domains; it&apos;s retired once the new live
+        container passes its check. If a request does hit a container that just stopped, the proxy retries it for up to 5 seconds. The
+        app&apos;s direct port still has a brief gap. Needs agent 1.1.4 or later.
       </P>
 
       <H3>Failed deployments clean up</H3>

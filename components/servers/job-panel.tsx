@@ -19,6 +19,9 @@ export const jobTone: Record<JobStatus, Tone> = {
 export function jobTitle(job: Pick<Job, "type" | "payload">) {
   if (job.type === "app.deploy") return `Deploy ${String(job.payload.app)}`;
   if (job.type === "app.remove") return `Remove app ${String(job.payload.app)}`;
+  if (job.type === "os.upgrade") return job.payload.mode === "security" ? "Install security updates" : "Install all updates";
+  if (job.type === "os.reboot") return "Reboot";
+  if (job.type === "app.exec") return `Run on ${String(job.payload.app)}: ${String(job.payload.command).slice(0, 60)}`;
   const target = String(job.payload.unit ?? job.payload.container ?? "").replace(/\.service$/, "");
   const [kind, verb] = job.type.split(".");
   const label = verb === "logs" ? "Logs" : verb[0].toUpperCase() + verb.slice(1);

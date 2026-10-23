@@ -41,3 +41,23 @@ export function OwnerName() {
   const user = useAuthStore((s) => s.user);
   return <>{user ? `${displayName(user)}’s Servers` : "Your Servers"}</>;
 }
+
+export function RoleBadge() {
+  const viewer = useAuthStore((s) => s.user?.role === "viewer");
+  return viewer ? (
+    <span className="rounded-full bg-white/15 px-1.5 py-px text-[10px] font-semibold text-fg">Viewer</span>
+  ) : (
+    <span className="rounded-full bg-accent px-1.5 py-px text-[10px] font-semibold text-white">Owner</span>
+  );
+}
+
+/** A reminder for view-only users that changes need an admin. */
+export function ViewerBanner() {
+  const viewer = useAuthStore((s) => s.user?.role === "viewer");
+  if (!viewer) return null;
+  return (
+    <div className="border-b border-white/[0.06] bg-white/[0.03] px-4 py-2 text-center text-xs text-muted">
+      You have view-only access: you can see everything, but changes need an admin.
+    </div>
+  );
+}

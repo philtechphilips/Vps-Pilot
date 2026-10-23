@@ -23,7 +23,10 @@ import { type App, isDeploying, runtimeLabel, useApp, useAppDeployments, useDele
 import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
+import { AppBackupsSection } from "./backups";
+import { CronSection } from "./cron";
 import { TrafficSection } from "./traffic";
+import { UptimeSection } from "./uptime";
 
 export function AppDetailView() {
   const { id } = useParams<{ id: string }>();
@@ -268,10 +271,14 @@ export function AppDetailView() {
           </Card>
         </section>
 
+        <UptimeSection domains={appDomains.data ?? []} />
         <TrafficSection appId={a.id} />
 
         <EnvSection key={`env-${a.id}`} app={a} onRedeploy={() => deploy.mutate(undefined, { onSuccess: (d) => goTo(d.id) })} />
         <SettingsSection key={`settings-${a.id}`} app={a} />
+        <CronSection app={a} />
+        <ErrorAlertsSection key={`errors-${a.id}`} app={a} />
+        <AppBackupsSection app={a} />
 
         <FormCard
           danger
@@ -379,6 +386,7 @@ function SettingsSection({ app }: { app: App }) {
     health_timeout_seconds: String(app.health_timeout_seconds),
     cpu_limit: app.cpu_limit ?? "",
     memory_limit: app.memory_limit ?? "",
+    data_path: app.data_path ?? "",
     auto_deploy: app.auto_deploy,
   });
   const [saved, setSaved] = useState(false);
@@ -405,6 +413,7 @@ function SettingsSection({ app }: { app: App }) {
         health_timeout_seconds: Number(form.health_timeout_seconds),
         cpu_limit: form.cpu_limit.trim() || null,
         memory_limit: form.memory_limit.trim().toLowerCase() || null,
+        ...(app.runtime === "docker" ? { data_path: form.data_path.trim() } : {}),
         ...(app.github_repo ? { auto_deploy: form.auto_deploy } : {}),
       },
       { onSuccess: () => setSaved(true) },
@@ -466,6 +475,9 @@ function SettingsSection({ app }: { app: App }) {
             <Field id="mem" label="Memory" value={form.memory_limit} onChange={set("memory_limit")} placeholder="e.g. 512m" />
           </>
         )}
+        {app.runtime === "docker" && (
+          <Field id="datapath" label="Data folder (kept across deploys)" value={form.data_path} onChange={set("data_path")} placeholder="e.g. /app/uploads" mono />
+        )}
         <div>
           <Label>Source</Label>
           <div className="flex h-10 items-center gap-2 truncate rounded-md border border-line bg-bg-200 px-3 text-[13px] text-muted">
@@ -497,6 +509,49 @@ function SettingsSection({ app }: { app: App }) {
           </label>
         )}
       </div>
+    </FormCard>
+  );
+}
+
+function ErrorAlertsSection({ app }: { app: App }) {
+  const update = useUpdateApp(app.id);
+  const [text, setText] = useState(app.error_ignore.join("\n"));
+  const [saved, setSaved] = useState(false);
+  const lines = text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  const problem = lines.length > 20 ? "Up to 20 lines" : lines.some((l) => l.length < 2 || l.length > 200) ? "Each line needs 2 to 200 characters" : null;
+
+  return (
+    <FormCard
+      title="Error Alerts"
+      description="VPSPilot counts error lines in this app's logs and alerts you (App logging errors). Lines containing any of the text below are left out, for noise you already know about."
+      footer={update.error ? <span className="text-err">{update.error.message}</span> : problem ? problem : saved ? "Saved. The agent picks it up within a minute." : "One per line, plain text, not case-sensitive."}
+      action={
+        <Button
+          variant="primary"
+          size="sm"
+          disabled={!!problem || update.isPending}
+          onClick={() => update.mutate({ error_ignore: lines }, { onSuccess: () => setSaved(true) })}
+        >
+          Save
+        </Button>
+      }
+    >
+      <Label htmlFor="ignore">Ignore error lines containing</Label>
+      <textarea
+        id="ignore"
+        value={text}
+        onChange={(e) => {
+          setSaved(false);
+          setText(e.target.value);
+        }}
+        rows={3}
+        spellCheck={false}
+        placeholder={"ECONNRESET\nDeprecationWarning"}
+        className="w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-[12px] text-fg outline-none placeholder:text-subtle focus:border-line-strong"
+      />
     </FormCard>
   );
 }

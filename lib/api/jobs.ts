@@ -15,7 +15,10 @@ export type JobType =
   | "container.stop"
   | "container.logs"
   | "app.deploy"
-  | "app.remove";
+  | "app.remove"
+  | "os.upgrade"
+  | "os.reboot"
+  | "app.exec";
 
 export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "expired" | "canceled";
 

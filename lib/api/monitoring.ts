@@ -25,9 +25,21 @@ export type Alert = {
   acknowledged_at: string | null;
   acknowledged_by: string | null;
   resolved_at: string | null;
+  snoozed_until: string | null;
 };
 
-export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "app_errors" | "tls_expiring" | "backup_stale";
+export type MaintenanceWindow = {
+  id: string;
+  server_id: string | null;
+  application_id: string | null;
+  scope: string;
+  starts_at: string;
+  ends_at: string;
+  reason: string | null;
+  created_by: string;
+};
+
+export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "app_errors" | "error_rate" | "updates_pending" | "site_down" | "tls_expiring" | "backup_stale";
 
 export type AlertRule = {
   id: string;
@@ -39,6 +51,7 @@ export type AlertRule = {
   enabled: boolean;
   notify_email: boolean;
   server_id: string | null;
+  application_id: string | null;
   target: "server" | "application" | "domain" | "database";
   metric: boolean;
 };
@@ -98,6 +111,41 @@ export function useAcknowledge() {
   });
 }
 
+export function useSnooze() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: ({ id, minutes }: { id: string; minutes: number | null }) =>
+      api<Alert>(`/monitoring/alerts/${id}/snooze`, { method: "POST", body: { minutes }, auth: true }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useMaintenance() {
+  return useQuery({
+    queryKey: ["monitoring", "maintenance"],
+    queryFn: () => api<MaintenanceWindow[]>("/monitoring/maintenance", { auth: true }),
+    enabled: useSignedIn(),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useStartMaintenance() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (body: { server_id?: string | null; application_id?: string | null; minutes: number; reason?: string }) =>
+      api<MaintenanceWindow>("/monitoring/maintenance", { method: "POST", body, auth: true }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useEndMaintenance() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (id: string) => api<void>(`/monitoring/maintenance/${id}`, { method: "DELETE", auth: true }),
+    onSuccess: invalidate,
+  });
+}
+
 export function useEvaluateNow() {
   const invalidate = useInvalidate();
   return useMutation({
@@ -119,7 +167,7 @@ export function useUpdateRule() {
 export function useCreateRule() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: (body: RuleInput & { kind: RuleKind; server_id?: string | null }) =>
+    mutationFn: (body: RuleInput & { kind: RuleKind; server_id?: string | null; application_id?: string | null }) =>
       api<AlertRule>("/monitoring/rules", { method: "POST", body, auth: true }),
     onSuccess: invalidate,
   });
@@ -146,6 +194,12 @@ export const KIND_INFO: Record<RuleKind, { label: string; describe: (r: Pick<Ale
     label: "App logging errors",
     describe: (r) => `${r.threshold === 1 ? "An error line" : `${r.threshold} error lines`} in an app's logs within ${r.duration_minutes} min`,
   },
+  error_rate: { label: "High error rate", describe: (r) => `Over ${r.threshold}% of an app's requests fail with 5xx for ${r.duration_minutes} min` },
+  updates_pending: {
+    label: "Security updates pending",
+    describe: (r) => `${r.threshold} or more security updates waiting for ${r.duration_minutes >= 1440 ? `${Math.round(r.duration_minutes / 1440)} days` : `${r.duration_minutes} min`}`,
+  },
+  site_down: { label: "Site down", describe: (r) => `A domain fails its uptime check for ${r.duration_minutes} min` },
   tls_expiring: { label: "Certificate expiring", describe: (r) => `Certificate valid for less than ${r.threshold} days, or renewal failing` },
   backup_stale: { label: "Backups stale or failing", describe: (r) => `No good backup for ${r.threshold} hours, or the last one failed` },
 };
@@ -154,12 +208,20 @@ export const KIND_INFO: Record<RuleKind, { label: string; describe: (r: Pick<Ale
  * once and have no duration (certificates, backups). */
 export const KIND_UNIT: Partial<Record<RuleKind, { label: string; hint: string; default: number; timed?: true }>> = {
   app_errors: { label: "At least", hint: "error lines", default: 1, timed: true },
+  error_rate: { label: "5xx above", hint: "% of requests", default: 5, timed: true },
+  updates_pending: { label: "At least", hint: "security updates", default: 1, timed: true },
   tls_expiring: { label: "Days left below", hint: "days", default: 14 },
   backup_stale: { label: "No good backup for", hint: "hours", default: 36 },
 };
 
 /** Who a rule watches, for the rules table. */
-export function ruleScope(r: Pick<AlertRule, "target" | "server_id">, serverName: (id: string) => string): string {
+export function ruleScope(
+  r: Pick<AlertRule, "target" | "server_id"> & { kind?: RuleKind; application_id?: string | null },
+  serverName: (id: string) => string,
+  appName?: (id: string) => string,
+): string {
+  if (r.application_id) return appName ? appName(r.application_id) : "One app";
+  if (r.kind === "site_down") return "Live domains of apps";
   if (r.target === "application") return "All applications";
   if (r.target === "domain") return "Domains with automatic HTTPS";
   if (r.target === "database") return "Databases with a backup schedule";

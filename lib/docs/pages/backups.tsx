@@ -58,10 +58,35 @@ PUT /api/v1/backups/policies/{instance_id}
       </P>
       <CodeBlock lang="http" code={`POST /api/v1/backups/run\n{ "instance_id": "4d1e…", "database": "app" }`} />
 
+      <H2 id="app-files">App file backups</H2>
+      <P>
+        Databases aren&apos;t the only thing worth keeping. The <strong>File Backups</strong> section of an app backs up what it keeps between
+        deploys (see <A href="/docs/deployments/applications#data-folder">files that survive deploys</A>): a Docker app&apos;s data folder,
+        a systemd app&apos;s shared folder, or a Compose project&apos;s named volumes.
+      </P>
+      <Ul>
+        <li>One encrypted <C>.tar.gz.enc</C> per backup (AES-256, the same key as database backups), stored and uploaded the same way.</li>
+        <li>Schedules, retention, <strong>Back up now</strong> and off-server storage work as for databases.</li>
+        <li>
+          <strong>Verify</strong> decrypts the backup and reads every file. <strong>Restore</strong> stops the app, empties the folder or
+          volumes, puts the files back and starts it again.
+        </li>
+        <li>
+          Files are copied as they are: a database running inside a Compose project should be backed up as a database, not from its volume.
+        </li>
+      </Ul>
+      <CodeBlock
+        lang="http"
+        code={`
+PUT  /api/v1/backups/apps/{app_id}/policy   { "enabled": true, "every_hours": 24, "keep": 7 }
+POST /api/v1/backups/apps/{app_id}/run`}
+      />
+      <P>Needs agent 1.1.4 or later.</P>
+
       <H2>Staleness alerts</H2>
       <P>
-        The <strong>Backups stale or failing</strong> alert rule fires when a scheduled database has had no successful backup for 36 hours.
-        Adjust the threshold in <A href="/docs/operations/monitoring">Monitoring</A>.
+        The <strong>Backups stale or failing</strong> alert rule fires as soon as a scheduled backup fails, or when a database or app has had
+        no successful backup for 36 hours. Adjust the threshold in <A href="/docs/operations/monitoring">Monitoring</A>.
       </P>
     </>
   );

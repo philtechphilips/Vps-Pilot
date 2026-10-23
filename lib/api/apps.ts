@@ -65,6 +65,10 @@ export type App = {
   health_timeout_seconds: number;
   cpu_limit: string | null;
   memory_limit: string | null;
+  /** Docker apps: folder inside the container kept across deploys (and backed up). */
+  data_path: string | null;
+  /** Error lines containing any of these aren't counted for alerts. */
+  error_ignore: string[];
   env: EnvVar[];
   current_deployment: Deployment | null;
   latest_deployment: Deployment | null;
@@ -115,6 +119,8 @@ export type AppUpdate = Partial<
     | "health_timeout_seconds"
     | "cpu_limit"
     | "memory_limit"
+    | "data_path"
+    | "error_ignore"
   >
 > & { env?: EnvInput[]; auto_deploy?: boolean };
 

@@ -115,9 +115,10 @@ export function Jobs() {
         rows={[
           ["Services", <C key="s">service.start · service.stop · service.restart · service.logs</C>],
           ["Containers", <C key="c">container.start · container.stop · container.restart · container.logs</C>],
-          ["Applications", <C key="a">app.deploy · app.remove · app.logs</C>],
+          ["Applications", <C key="a">app.deploy · app.remove · app.logs · app.exec</C>],
           ["Databases", <C key="d">db.create · db.remove · db.control · db.query · db.explore · db.admin · db.redis · db.export · db.import</C>],
-          ["Backups", <C key="b">backup.create · backup.restore · backup.delete · backup.storage_test</C>],
+          ["Backups", <C key="b">backup.create · backup.restore · backup.files · backup.files_restore · backup.delete · backup.storage_test</C>],
+          ["System", <C key="o">os.upgrade · os.reboot</C>],
           ["Proxy", <C key="p">proxy.apply · proxy.status</C>],
           ["Logs", <C key="l">logs.read</C>],
         ]}
@@ -171,6 +172,7 @@ export function Security() {
           ],
           ["Helper", "Root, but only a fixed set of operations with validated arguments. No shell, no arbitrary commands. Job secrets never reach its log."],
           ["Native (systemd) apps", "Each app runs, and builds, as its own system user in a hardened unit: read-only system, private /tmp, no new privileges, no capabilities."],
+          ["Scheduled jobs", "Run inside the app: its container, or its own user and sandbox. Never on the server as root."],
           ["Compose apps", "Privileged mode, host namespaces, devices, binds outside the repository, the Docker socket and external volumes are refused."],
           ["Repository content", "Treated as untrusted. Files are read with size limits; anything copied into a generated Dockerfile must match strict patterns."],
         ]}
@@ -220,6 +222,15 @@ uv run python -m app.encryption rotate`}
         encrypted at rest, and handed to the agent only for the job that needs it. A copy of your bucket alone can’t be read, so keep the{" "}
         <A href="/docs/backups/s3-storage#the-recovery-kit">recovery kit</A> offline: without it, neither can you if the control plane is lost.
       </P>
+
+      <H2>Roles</H2>
+      <Table
+        head={["Role", "Can"]}
+        rows={[
+          ["Admin", "Everything."],
+          ["Viewer", "See everything except secrets: database passwords, exports, query results and the list of users. Read logs. Change nothing."],
+        ]}
+      />
 
       <H2>Audit trail</H2>
       <P>

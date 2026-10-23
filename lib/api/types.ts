@@ -4,7 +4,7 @@ export type User = {
   id: number;
   email: string;
   name: string | null;
-  role: "user" | "admin";
+  role: "user" | "admin" | "viewer";
   two_factor_enabled: boolean;
   two_factor_method: "email" | "totp" | null;
   totp_enabled: boolean;

@@ -100,27 +100,7 @@ export function BackupsView() {
         ) : !list.length ? (
           <Card className="p-5 text-sm text-subtle">No backups yet. Turn on a schedule above or press Back up now.</Card>
         ) : (
-          <Card className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-sm">
-              <thead>
-                <tr className="border-b border-line text-left text-xs text-subtle">
-                  <th className="px-4 py-2.5 font-normal">Database</th>
-                  <th className="px-4 py-2.5 font-normal">Status</th>
-                  <th className="px-4 py-2.5 font-normal">Created</th>
-                  <th className="px-4 py-2.5 font-normal">Size</th>
-                  <th className="px-4 py-2.5 font-normal">Checksum</th>
-                  <th className="px-4 py-2.5 font-normal">Stored</th>
-                  <th className="px-4 py-2.5 font-normal">Restore check</th>
-                  <th className="w-56 px-4 py-2.5" />
-                </tr>
-              </thead>
-              <tbody>
-                {list.map((r) => (
-                  <RunRow key={r.id} r={r} />
-                ))}
-              </tbody>
-            </table>
-          </Card>
+          <RunsTable runs={list} />
         )}
         {list.length > 0 && <LoadMore hasMore={!!runs.hasNextPage} loading={runs.isFetchingNextPage} onLoad={() => runs.fetchNextPage()} label="backups" />}
       </section>
@@ -182,6 +162,33 @@ function PolicyRow({ p }: { p: Policy }) {
   );
 }
 
+/** Backups of databases and of apps' files, with verify, restore and delete. */
+export function RunsTable({ runs }: { runs: BackupRun[] }) {
+  return (
+    <Card className="overflow-x-auto">
+      <table className="w-full min-w-[980px] text-sm">
+        <thead>
+          <tr className="border-b border-line text-left text-xs text-subtle">
+            <th className="px-4 py-2.5 font-normal">Backup of</th>
+            <th className="px-4 py-2.5 font-normal">Status</th>
+            <th className="px-4 py-2.5 font-normal">Created</th>
+            <th className="px-4 py-2.5 font-normal">Size</th>
+            <th className="px-4 py-2.5 font-normal">Checksum</th>
+            <th className="px-4 py-2.5 font-normal">Stored</th>
+            <th className="px-4 py-2.5 font-normal">Restore check</th>
+            <th className="w-56 px-4 py-2.5" />
+          </tr>
+        </thead>
+        <tbody>
+          {runs.map((r) => (
+            <RunRow key={r.id} r={r} />
+          ))}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
+
 function RunRow({ r }: { r: BackupRun }) {
   const action = useBackupAction();
   const [restoring, setRestoring] = useState(false);
@@ -189,6 +196,27 @@ function RunRow({ r }: { r: BackupRun }) {
   const [message, setMessage] = useState<string | null>(null);
   const done = r.status === "succeeded";
   const redis = r.engine === "redis";
+  const files = r.kind === "files";
+  const name = files ? (r.application_name ?? "app") : redis ? (r.instance_name ?? "redis") : r.database;
+  const restore = (mode: "replace" | "new", into?: string) => {
+    setRestoring(false);
+    setMessage("Restoring…");
+    action.mutate(
+      { run: r.id, action: "restore", body: { mode, into } },
+      {
+        onSuccess: async (reply) => {
+          try {
+            if (!reply.job_id) return;
+            const result = await waitForBackupJob(reply.job_id);
+            setMessage(files ? `Restored ${result.files ?? 0} files` : `Restored ${result.tables ?? 0} tables${into ? ` into ${into}` : ""}`);
+          } catch (e) {
+            setMessage(e instanceof Error ? e.message : "Restore failed");
+          }
+        },
+        onError: (e) => setMessage(e.message),
+      },
+    );
+  };
 
   return (
     <>
@@ -196,10 +224,21 @@ function RunRow({ r }: { r: BackupRun }) {
         <td className="px-4 py-3">
           <div className="flex items-center gap-2.5">
             {r.engine && <BrandChip name={ENGINE_BRAND[r.engine]} size={22} />}
+            {files && (
+              <span className="flex size-[22px] items-center justify-center rounded-md border border-line bg-bg-200">
+                <Icon name="folder" size={12} className="text-muted" />
+              </span>
+            )}
             <span>
-              <span className="block font-mono text-[13px]">{redis ? r.instance_name : r.database}</span>
+              {files ? (
+                <Link href={`/dashboard/applications/${r.application_id}`} className="block font-mono text-[13px] hover:underline">
+                  {name}
+                </Link>
+              ) : (
+                <span className="block font-mono text-[13px]">{name}</span>
+              )}
               <span className="block text-xs text-subtle">
-                {r.instance_name} · {r.trigger}
+                {files ? `files${r.files != null ? ` · ${r.files}` : ""}` : r.instance_name} · {r.trigger}
               </span>
             </span>
           </div>
@@ -258,36 +297,23 @@ function RunRow({ r }: { r: BackupRun }) {
           {message && <span className="mt-1 block text-right text-xs text-muted">{message}</span>}
         </td>
       </tr>
-      {restoring && (
-        <RestoreDialog
-          r={r}
-          onClose={() => setRestoring(false)}
-          onRestore={(mode, into) => {
-            setRestoring(false);
-            setMessage("Restoring…");
-            action.mutate(
-              { run: r.id, action: "restore", body: { mode, into } },
-              {
-                onSuccess: async (reply) => {
-                  try {
-                    if (!reply.job_id) return;
-                    const result = await waitForBackupJob(reply.job_id);
-                    setMessage(`Restored ${result.tables ?? 0} tables${into ? ` into ${into}` : ""}`);
-                  } catch (e) {
-                    setMessage(e instanceof Error ? e.message : "Restore failed");
-                  }
-                },
-                onError: (e) => setMessage(e.message),
-              },
-            );
-          }}
-        />
-      )}
+      {restoring && !files && <RestoreDialog r={r} onClose={() => setRestoring(false)} onRestore={restore} />}
+      <ConfirmDialog
+        open={restoring && files}
+        onClose={() => setRestoring(false)}
+        title={`Restore ${name}'s files`}
+        confirmText={name}
+        action="Restore"
+        onConfirm={() => restore("replace")}
+      >
+        The app is stopped, its data folder (or volumes) is emptied and filled from this backup, then the app starts again. Files written since the
+        backup are lost.
+      </ConfirmDialog>
       <ConfirmDialog
         open={deleting}
         onClose={() => setDeleting(false)}
         title="Delete backup"
-        confirmText={redis ? (r.instance_name ?? "redis") : r.database}
+        confirmText={name}
         action="Delete"
         onConfirm={() => {
           setDeleting(false);

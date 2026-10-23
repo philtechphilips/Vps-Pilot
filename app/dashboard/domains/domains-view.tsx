@@ -139,6 +139,14 @@ function DomainCard({ d }: { d: Domain }) {
               <Icon name="lock" size={14} className="text-subtle" />
               <Certificate d={d} />
             </span>
+            {d.uptime?.up != null && (
+              <span className={cn("flex items-center gap-1.5", d.uptime.up ? "text-muted" : "text-err")} title={d.uptime.error ?? undefined}>
+                <Icon name="activity" size={14} className={d.uptime.up ? "text-ok" : "text-err"} />
+                {d.uptime.up ? "Up" : `Down: ${d.uptime.error}`}
+                {d.uptime.uptime_24h != null && <span className="text-subtle">· {d.uptime.uptime_24h}% today</span>}
+                {d.uptime.up && d.uptime.ms != null && <span className="text-subtle">· {Math.round(d.uptime.ms)} ms</span>}
+              </span>
+            )}
           </div>
           {d.status === "error" && d.error && <p className="mt-2 text-sm text-err">{d.error}</p>}
         </div>

@@ -22,10 +22,15 @@ import {
   useAlerts,
   useCreateRule,
   useDeleteRule,
+  useEndMaintenance,
   useEvaluateNow,
   useFleet,
+  useMaintenance,
+  useSnooze,
+  useStartMaintenance,
   useUpdateRule,
 } from "@/lib/api/monitoring";
+import { useApps } from "@/lib/api/apps";
 import { type MetricsRange, useServers } from "@/lib/api/servers";
 import { formatDuration, timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -162,6 +167,8 @@ export function MonitoringView() {
           <Incidents state={incidentTab} />
         </section>
 
+        <Maintenance />
+
         <Rules />
       </Container>
     </>
@@ -236,9 +243,17 @@ function targetHref(a: Alert) {
   return a.target_type === "server" ? `/dashboard/servers/${a.target_id}` : `/dashboard/applications/${a.target_id}`;
 }
 
+const SNOOZE = [
+  { minutes: 60, label: "1 hour" },
+  { minutes: 240, label: "4 hours" },
+  { minutes: 1440, label: "1 day" },
+  { minutes: 10080, label: "1 week" },
+];
+
 function Incidents({ state }: { state: "open" | "resolved" }) {
   const alerts = useAlerts(state);
   const ack = useAcknowledge();
+  const snooze = useSnooze();
   if (alerts.isLoading) return <div className="skeleton h-32 rounded-xl" />;
   if (!alerts.data?.length) {
     return (
@@ -267,6 +282,14 @@ function Incidents({ state }: { state: "open" | "resolved" }) {
               </div>
               {a.detail && <div className="truncate text-xs text-subtle">{a.detail}</div>}
               {a.acknowledged_by && a.state !== "resolved" && <div className="text-xs text-subtle">Acknowledged by {a.acknowledged_by}</div>}
+              {a.state !== "resolved" && a.snoozed_until && (
+                <div className="flex items-center gap-2 text-xs text-subtle">
+                  <Icon name="bell" size={12} /> Snoozed until {new Date(a.snoozed_until).toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" })}
+                  <button type="button" className="text-muted underline underline-offset-2 hover:text-fg" onClick={() => snooze.mutate({ id: a.id, minutes: null })}>
+                    Unsnooze
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-3 pl-7 sm:pl-0">
@@ -276,6 +299,21 @@ function Incidents({ state }: { state: "open" | "resolved" }) {
                 ? `Resolved ${timeAgo(a.resolved_at)} · lasted ${formatDuration(a.fired_at ?? a.started_at, a.resolved_at)}`
                 : `${a.state === "firing" ? "Firing" : "Acknowledged"} for ${formatDuration(a.fired_at ?? a.started_at)}`}
             </span>
+            {a.state !== "resolved" && (
+              <Select
+                aria-label={`Snooze ${a.title}`}
+                className="h-7 w-28 text-xs"
+                value=""
+                onChange={(e) => e.target.value && snooze.mutate({ id: a.id, minutes: Number(e.target.value) })}
+              >
+                <option value="">Snooze…</option>
+                {SNOOZE.map((o) => (
+                  <option key={o.minutes} value={o.minutes}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            )}
             {a.state === "firing" && (
               <Button variant="secondary" size="xs" disabled={ack.isPending} onClick={() => ack.mutate(a.id)}>
                 Acknowledge
@@ -285,6 +323,139 @@ function Incidents({ state }: { state: "open" | "resolved" }) {
         </div>
       ))}
     </Card>
+  );
+}
+
+const PAUSE = [
+  { minutes: 30, label: "30 minutes" },
+  { minutes: 60, label: "1 hour" },
+  { minutes: 240, label: "4 hours" },
+  { minutes: 1440, label: "1 day" },
+];
+
+/** Pause alerts while you work on something. */
+function Maintenance() {
+  const windows = useMaintenance();
+  const end = useEndMaintenance();
+  const [open, setOpen] = useState(false);
+  const active = windows.data ?? [];
+
+  return (
+    <section>
+      <SectionTitle
+        action={
+          <Button variant="secondary" size="xs" icon="pause" onClick={() => setOpen(true)}>
+            Pause alerts
+          </Button>
+        }
+      >
+        Maintenance
+      </SectionTitle>
+      {active.length === 0 ? (
+        <Card className="p-4 text-sm text-muted">No maintenance going on. Pause alerts before planned work so nobody gets paged for it.</Card>
+      ) : (
+        <Card className="overflow-hidden">
+          {active.map((w) => (
+            <div key={w.id} className="flex flex-wrap items-center gap-3 border-b border-line px-4 py-3 text-sm last:border-0">
+              <Icon name="pause" size={14} className="text-warn" />
+              <span className="font-medium">{w.scope}</span>
+              {w.reason && <span className="text-muted">{w.reason}</span>}
+              <span className="text-xs text-subtle">
+                until {new Date(w.ends_at).toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" })} · {w.created_by}
+              </span>
+              <Button variant="secondary" size="xs" className="ml-auto" disabled={end.isPending} onClick={() => end.mutate(w.id)}>
+                End now
+              </Button>
+            </div>
+          ))}
+        </Card>
+      )}
+      {open && <PauseDialog onClose={() => setOpen(false)} />}
+    </section>
+  );
+}
+
+function PauseDialog({ onClose }: { onClose: () => void }) {
+  const start = useStartMaintenance();
+  const { data: servers } = useServers();
+  const { data: apps } = useApps();
+  const [scope, setScope] = useState("");
+  const [minutes, setMinutes] = useState(60);
+  const [reason, setReason] = useState("");
+  const [kind, id] = scope.split(":");
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Pause alerts"
+        onMouseDown={(e) => e.stopPropagation()}
+        className="w-full max-w-[440px] animate-fade-up overflow-hidden rounded-t-xl border border-line-strong bg-bg-100 shadow-2xl sm:rounded-xl"
+      >
+        <div className="space-y-4 p-6">
+          <h2 className="text-xl font-semibold tracking-tight">Pause alerts</h2>
+          <p className="text-sm text-muted">No new incidents open and nothing notifies while it lasts. Problems still there afterwards alert then.</p>
+          <div>
+            <Label htmlFor="mscope">For</Label>
+            <Select id="mscope" value={scope} onChange={(e) => setScope(e.target.value)}>
+              <option value="">Everything</option>
+              <optgroup label="Servers (and what runs on them)">
+                {servers
+                  ?.filter((s) => s.enrolled_at)
+                  .map((s) => (
+                    <option key={s.id} value={`server:${s.id}`}>
+                      {s.name}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Apps">
+                {apps?.map((a) => (
+                  <option key={a.id} value={`app:${a.id}`}>
+                    {a.name}
+                  </option>
+                ))}
+              </optgroup>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="mlen">For how long</Label>
+              <Select id="mlen" value={String(minutes)} onChange={(e) => setMinutes(Number(e.target.value))}>
+                {PAUSE.map((o) => (
+                  <option key={o.minutes} value={o.minutes}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="mwhy">Reason</Label>
+              <Input id="mwhy" placeholder="optional" value={reason} onChange={(e) => setReason(e.target.value)} />
+            </div>
+          </div>
+          {start.error && <p className="text-sm text-err">{start.error.message}</p>}
+        </div>
+        <div className="flex justify-between gap-2 border-t border-line bg-bg-200 px-6 py-4">
+          <Button variant="secondary" size="md" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            disabled={start.isPending}
+            onClick={() =>
+              start.mutate(
+                { server_id: kind === "server" ? id : null, application_id: kind === "app" ? id : null, minutes, reason: reason.trim() || undefined },
+                { onSuccess: onClose },
+              )
+            }
+          >
+            Pause alerts
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -313,9 +484,11 @@ function Rules() {
   const update = useUpdateRule();
   const remove = useDeleteRule();
   const { data: servers } = useServers();
+  const { data: apps } = useApps();
   const [editing, setEditing] = useState<AlertRule | "new" | null>(null);
   const [deleting, setDeleting] = useState<AlertRule | null>(null);
   const serverName = (id: string | null) => servers?.find((s) => s.id === id)?.name ?? "one server";
+  const appName = (id: string) => apps?.find((a) => a.id === id)?.name ?? "one app";
 
   return (
     <section>
@@ -347,7 +520,7 @@ function Rules() {
               <tr key={r.id} className={cn("border-b border-line last:border-0 hover:bg-white/[0.02]", !r.enabled && "text-muted")}>
                 <td className="px-4 py-3 font-medium">{r.name}</td>
                 <td className="px-4 py-3 text-muted">{KIND_INFO[r.kind]?.describe(r) ?? r.kind}</td>
-                <td className="px-4 py-3 text-muted">{ruleScope(r, serverName)}</td>
+                <td className="px-4 py-3 text-muted">{ruleScope(r, serverName, appName)}</td>
                 <td className="px-4 py-3">
                   <Badge tone={sevTone[r.severity]}>{r.severity}</Badge>
                 </td>
@@ -398,6 +571,8 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   const create = useCreateRule();
   const update = useUpdateRule();
   const { data: servers } = useServers();
+  const { data: apps } = useApps();
+  const [appId, setAppId] = useState(rule?.application_id ?? "");
   const [kind, setKind] = useState<RuleKind>(rule?.kind ?? "cpu_high");
   const [name, setName] = useState(rule?.name ?? "");
   const [threshold, setThreshold] = useState(String(rule?.threshold ?? 85));
@@ -405,10 +580,11 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   const [severity, setSeverity] = useState<Severity>(rule?.severity ?? "warning");
   const [serverId, setServerId] = useState(rule?.server_id ?? "");
   const unit = KIND_UNIT[kind];
-  const metric = !["agent_offline", "app_down"].includes(kind);
+  const metric = !["agent_offline", "app_down", "site_down"].includes(kind);
   // Certificate and backup rules are checked once; they have no duration.
   const timed = !unit || !!unit.timed;
-  const scoped = timed && !["app_down", "app_errors"].includes(kind);
+  const forApps = ["app_down", "app_errors", "error_rate", "site_down"].includes(kind);
+  const scoped = timed && !forApps;
   const error = create.error ?? update.error;
   const busy = create.isPending || update.isPending;
 
@@ -420,7 +596,7 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
       ...(metric ? { threshold: Number(threshold) } : {}),
     };
     if (rule) update.mutate({ id: rule.id, ...common }, { onSuccess: onClose });
-    else create.mutate({ kind, ...common, server_id: scoped && serverId ? serverId : null }, { onSuccess: onClose });
+    else create.mutate({ kind, ...common, server_id: scoped && serverId ? serverId : null, application_id: forApps && appId ? appId : null }, { onSuccess: onClose });
   };
 
   return (
@@ -470,7 +646,7 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
             {timed && (
               <div className={metric ? "" : "col-span-2"}>
                 <Label htmlFor="rd" hint="minutes">
-                  {kind === "app_errors" ? "Within" : "For at least"}
+                  {kind === "app_errors" || kind === "error_rate" ? "Within" : "For at least"}
                 </Label>
                 <Input id="rd" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))} />
               </div>
@@ -485,6 +661,19 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
                 <option value="info">Info</option>
               </Select>
             </div>
+            {!rule && forApps && (
+              <div>
+                <Label htmlFor="rap">Apps</Label>
+                <Select id="rap" value={appId} onChange={(e) => setAppId(e.target.value)}>
+                  <option value="">All apps</option>
+                  {apps?.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            )}
             {!rule && scoped && (
               <div>
                 <Label htmlFor="rsv">Servers</Label>

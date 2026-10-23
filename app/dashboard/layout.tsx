@@ -5,7 +5,7 @@ import { MobileNav, SectionCrumb, SectionCrumbFallback, Sidebar, SidebarFallback
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/ui";
 import { SearchButton } from "@/components/dashboard/search-button";
-import { AuthGate, GateLoading, OwnerName } from "@/components/auth/auth-gate";
+import { AuthGate, GateLoading, OwnerName, RoleBadge, ViewerBanner } from "@/components/auth/auth-gate";
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s – VPSPilot" },
@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
               <span className="hidden sm:inline">
                 <OwnerName />
               </span>
-              <span className="rounded-full bg-accent px-1.5 py-px text-[10px] font-semibold text-white">Owner</span>
+              <RoleBadge />
             </Crumb>
             <Slash />
             <Crumb>
@@ -64,6 +64,7 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
 
         <main className="flex flex-1 flex-col lg:pr-2">
           <div className="flex-1 border-t border-white/[0.06] bg-panel lg:rounded-tl-2xl lg:rounded-tr-2xl lg:border-x">
+            <ViewerBanner />
             <Suspense fallback={<GateLoading />}>
               <AuthGate>{children}</AuthGate>
             </Suspense>

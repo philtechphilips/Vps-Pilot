@@ -5,6 +5,7 @@ import { AlertChannelsCard } from "@/components/dashboard/alert-channels";
 import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
 import { EnrollmentTokensCard, PasswordCard, PlatformCards, RecoveryKitCard, VersionCard } from "@/components/dashboard/platform-settings";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
+import { TeamCard } from "@/components/dashboard/team-card";
 import { GitHubCard } from "@/components/github/github-card";
 import { Container, PageHeader } from "@/components/ui";
 
@@ -14,6 +15,7 @@ const sections = [
   { id: "general", label: "General" },
   { id: "security", label: "Security" },
   { id: "sessions", label: "Sessions" },
+  { id: "team", label: "Team" },
   { id: "enrollment", label: "Enrollment Tokens" },
   { id: "git", label: "Git" },
   { id: "notifications", label: "Notifications" },
@@ -51,6 +53,10 @@ export default function SettingsPage() {
 
           <div id="sessions" className="scroll-mt-20">
             <SessionsCard />
+          </div>
+
+          <div id="team" className="scroll-mt-20">
+            <TeamCard />
           </div>
 
           <div id="enrollment" className="scroll-mt-20">

@@ -7,9 +7,14 @@ import { useAuthStore } from "@/lib/stores/auth-store";
 
 export type BackupRun = {
   id: string;
-  instance_id: string;
+  /** "files": an app's data folder or volumes; "database": a database dump. */
+  kind: "database" | "files";
+  instance_id: string | null;
   instance_name: string | null;
   engine: Engine | null;
+  application_id: string | null;
+  application_name: string | null;
+  files: number | null;
   database: string;
   trigger: "scheduled" | "manual";
   status: "queued" | "running" | "succeeded" | "failed";
@@ -36,6 +41,16 @@ export type Policy = {
   keep: number;
   databases: string[];
   next_run_at: string | null;
+};
+
+export type AppBackupPolicy = {
+  application_id: string;
+  enabled: boolean;
+  every_hours: number;
+  keep: number;
+  next_run_at: string | null;
+  /** False for a Docker app without a data folder: nothing to back up yet. */
+  ready: boolean;
 };
 
 export type BackupSettings = {
@@ -67,15 +82,16 @@ function useSignedIn() {
 const PAGE = 30;
 const busy = (runs: BackupRun[] | undefined) => runs?.some((r) => r.status === "queued" || r.status === "running" || r.verify_status === "running");
 
-export function useBackupRuns(instanceId?: string) {
+export function useBackupRuns(instanceId?: string, applicationId?: string) {
   return useInfiniteQuery({
-    queryKey: ["backups", "runs", instanceId ?? "all"],
+    queryKey: ["backups", "runs", instanceId ?? applicationId ?? "all"],
     enabled: useSignedIn(),
     initialPageParam: undefined as string | undefined,
     queryFn: ({ pageParam }) => {
       const params = new URLSearchParams({ limit: String(PAGE) });
       if (pageParam) params.set("before", pageParam);
       if (instanceId) params.set("instance_id", instanceId);
+      if (applicationId) params.set("application_id", applicationId);
       return api<BackupRun[]>(`/backups?${params}`, { auth: true });
     },
     getNextPageParam: (last) => (last.length === PAGE ? last[last.length - 1].id : undefined),
@@ -89,6 +105,26 @@ export function useBackupSummary() {
 
 export function usePolicies() {
   return useQuery({ queryKey: ["backups", "policies"], queryFn: () => api<Policy[]>("/backups/policies", { auth: true }), enabled: useSignedIn() });
+}
+
+export function useAppBackupPolicy(appId: string) {
+  return useQuery({ queryKey: ["backups", "app", appId], queryFn: () => api<AppBackupPolicy>(`/backups/apps/${appId}/policy`, { auth: true }), enabled: useSignedIn() });
+}
+
+export function useSetAppBackupPolicy(appId: string) {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: (body: Partial<Pick<AppBackupPolicy, "enabled" | "every_hours" | "keep">>) => api<AppBackupPolicy>(`/backups/apps/${appId}/policy`, { method: "PUT", body, auth: true }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useRunAppBackup(appId: string) {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: () => api<BackupRun>(`/backups/apps/${appId}/run`, { method: "POST", auth: true }),
+    onSuccess: invalidate,
+  });
 }
 
 export function useBackupSettings() {

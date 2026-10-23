@@ -22,6 +22,7 @@ import {
 } from "@/lib/api/servers";
 import { isActive, type JobType, useRunAction, useServerJobs } from "@/lib/api/jobs";
 import { formatBytes, formatDate, formatRate, formatUptime, timeAgo } from "@/lib/format";
+import { UpdatesSection } from "./updates";
 
 const PROTECTED = new Set(["vpspilot-agent.service", "vpspilot-helper.service"]);
 const NO_STOP = new Set(["ssh.service", "sshd.service"]);
@@ -402,6 +403,14 @@ export function ServerDetailView() {
                 </Card>
               </section>
             </div>
+
+            <UpdatesSection
+              name={s.name}
+              updates={s.inventory.updates ?? undefined}
+              live={s.status === "online"}
+              busy={run.isPending || (jobs.data ?? []).some((j) => j.type === "os.upgrade" && isActive(j.status))}
+              action={action}
+            />
 
             <section>
               <SectionTitle>Recent activity</SectionTitle>

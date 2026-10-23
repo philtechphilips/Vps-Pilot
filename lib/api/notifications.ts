@@ -80,7 +80,7 @@ export function useUpdateNotificationSettings() {
 /* Alert channels (shared by all admins) */
 
 export type ChannelKind = "webhook" | "slack" | "telegram";
-export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded";
+export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded" | "job.failed";
 
 export type AlertChannel = {
   id: string;
@@ -89,6 +89,8 @@ export type AlertChannel = {
   target_label: string;
   events: ChannelEvent[];
   enabled: boolean;
+  /** Telegram: the bot answers /status, /apps and /alerts in the chat. */
+  commands: boolean;
   created_by: string;
   created_at: string;
   last_sent_at: string | null;
@@ -110,7 +112,7 @@ export function useAlertChannels() {
 export function useCreateChannel() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { kind: ChannelKind; name: string; config: ChannelConfig; events: ChannelEvent[] }) =>
+    mutationFn: (body: { kind: ChannelKind; name: string; config: ChannelConfig; events: ChannelEvent[]; commands?: boolean }) =>
       api<{ channel: AlertChannel; secret: string | null }>("/notifications/channels", { method: "POST", body, auth: true }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: channelKey }),
   });
@@ -119,7 +121,7 @@ export function useCreateChannel() {
 export function useUpdateChannel() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id: string; enabled?: boolean; events?: ChannelEvent[]; name?: string; config?: ChannelConfig }) =>
+    mutationFn: ({ id, ...body }: { id: string; enabled?: boolean; events?: ChannelEvent[]; name?: string; config?: ChannelConfig; commands?: boolean }) =>
       api<AlertChannel>(`/notifications/channels/${id}`, { method: "PATCH", body, auth: true }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: channelKey }),
   });

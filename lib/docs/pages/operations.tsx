@@ -140,8 +140,11 @@ export function Monitoring() {
           ["Heavy swapping", "Server", "≥ 80% for 15 min (off by default)", "info"],
           ["Application down", "Application", "Not running for 2 min", "critical"],
           ["App logging errors", "Application", "1 error line within 5 min", "warning"],
+          ["High error rate", "Application", "> 5% of requests fail with 5xx for 5 min", "warning"],
+          ["Site down", "Domain", "Uptime check failing for 2 min", "critical"],
+          ["Security updates pending", "Server", "1 or more for 3 days", "warning"],
           ["Certificate expiring", "Domain", "< 14 days left", "warning"],
-          ["Backups stale or failing", "Database", "No good backup in 36 h", "warning"],
+          ["Backups stale or failing", "Database or app", "Last backup failed, or none good in 36 h", "warning"],
         ]}
       />
 
@@ -178,6 +181,50 @@ export function Monitoring() {
         masked on the server before the line is sent, and stored lines are encrypted and kept for 7 days. Raise the threshold (for
         example 20 lines in 5 minutes) for a noisy app, or turn the rule off. Needs agent 1.1.3 or later.
       </P>
+
+      <H3 id="uptime">Uptime checks</H3>
+      <P>
+        Once a minute the control plane requests each live domain&apos;s health check path, the way a visitor reaches it: DNS, the proxy,
+        HTTPS and the app. A connection error, timeout, certificate problem or 5xx answer counts as down; a 4xx is up (a login page is a
+        working site). The app&apos;s page charts availability and response time over 24 hours, 7 or 30 days, and the{" "}
+        <strong>Site down</strong> rule alerts when checks fail for 2 minutes. When the control plane runs on the same server, these checks
+        don&apos;t see network problems between the server and the internet.
+      </P>
+
+      <H3>High error rate</H3>
+      <P>
+        Uses the request counts from the proxy (see Application traffic): it fires when more than 5% of requests through an app&apos;s
+        domains are answered with 5xx over 5 minutes, and only with at least 20 requests in that time, so one failure on a quiet app
+        doesn&apos;t page you.
+      </P>
+
+      <H3>Security updates pending</H3>
+      <P>
+        Agents read pending package updates from apt every 6 hours; each server&apos;s page lists them, flags a needed reboot, and has
+        buttons to install security updates, all updates, or reboot. The rule waits 3 days by default, since unattended-upgrades usually
+        installs security fixes overnight. Needs agent 1.1.4 or later.
+      </P>
+
+      <H3>Rules for one app</H3>
+      <P>
+        App rules (down, errors, error rate, site down) can be limited to one app when you create them, for example a stricter error rule
+        for your main app, while the default rule covers the rest.
+      </P>
+
+      <H2 id="maintenance">Snoozing and maintenance</H2>
+      <Table
+        head={["", "What it does"]}
+        rows={[
+          ["Snooze", "Holds back one incident's notifications for an hour, a day or a week. It stays open and still resolves; nothing is sent while snoozed."],
+          [
+            "Maintenance",
+            <>
+              <strong key="p">Pause alerts</strong> on the Monitoring page for everything, one server (and what runs on it) or one app. While it
+              lasts no new incidents open and nothing notifies; a problem still there when it ends alerts then.
+            </>,
+          ],
+        ]}
+      />
 
       <H2>Alert states</H2>
       <Table
@@ -275,6 +322,24 @@ export function Notifications() {
         Destinations are stored encrypted. Channels can&apos;t point at the control plane&apos;s own host or link-local addresses, and
         redirects aren&apos;t followed; private network addresses are fine. Each channel shows when it last delivered, or why it failed.
       </P>
+      <H3 id="telegram-commands">Telegram commands</H3>
+      <P>
+        Turn on <strong>Commands</strong> for a Telegram channel and its bot answers, in that chat only:
+      </P>
+      <Table
+        head={["Command", "Answer"]}
+        rows={[
+          [<C key="s">/status</C>, "Each server: online or offline, CPU, memory and disk."],
+          [<C key="a">/apps</C>, "Each app: up, down (and why), or not deployed."],
+          [<C key="l">/alerts</C>, "Open alerts with their details."],
+          [<C key="h">/help</C>, "The list of commands."],
+        ]}
+      />
+      <P>
+        Commands only read; nothing can be changed from Telegram. Messages from any other chat are ignored. VPSPilot fetches the bot&apos;s
+        messages itself (long polling), so it needs no public webhook, but the bot can&apos;t be used by another program at the same time.
+      </P>
+
       <H3>Verifying webhook signatures</H3>
       <P>
         Each request carries <C>X-VPSPilot-Event</C> and <C>X-VPSPilot-Signature: sha256=…</C>, the HMAC-SHA256 of the raw body with the

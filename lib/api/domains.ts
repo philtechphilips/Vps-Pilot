@@ -26,8 +26,29 @@ export type Domain = {
   cert_days_left: number | null;
   cert_error: string | null;
   cert_checked_at: string | null;
+  /** Uptime checks from the control plane (domains that serve an app). */
+  uptime: { up: boolean | null; checked_at: string | null; ms: number | null; error: string | null; uptime_24h: number | null } | null;
   created_at: string;
 };
+
+export type UptimeRange = "24h" | "7d" | "30d";
+export type Uptime = {
+  url: string;
+  range: UptimeRange;
+  uptime: number | null;
+  checks: number;
+  points: { t: string; uptime: number | null; ms: number | null }[];
+  recent_failures: { ts: string; status: number | null; error: string | null }[];
+};
+
+export function useUptime(domainId: string | undefined, range: UptimeRange) {
+  return useQuery({
+    queryKey: ["domains", "uptime", domainId, range],
+    queryFn: () => api<Uptime>(`/domains/${domainId}/uptime?range=${range}`, { auth: true }),
+    enabled: useSignedIn() && !!domainId,
+    refetchInterval: 60_000,
+  });
+}
 
 export const domainKeys = { all: (appId?: string) => ["domains", appId ?? "all"] as const };
 
