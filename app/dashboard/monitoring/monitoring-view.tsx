@@ -407,8 +407,8 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   const unit = KIND_UNIT[kind];
   const metric = !["agent_offline", "app_down"].includes(kind);
   // Certificate and backup rules are checked once; they have no duration.
-  const timed = !unit;
-  const scoped = timed && kind !== "app_down";
+  const timed = !unit || !!unit.timed;
+  const scoped = timed && !["app_down", "app_errors"].includes(kind);
   const error = create.error ?? update.error;
   const busy = create.isPending || update.isPending;
 
@@ -470,7 +470,7 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
             {timed && (
               <div className={metric ? "" : "col-span-2"}>
                 <Label htmlFor="rd" hint="minutes">
-                  For at least
+                  {kind === "app_errors" ? "Within" : "For at least"}
                 </Label>
                 <Input id="rd" inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value.replace(/\D/g, ""))} />
               </div>

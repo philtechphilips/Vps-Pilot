@@ -27,7 +27,7 @@ export type Alert = {
   resolved_at: string | null;
 };
 
-export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "tls_expiring" | "backup_stale";
+export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "app_errors" | "tls_expiring" | "backup_stale";
 
 export type AlertRule = {
   id: string;
@@ -142,12 +142,18 @@ export const KIND_INFO: Record<RuleKind, { label: string; describe: (r: Pick<Ale
   inode_high: { label: "Inodes", describe: (r) => `Inodes above ${r.threshold}% for ${r.duration_minutes} min` },
   swap_high: { label: "Swap", describe: (r) => `Swap above ${r.threshold}% for ${r.duration_minutes} min` },
   app_down: { label: "Application down", describe: (r) => `Container not running for ${r.duration_minutes} min` },
+  app_errors: {
+    label: "App logging errors",
+    describe: (r) => `${r.threshold === 1 ? "An error line" : `${r.threshold} error lines`} in an app's logs within ${r.duration_minutes} min`,
+  },
   tls_expiring: { label: "Certificate expiring", describe: (r) => `Certificate valid for less than ${r.threshold} days, or renewal failing` },
   backup_stale: { label: "Backups stale or failing", describe: (r) => `No good backup for ${r.threshold} hours, or the last one failed` },
 };
 
-/** Kinds checked once (no duration): the threshold is days or hours, not %. */
-export const KIND_UNIT: Partial<Record<RuleKind, { label: string; hint: string; default: number }>> = {
+/** Kinds whose threshold isn't a percentage. Without `timed` they are checked
+ * once and have no duration (certificates, backups). */
+export const KIND_UNIT: Partial<Record<RuleKind, { label: string; hint: string; default: number; timed?: true }>> = {
+  app_errors: { label: "At least", hint: "error lines", default: 1, timed: true },
   tls_expiring: { label: "Days left below", hint: "days", default: 14 },
   backup_stale: { label: "No good backup for", hint: "hours", default: 36 },
 };

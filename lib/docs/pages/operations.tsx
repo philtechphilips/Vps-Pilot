@@ -126,8 +126,8 @@ export function Monitoring() {
       <H2>Alert rules</H2>
       <P>
         VPSPilot ships with a rule for each of these. Change thresholds, durations and severities, or add more rules of the same kinds.
-        Percentage thresholds stay below 100; certificate rules take days and backup rules hours (168 suits weekly backups), and those two
-        are checked once rather than over a duration.
+        Percentage thresholds stay below 100; app error rules count lines; certificate rules take days and backup rules hours (168 suits
+        weekly backups), and those two are checked once rather than over a duration.
       </P>
       <Table
         head={["Rule", "Target", "Default", "Severity"]}
@@ -139,6 +139,7 @@ export function Monitoring() {
           ["Inodes almost exhausted", "Server", "≥ 85% for 30 min", "warning"],
           ["Heavy swapping", "Server", "≥ 80% for 15 min (off by default)", "info"],
           ["Application down", "Application", "Not running for 2 min", "critical"],
+          ["App logging errors", "Application", "1 error line within 5 min", "warning"],
           ["Certificate expiring", "Domain", "< 14 days left", "warning"],
           ["Backups stale or failing", "Database", "No good backup in 36 h", "warning"],
         ]}
@@ -148,8 +149,35 @@ export function Monitoring() {
       <Ul>
         <li>Metric rules average samples over the rule’s duration, so a single spike never alerts.</li>
         <li>They resolve only once the value falls 3 points below the threshold, so values at the edge don’t flap.</li>
+        <li>
+          App error alerts resolve after three quiet windows (15 minutes by default), so an app that fails every few minutes is one
+          incident, not a page every time.
+        </li>
         <li>There is at most one open alert per rule and target.</li>
       </Ul>
+
+      <H3 id="app-errors">App logging errors</H3>
+      <P>
+        Once a minute the agent reads what each app logged (its container, every service of a Compose app, or its systemd journal) and
+        counts the error lines. The alert says how many there were and shows the latest one, so a Telegram or Slack message tells you
+        what broke.
+      </P>
+      <Table
+        head={["Counted as an error", "Examples"]}
+        rows={[
+          ["JSON logs at error level", <C key="j">{`{"level":"error",…}`}, pino level 50+</C>],
+          ["Journal entries at priority err or worse", "systemd apps"],
+          [
+            "Lines with an error marker",
+            <C key="m">ERROR · FATAL · Traceback · TypeError: · Error: · [error] · level=error · npm ERR!</C>,
+          ],
+        ]}
+      />
+      <P>
+        Output on stderr alone doesn&apos;t count, since many apps log everything there. Passwords, tokens and credentials in URLs are
+        masked on the server before the line is sent, and stored lines are encrypted and kept for 7 days. Raise the threshold (for
+        example 20 lines in 5 minutes) for a noisy app, or turn the rule off. Needs agent 1.1.3 or later.
+      </P>
 
       <H2>Alert states</H2>
       <Table
