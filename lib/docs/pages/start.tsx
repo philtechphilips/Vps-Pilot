@@ -181,7 +181,7 @@ curl -fsSL https://raw.githubusercontent.com/philtechphilips/VPS-PIlot-BE/main/d
         rows={[
           [<C key="s">sudo vpspilot status</C>, "Container state and API health."],
           [<C key="l">sudo vpspilot logs [api|web|db|proxy]</C>, "Follow one component's logs (sign-in codes appear in the API log when email isn't set up)."],
-          [<C key="u">sudo vpspilot upgrade</C>, "Back up, pull the latest code, rebuild and restart. Upgrade agents afterwards."],
+          [<C key="u">sudo vpspilot upgrade</C>, "Back up, pull the latest code, rebuild and restart, and upgrade the agent on this server. Upgrade agents on other servers afterwards."],
           [<C key="b">sudo vpspilot backup [DIR]</C>, <>Save the database and <C>.env</C> (with its keys) to <C>DIR</C>, default <C>/var/backups/vpspilot</C>.</>],
           [<C key="r">sudo vpspilot restore FILE</C>, <>Restore a file made by <C>vpspilot backup</C>.</>],
           [<C key="rs">sudo vpspilot restart</C>, <>Apply edits to <C>.env</C>, such as adding <C>RESEND_API_KEY</C>.</>],

@@ -162,7 +162,7 @@ export function VersionCard() {
         </span>
       </div>
       <p className="mt-3 text-xs text-subtle">
-        Upgrade the control plane with <Mono>vpspilot upgrade</Mono> on its server; servers whose agent is older show an upgrade hint on their page.
+        Upgrade the control plane with <Mono>vpspilot upgrade</Mono> on its server, which also upgrades the agent on that server; other servers whose agent is older show an upgrade hint on their page.
       </p>
     </Card>
   );
