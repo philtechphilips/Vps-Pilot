@@ -38,6 +38,20 @@ app.example.com.   300  IN  AAAA  2001:db8::10`}
         <C>example.com</C>, or the other way round, depending on which one you add.
       </P>
 
+      <H2 id="protect">Password-protect or restrict a domain</H2>
+      <P>
+        <strong>Protect</strong> on a domain adds a password prompt (HTTP basic auth; only a bcrypt hash is stored) and/or an allowlist of IP
+        addresses and ranges; everyone else gets a 403. Good for staging sites and admin panels. Behind Cloudflare&apos;s proxy, visitors arrive
+        from Cloudflare&apos;s addresses, so use a password there instead of an allowlist.
+      </P>
+
+      <H2 id="status-pages">Status pages</H2>
+      <P>
+        A public page at <C>https://&lt;dashboard&gt;/status/&lt;name&gt;</C> showing whether the domains you pick are up, their daily uptime
+        for 30 days and recent outages, from the checks VPSPilot runs every minute. No sign-in needed. It shows the names you choose and
+        nothing about your servers. Create them under <strong>Domains → Status Pages</strong>.
+      </P>
+
       <H2>DNS and certificate status</H2>
       <Table
         head={["DNS status", "Meaning"]}
@@ -205,10 +219,30 @@ export function Monitoring() {
         installs security fixes overnight. Needs agent 1.1.4 or later.
       </P>
 
+      <H3 id="resources">App resources</H3>
+      <P>
+        Each app page charts its CPU and memory once a minute: a container&apos;s own usage, a Compose project&apos;s services added up, or a
+        systemd service&apos;s cgroup, for an hour, a day or a week. Needs agent 1.1.5 or later.
+      </P>
+
+      <H3 id="errors">Errors by cause</H3>
+      <P>
+        The app page&apos;s <strong>Errors</strong> groups error lines by cause: numbers, ids, quoted values and timestamps are left out when
+        comparing, so the same bug is one row with its count, first and last time seen and a 14-day trend. <strong>Ignore</strong> stops the
+        agent counting it, for the alert too.
+      </P>
+
       <H3>Rules for one app</H3>
       <P>
         App rules (down, errors, error rate, site down) can be limited to one app when you create them, for example a stricter error rule
         for your main app, while the default rule covers the rest.
+      </P>
+
+      <H2 id="weekly-report">Weekly report</H2>
+      <P>
+        Every Monday at 08:00 (in the timezone set in <strong>Settings → Notifications</strong>), a summary of the week: uptime per site,
+        deploys, alerts, app errors, backups, disk use per server and pending updates. It goes to the inbox, by email to admins who keep it on,
+        and to alert channels with <strong>Weekly report</strong> ticked (Telegram included). <strong>Send now</strong> shows this week&apos;s.
       </P>
 
       <H2 id="maintenance">Snoozing and maintenance</H2>
@@ -258,6 +292,13 @@ export function Logs() {
           ["Application", "The current release of an app, with its state and restart count: container output, the public service of a Compose app, or the journal of a systemd app."],
         ]}
       />
+
+      <H2 id="search">Searching logs</H2>
+      <P>
+        <strong>Logs → Search all apps&apos; logs</strong> finds lines containing some text (any case) in every app&apos;s logs, or one
+        app&apos;s, over the last hour, day or week. Each server searches what it still has (Docker keeps the last 30 MB of each app&apos;s
+        output; the journal keeps systemd apps&apos; logs), so nothing is copied off your servers. Secrets are masked in the results.
+      </P>
 
       <H2>Following</H2>
       <P>

@@ -394,6 +394,23 @@ export function ConnectServer() {
         ]}
       />
 
+      <H2>Security check and firewall</H2>
+      <P>
+        <strong>Run security check</strong> on the server&apos;s page reviews SSH login settings (password and root login), the firewall,
+        databases and container ports open to the internet, automatic security updates and pending reboots, and shows how to fix each.
+        From there you can turn on the firewall (SSH, 80 and 443 are allowed first, so you can&apos;t lock yourself out), open or close ports
+        (optionally only from one address), and turn on automatic security updates. SSH settings are explained rather than changed, so a missing
+        key can&apos;t lock you out. Docker-published ports skip the firewall: use an app&apos;s <strong>Private port</strong> setting for
+        those.
+      </P>
+
+      <H2>Disk usage</H2>
+      <P>
+        <strong>Check disk usage</strong> shows where the space went (images, build cache, volumes, backups, releases, logs, apt cache) and
+        what can go. <strong>Clean up</strong> removes only the build cache, untagged images, system logs over 200 MB and the apt cache:
+        never containers, volumes or the images kept for rollbacks.
+      </P>
+
       <H2>System updates</H2>
       <P>
         The server&apos;s page lists pending package updates (security ones first) and whether a reboot is needed, with buttons to install

@@ -118,9 +118,9 @@ export function Jobs() {
           ["Applications", <C key="a">app.deploy · app.remove · app.logs · app.exec</C>],
           ["Databases", <C key="d">db.create · db.remove · db.control · db.query · db.explore · db.admin · db.redis · db.export · db.import</C>],
           ["Backups", <C key="b">backup.create · backup.restore · backup.files · backup.files_restore · backup.delete · backup.storage_test</C>],
-          ["System", <C key="o">os.upgrade · os.reboot</C>],
+          ["System", <C key="o">os.upgrade · os.reboot · disk.usage · disk.cleanup · security.check · security.auto_updates · firewall.apply</C>],
           ["Proxy", <C key="p">proxy.apply · proxy.status</C>],
-          ["Logs", <C key="l">logs.read</C>],
+          ["Logs", <C key="l">logs.read · logs.search</C>],
         ]}
       />
 

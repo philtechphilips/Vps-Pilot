@@ -21,6 +21,12 @@ export function jobTitle(job: Pick<Job, "type" | "payload">) {
   if (job.type === "app.remove") return `Remove app ${String(job.payload.app)}`;
   if (job.type === "os.upgrade") return job.payload.mode === "security" ? "Install security updates" : "Install all updates";
   if (job.type === "os.reboot") return "Reboot";
+  if (job.type === "disk.usage") return "Check disk usage";
+  if (job.type === "disk.cleanup") return "Clean up disk";
+  if (job.type === "security.check") return "Security check";
+  if (job.type === "security.auto_updates") return "Turn on automatic security updates";
+  if (job.type === "firewall.apply")
+    return job.payload.action === "enable" ? "Turn on the firewall" : `${job.payload.action === "allow" ? "Open" : "Close"} port ${String(job.payload.port)}`;
   if (job.type === "app.exec") return `Run on ${String(job.payload.app)}: ${String(job.payload.command).slice(0, 60)}`;
   const target = String(job.payload.unit ?? job.payload.container ?? "").replace(/\.service$/, "");
   const [kind, verb] = job.type.split(".");

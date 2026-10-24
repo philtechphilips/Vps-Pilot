@@ -102,6 +102,9 @@ export function Applications() {
           ["health_path", "path · /", "Requested on the candidate container before release. Any status below 400 passes."],
           ["health_timeout_seconds", "5–600 · 60", "How long the candidate has to become healthy."],
           ["data_path", "path", <>Docker apps: a folder inside the container kept across deploys, such as <C key="d">/app/uploads</C>. See below.</>],
+          ["release_command", "string", <>Runs with the new version before it takes traffic, e.g. <C key="r">npx prisma migrate deploy</C>. See below.</>],
+          ["private_port", "bool · false", "Docker and Compose apps: publish the host port on 127.0.0.1 only, so the app is reachable through its domains and not directly from the internet."],
+          ["preview_domain", "domain", <>Turns on <A key="p" href="#previews">preview deployments</A> at pr-&lt;n&gt;.&lt;domain&gt;.</>],
           ["error_ignore", "list of text", <>Error lines containing any of these aren&apos;t counted for the <A key="a" href="/docs/operations/monitoring#app-errors">App logging errors</A> alert.</>],
           ["cpu_limit", "e.g. 0.5, 2", "CPU cores the container may use."],
           ["memory_limit", "e.g. 512m, 2g", "Hard memory limit."],
@@ -145,6 +148,20 @@ export function Applications() {
         <A href="/docs/backups/database-backups#app-files">app file backups</A>.
       </P>
 
+      <H2 id="release-command">Release command</H2>
+      <P>
+        Set a <strong>release command</strong> for anything that must happen before a new version serves: database migrations, cache warm-ups.
+        It runs once per deploy with the new code and the app&apos;s environment (a one-off container of the new image, the new release as the
+        app&apos;s user, or a one-off container of a Compose app&apos;s public service), after the build and before the candidate starts. If it
+        fails, the deploy stops and the live version keeps serving. Rollbacks don&apos;t run it again. Needs agent 1.1.5 or later.
+      </P>
+
+      <H2 id="run-a-command">Run a command</H2>
+      <P>
+        The app page&apos;s <strong>Run a Command</strong> box runs a one-off command where the app runs, with its environment (for example{" "}
+        <C>npm run seed</C> or creating an admin user), and streams the output. It stops after 30 minutes.
+      </P>
+
       <H2 id="scheduled-jobs">Scheduled jobs</H2>
       <P>
         Run a command inside an app on a schedule, such as <C>npm run cleanup</C> every night, from the app&apos;s{" "}
@@ -163,6 +180,38 @@ export function Applications() {
         </li>
       </Ul>
       <P>Needs agent 1.1.4 or later.</P>
+
+      <H2 id="previews">Preview deployments</H2>
+      <P>
+        With a <strong>preview domain</strong> set (GitHub-linked apps), every pull request from the repository gets its own copy of the app,
+        <C>&lt;app&gt;-pr-&lt;n&gt;</C>, at <C>pr-&lt;n&gt;.&lt;preview domain&gt;</C>. It&apos;s redeployed on every push to the pull request
+        and removed when it closes.
+      </P>
+      <Ul>
+        <li>
+          Add one DNS record, <C>*.preview.example.com</C> pointing at the server, and accept the GitHub App&apos;s new{" "}
+          <strong>Pull requests</strong> (read) permission and event in its GitHub settings.
+        </li>
+        <li>
+          Previews get the app&apos;s variables, <strong>including its database</strong>. Use <strong>Overrides for previews</strong> to point
+          them at a staging database or test keys.
+        </li>
+        <li>Pull requests from forks never get a preview: they would run someone else&apos;s code with your app&apos;s secrets.</li>
+        <li>Up to 10 previews per app; their ports are private, so they&apos;re only reachable through their domains.</li>
+      </Ul>
+
+      <H2 id="move">Moving an app to another server</H2>
+      <P>
+        <strong>Move to Another Server</strong> on the app page copies the app to a server you pick, step by step: its files (through your
+        off-server backup storage), each managed database attached to it (a new instance on the new server, the data exported and imported,
+        the app&apos;s variable pointed at it; Redis data isn&apos;t copied), a deploy there, and its domains on the new server&apos;s proxy.
+      </P>
+      <P>
+        The old copy keeps serving the whole time. When the move is ready, the page lists your domains with whether DNS already points at the
+        new server. Change the records, then <strong>Finish move</strong>: the old copy is removed. The old server&apos;s databases are kept
+        until you delete them. <strong>Cancel</strong>, or any failed step, puts the app back on the old server as it was. Do it at a quiet
+        time: writes to a database after its copy is taken aren&apos;t moved.
+      </P>
 
       <H2>Apps keep running</H2>
       <P>
@@ -359,6 +408,7 @@ export function Lifecycle() {
         code={`
 fetch      shallow git checkout (or docker pull for image apps)
 build      docker build → vpspilot/<app>:<commit>-<deployment>
+release command   (if set) a one-off container of the new image
 candidate  start vp-<app>-candidate on a random loopback port
 health     GET <health_path> until < 400, the container exits, or the timeout
 release    stop the live container, start the new one on the host port

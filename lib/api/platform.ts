@@ -14,6 +14,8 @@ export type Platform = {
   schema: string | null;
   updated_at: string | null;
   recovery_kit_at: string | null;
+  weekly_report: boolean;
+  report_timezone: string;
 };
 
 export type EnrollmentTokenRow = {
@@ -37,9 +39,14 @@ export function usePlatform() {
 export function useSavePlatform() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name?: string; public_url?: string }) => api<Platform>("/platform", { method: "PUT", body, auth: true }),
+    mutationFn: (body: { name?: string; public_url?: string; weekly_report?: boolean; report_timezone?: string }) =>
+      api<Platform>("/platform", { method: "PUT", body, auth: true }),
     onSuccess: (data) => queryClient.setQueryData(["platform"], data),
   });
+}
+
+export function useSendWeeklyReport() {
+  return useMutation({ mutationFn: () => api<{ title: string; text: string }>("/platform/weekly-report", { method: "POST", auth: true }) });
 }
 
 export function useChangePassword() {

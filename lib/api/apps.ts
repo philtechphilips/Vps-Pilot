@@ -67,9 +67,20 @@ export type App = {
   memory_limit: string | null;
   /** Docker apps: folder inside the container kept across deploys (and backed up). */
   data_path: string | null;
+  /** Runs with the new version before it takes traffic (e.g. migrations). */
+  release_command: string | null;
+  /** Docker/Compose: host port on 127.0.0.1 only (reachable through domains). */
+  private_port: boolean;
   /** Error lines containing any of these aren't counted for alerts. */
   error_ignore: string[];
   env: EnvVar[];
+  /** Previews: pr-<n>.<preview_domain>, with preview_env overriding env. */
+  preview_domain: string | null;
+  preview_env: EnvVar[];
+  /** Set on a preview: the app it previews and its pull request. */
+  preview_of: string | null;
+  preview_pr: number | null;
+  previews: { id: string; name: string; pr: number }[];
   current_deployment: Deployment | null;
   latest_deployment: Deployment | null;
   created_at: string;
@@ -121,8 +132,10 @@ export type AppUpdate = Partial<
     | "memory_limit"
     | "data_path"
     | "error_ignore"
+    | "release_command"
+    | "private_port"
   >
-> & { env?: EnvInput[]; auto_deploy?: boolean };
+> & { env?: EnvInput[]; auto_deploy?: boolean; preview_domain?: string; preview_env?: EnvInput[] };
 
 export const isDeploying = (s: DeploymentStatus | undefined) => s === "queued" || s === "running";
 
@@ -274,5 +287,95 @@ export function useAppTraffic(appId: string | undefined, range: TrafficRange) {
     queryFn: () => api<Traffic>(`/applications/${appId}/requests?range=${range}`, { auth: true }),
     enabled: useSignedIn() && !!appId,
     refetchInterval: 60_000,
+  });
+}
+
+export type Usage = {
+  range: TrafficRange;
+  points: { ts: string; cpu_percent: number | null; memory_bytes: number | null }[];
+  cpu_percent: number | null;
+  memory_bytes: number | null;
+  peak_memory_bytes: number | null;
+  memory_limit: string | null;
+};
+
+/** The app's CPU and memory over time (reported once a minute). */
+export function useAppUsage(appId: string | undefined, range: TrafficRange) {
+  return useQuery({
+    queryKey: ["applications", appId, "usage", range],
+    queryFn: () => api<Usage>(`/applications/${appId}/usage?range=${range}`, { auth: true }),
+    enabled: useSignedIn() && !!appId,
+    refetchInterval: 60_000,
+  });
+}
+
+export type ErrorGroup = {
+  id: string;
+  fingerprint: string;
+  sample: string;
+  total: number;
+  today: number;
+  days: number[];
+  first_seen: string;
+  last_seen: string;
+  ignored: boolean;
+};
+
+/** The app's errors grouped by cause, most recent first. */
+export function useErrorGroups(appId: string | undefined) {
+  return useQuery({
+    queryKey: ["applications", appId, "errors"],
+    queryFn: () => api<ErrorGroup[]>(`/applications/${appId}/errors`, { auth: true }),
+    enabled: useSignedIn() && !!appId,
+    refetchInterval: 60_000,
+  });
+}
+
+export function useIgnoreError(appId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ignored }: { id: string; ignored: boolean }) =>
+      api<{ ignored: boolean }>(`/applications/${appId}/errors/${id}/ignore?ignored=${ignored}`, { method: "POST", auth: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["applications", appId, "errors"] }),
+  });
+}
+
+export type AppMove = {
+  id: string;
+  status: "running" | "waiting_dns" | "done" | "failed" | "canceled";
+  step: "files" | "databases" | "deploy" | "restore" | "domains" | "dns" | "finished";
+  include_files: boolean;
+  source_server: string | null;
+  target_server: string | null;
+  target_ips: string[];
+  databases: { from: string; to: string | null; engine: string; stage: string }[];
+  error: string | null;
+  created_at: string;
+  finished_at: string | null;
+};
+
+export type MoveInfo = {
+  plan: { databases: { name: string; engine: string }[]; files: boolean; storage: boolean };
+  move: AppMove | null;
+};
+
+export function useAppMove(appId: string) {
+  return useQuery({
+    queryKey: ["applications", appId, "move"],
+    queryFn: () => api<MoveInfo>(`/applications/${appId}/move`, { auth: true }),
+    enabled: useSignedIn(),
+    refetchInterval: (q) => (q.state.data?.move?.status === "running" ? 3_000 : q.state.data?.move?.status === "waiting_dns" ? 20_000 : false),
+  });
+}
+
+export function useMoveAction(appId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ action, body }: { action: "start" | "finish" | "cancel"; body?: { server_id: string; include_files: boolean } }) =>
+      api<AppMove>(`/applications/${appId}/move${action === "start" ? "" : `/${action}`}`, { method: "POST", body, auth: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["applications", appId] });
+      queryClient.invalidateQueries({ queryKey: ["domains"] });
+    },
   });
 }

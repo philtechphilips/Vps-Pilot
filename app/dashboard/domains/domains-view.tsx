@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/dashboard/confirm-dialog";
+import { StatusPagesSection } from "@/components/dashboard/status-pages";
 import { Icon } from "@/components/icons";
-import { Badge, Button, ButtonLink, Card, Container, EmptyState, Input, Mono, Select } from "@/components/ui";
+import { Badge, Button, ButtonLink, Card, Container, EmptyState, Input, Label, Mono, Select } from "@/components/ui";
 import { useApps } from "@/lib/api/apps";
-import { type Domain, domainUrl, type TlsMode, useAddDomain, useCheckDomain, useDomains, useRemoveDomain, useUpdateDomain } from "@/lib/api/domains";
+import { type Domain, domainUrl, type TlsMode, useAddDomain, useCheckDomain, useDomainAccess, useDomains, useRemoveDomain, useUpdateDomain } from "@/lib/api/domains";
 import { formatDate, timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -93,6 +94,8 @@ export function DomainsView() {
         </div>
       )}
 
+      <StatusPagesSection domains={domains.data ?? []} />
+
       <p className="flex items-start gap-2 text-xs leading-relaxed text-subtle">
         <Icon name="shield-check" size={14} className="mt-px shrink-0" />
         Each server runs a VPSPilot proxy (Caddy) on ports 80 and 443. Every change is validated before it&apos;s loaded and rolled back if the proxy rejects it; other
@@ -107,6 +110,7 @@ function DomainCard({ d }: { d: Domain }) {
   const update = useUpdateDomain();
   const remove = useRemoveDomain();
   const [confirm, setConfirm] = useState(false);
+  const [protecting, setProtecting] = useState(false);
   const publicIps = d.server_ips.filter((ip) => !PRIVATE_IP.test(ip));
   const dnsOk = d.dns_status === "ok";
 
@@ -148,6 +152,12 @@ function DomainCard({ d }: { d: Domain }) {
               </span>
             )}
           </div>
+          {(d.access.password || d.access.allow.length > 0) && (
+            <p className="mt-2 flex flex-wrap gap-2 text-xs text-muted">
+              {d.access.password && <span>Password required (user {d.access.user})</span>}
+              {d.access.allow.length > 0 && <span>Only from {d.access.allow.join(", ")}</span>}
+            </p>
+          )}
           {d.status === "error" && d.error && <p className="mt-2 text-sm text-err">{d.error}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
@@ -159,6 +169,11 @@ function DomainCard({ d }: { d: Domain }) {
           <Button variant="secondary" size="md" icon="refresh" disabled={check.isPending} onClick={() => check.mutate(d.id)}>
             Check
           </Button>
+          {!d.redirect_to && (
+            <Button variant="secondary" size="md" icon="lock" onClick={() => setProtecting(true)}>
+              {d.access.password || d.access.allow.length ? "Protected" : "Protect"}
+            </Button>
+          )}
           <Button variant="secondary" size="md" icon="trash" aria-label={`Remove ${d.hostname}`} onClick={() => setConfirm(true)} />
         </div>
       </div>
@@ -203,6 +218,7 @@ function DomainCard({ d }: { d: Domain }) {
         <span>Added {timeAgo(d.created_at)}</span>
       </div>
 
+      {protecting && <ProtectDialog d={d} onClose={() => setProtecting(false)} />}
       <ConfirmDialog
         open={confirm}
         onClose={() => setConfirm(false)}
@@ -235,4 +251,86 @@ function Certificate({ d }: { d: Domain }) {
   }
   if (d.cert_error) return <Badge tone={d.dns_status === "ok" ? "err" : "neutral"}>{d.dns_status === "ok" ? "Issuance pending or failed" : "Waiting for DNS"}</Badge>;
   return <Badge tone="blue">Issuing…</Badge>;
+}
+
+function ProtectDialog({ d, onClose }: { d: Domain; onClose: () => void }) {
+  const save = useDomainAccess();
+  const [user, setUser] = useState(d.access.user ?? "admin");
+  const [password, setPassword] = useState("");
+  const [removePassword, setRemovePassword] = useState(false);
+  const [allow, setAllow] = useState(d.access.allow.join("\n"));
+  const ranges = allow
+    .split(/[\s,]+/)
+    .map((x) => x.trim())
+    .filter(Boolean);
+  const valid = (!password || password.length >= 8) && /^[A-Za-z0-9._@-]{1,64}$/.test(user);
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Protect ${d.hostname}`}
+        onMouseDown={(e) => e.stopPropagation()}
+        className="w-full max-w-[480px] animate-fade-up overflow-hidden rounded-t-xl border border-line-strong bg-bg-100 shadow-2xl sm:rounded-xl"
+      >
+        <div className="space-y-4 p-6">
+          <h2 className="text-xl font-semibold tracking-tight">Protect {d.hostname}</h2>
+          <p className="text-sm text-muted">For staging sites and admin panels. Uptime checks keep working (a password prompt counts as up).</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="pu">User</Label>
+              <Input id="pu" value={user} onChange={(e) => setUser(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="pp" hint={d.access.password ? "leave empty to keep" : "8+ characters"}>
+                Password
+              </Label>
+              <Input id="pp" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+          </div>
+          {d.access.password && (
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={removePassword} onChange={(e) => setRemovePassword(e.target.checked)} className="accent-[var(--color-accent)]" />
+              Remove the password
+            </label>
+          )}
+          <div>
+            <Label htmlFor="pa" hint="one per line; empty lets everyone in">
+              Only allow these IP addresses or ranges
+            </Label>
+            <textarea
+              id="pa"
+              rows={3}
+              value={allow}
+              onChange={(e) => setAllow(e.target.value)}
+              spellCheck={false}
+              placeholder={"203.0.113.7\n198.51.100.0/24"}
+              className="w-full rounded-md border border-line bg-bg px-3 py-2 font-mono text-[12px] text-fg outline-none placeholder:text-subtle focus:border-line-strong"
+            />
+            <p className="mt-1 text-xs text-subtle">Behind Cloudflare&apos;s proxy (orange cloud) visitors arrive from Cloudflare&apos;s addresses, so use a password there instead.</p>
+          </div>
+          {save.error && <p className="text-sm text-err">{save.error.message}</p>}
+        </div>
+        <div className="flex justify-between gap-2 border-t border-line bg-bg-200 px-6 py-4">
+          <Button variant="secondary" size="md" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="md"
+            disabled={!valid || save.isPending}
+            onClick={() =>
+              save.mutate(
+                { id: d.id, user, allow: ranges, ...(removePassword ? { remove_password: true } : password ? { password } : {}) },
+                { onSuccess: onClose },
+              )
+            }
+          >
+            Save
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }

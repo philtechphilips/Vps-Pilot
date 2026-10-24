@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Button, Callout, Input, Mono, Select } from "@/components/ui";
@@ -86,6 +87,9 @@ export function LogsViewer() {
     <div className="flex min-h-[calc(100dvh-110px)] flex-col lg:flex-row">
       <aside className={cn("shrink-0 border-line bg-bg lg:block lg:w-72 lg:border-r", showFilters ? "block border-b" : "hidden")}>
         <div className="space-y-6 p-4">
+          <Link href="/dashboard/logs/search" className="flex items-center gap-2 rounded-md border border-line px-3 py-2 text-sm text-muted hover:text-fg">
+            <Icon name="search" size={14} /> Search all apps&apos; logs
+          </Link>
           <div>
             <h3 className="mb-2 text-xs font-medium text-subtle">Server</h3>
             <Select

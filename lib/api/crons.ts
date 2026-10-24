@@ -61,6 +61,14 @@ export function useDeleteCronJob(appId: string) {
   });
 }
 
+/** A one-off command inside the app; returns the job to follow. */
+export function useRunCommand(appId: string) {
+  return useMutation({
+    mutationFn: (body: { command: string; timeout_minutes?: number }) =>
+      api<{ job_id: string }>(`/applications/${appId}/run`, { method: "POST", body, auth: true }),
+  });
+}
+
 export function useRunCronJob(appId: string) {
   const queryClient = useQueryClient();
   return useMutation({

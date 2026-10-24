@@ -6,6 +6,7 @@ import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
 import { EnrollmentTokensCard, PasswordCard, PlatformCards, RecoveryKitCard, VersionCard } from "@/components/dashboard/platform-settings";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
 import { TeamCard } from "@/components/dashboard/team-card";
+import { WeeklyReportCard } from "@/components/dashboard/weekly-report-card";
 import { GitHubCard } from "@/components/github/github-card";
 import { Container, PageHeader } from "@/components/ui";
 
@@ -70,6 +71,7 @@ export default function SettingsPage() {
           <div id="notifications" className="scroll-mt-20 space-y-8">
             <NotificationSettingsCard />
             <AlertChannelsCard />
+            <WeeklyReportCard />
           </div>
 
           <div id="storage" className="scroll-mt-20">

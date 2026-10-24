@@ -400,6 +400,19 @@ POST /api/v1/applications
           ["PATCH", "/api/v1/applications/{id}/cron/{cron_id}", "Change any of those."],
           ["POST", "/api/v1/applications/{id}/cron/{cron_id}/run", "Run now; returns the job."],
           ["DELETE", "/api/v1/applications/{id}/cron/{cron_id}", "Delete it."],
+          ["POST", "/api/v1/applications/{id}/run", <>A one-off command: <C>command</C>, <C>timeout_minutes</C>. Returns the job.</>],
+        ]}
+      />
+      <H2>Usage, errors and moves</H2>
+      <Endpoints
+        routes={[
+          ["GET", "/api/v1/applications/{id}/usage?range=", <>CPU and memory over <C>1h</C>, <C>24h</C> or <C>7d</C>.</>],
+          ["GET", "/api/v1/applications/{id}/errors", "Errors grouped by cause, most recent first."],
+          ["POST", "/api/v1/applications/{id}/errors/{group_id}/ignore?ignored=", "Stop (or start again) counting an error."],
+          ["GET", "/api/v1/applications/{id}/move", "What a move would copy, and the latest move."],
+          ["POST", "/api/v1/applications/{id}/move", <><C>server_id</C>, <C>include_files</C>. Starts a move.</>],
+          ["POST", "/api/v1/applications/{id}/move/finish", "Once DNS points at the new server: remove the old copy."],
+          ["POST", "/api/v1/applications/{id}/move/cancel", "Put the app back on its old server."],
         ]}
       />
 
@@ -506,6 +519,10 @@ export function DomainsApi() {
           ["PATCH", "/api/v1/domains/{id}", <>Change <C>tls_mode</C>.</>],
           ["DELETE", "/api/v1/domains/{id}", "Remove a domain and re-apply the proxy."],
           ["POST", "/api/v1/domains/{id}/check", "Re-check DNS and refresh certificate status."],
+          ["PUT", "/api/v1/domains/{id}/access", <><C>user</C> + <C>password</C>, <C>remove_password</C>, <C>allow</C> (IP addresses or ranges).</>],
+          ["GET", "/api/v1/status-pages", "Status pages."],
+          ["POST", "/api/v1/status-pages", <><C>slug</C>, <C>title</C>, <C>description</C>, <C>components</C> (domain ids and labels).</>],
+          ["GET", "/api/v1/status/{slug}", "The public view of a status page (no sign-in)."],
           ["GET", "/api/v1/domains/{id}/uptime?range=", <>Uptime checks: availability, response times and recent failures for <C>24h</C>, <C>7d</C> or <C>30d</C>.</>],
           ["POST", "/api/v1/domains/servers/{server_id}/apply", "Re-apply the whole proxy config on a server."],
         ]}
@@ -541,6 +558,7 @@ export function DomainsApi() {
           ["GET", "/api/v1/logs/sources?server_id=", "Units and containers that can be read on a server."],
           ["POST", "/api/v1/logs", "Request a read; returns a job."],
           ["GET", "/api/v1/logs/{job_id}", "The lines, and a cursor to follow from."],
+          ["POST", "/api/v1/logs/search", <><C>query</C>, <C>range</C>, <C>application_ids</C>. One job per server; read each with the jobs API.</>],
         ]}
       />
       <CodeBlock

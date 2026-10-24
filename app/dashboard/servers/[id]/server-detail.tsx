@@ -22,6 +22,8 @@ import {
 } from "@/lib/api/servers";
 import { isActive, type JobType, useRunAction, useServerJobs } from "@/lib/api/jobs";
 import { formatBytes, formatDate, formatRate, formatUptime, timeAgo } from "@/lib/format";
+import { DiskSection } from "./disk";
+import { SecuritySection } from "./security";
 import { UpdatesSection } from "./updates";
 
 const PROTECTED = new Set(["vpspilot-agent.service", "vpspilot-helper.service"]);
@@ -403,6 +405,9 @@ export function ServerDetailView() {
                 </Card>
               </section>
             </div>
+
+            <SecuritySection serverId={s.id} live={s.status === "online"} />
+            <DiskSection serverId={s.id} live={s.status === "online"} />
 
             <UpdatesSection
               name={s.name}

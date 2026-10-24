@@ -27,6 +27,7 @@ export type Domain = {
   cert_error: string | null;
   cert_checked_at: string | null;
   /** Uptime checks from the control plane (domains that serve an app). */
+  access: { user: string | null; password: boolean; allow: string[] };
   uptime: { up: boolean | null; checked_at: string | null; ms: number | null; error: string | null; uptime_24h: number | null } | null;
   created_at: string;
 };
@@ -83,6 +84,15 @@ export function useUpdateDomain() {
   const invalidate = useInvalidate();
   return useMutation({
     mutationFn: ({ id, tls_mode }: { id: string; tls_mode: TlsMode }) => api<Domain>(`/domains/${id}`, { method: "PATCH", body: { tls_mode }, auth: true }),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDomainAccess() {
+  const invalidate = useInvalidate();
+  return useMutation({
+    mutationFn: ({ id, ...body }: { id: string; user?: string; password?: string; remove_password?: boolean; allow?: string[] }) =>
+      api<Domain>(`/domains/${id}/access`, { method: "PUT", body, auth: true }),
     onSuccess: invalidate,
   });
 }

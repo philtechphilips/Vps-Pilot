@@ -6,7 +6,7 @@ import { Icon } from "@/components/icons";
 import { JobPanel } from "@/components/servers/job-panel";
 import { Badge, Button, Card, Dot, Input, Label, Mono, SectionTitle, Select, type Tone } from "@/components/ui";
 import type { App } from "@/lib/api/apps";
-import { type CronJob, SCHEDULE_PRESETS, useCronJobs, useDeleteCronJob, useRunCronJob, useSaveCronJob } from "@/lib/api/crons";
+import { type CronJob, SCHEDULE_PRESETS, useCronJobs, useDeleteCronJob, useRunCommand, useRunCronJob, useSaveCronJob } from "@/lib/api/crons";
 import { timeAgo } from "@/lib/format";
 
 const statusTone: Record<NonNullable<CronJob["last_status"]>, Tone> = { running: "warn", succeeded: "ok", failed: "err", skipped: "neutral" };
@@ -17,6 +17,40 @@ function browserZone() {
   } catch {
     return "UTC";
   }
+}
+
+/** Run a one-off command inside the app, such as a seed or an admin user. */
+export function RunCommandSection({ app }: { app: App }) {
+  const run = useRunCommand(app.id);
+  const [command, setCommand] = useState("");
+  const [openJob, setOpenJob] = useState<string | null>(null);
+  const where = app.runtime === "systemd" ? `as vp-${app.name} in the live release` : "inside the app's container";
+  const go = () => command.trim() && run.mutate({ command: command.trim() }, { onSuccess: (r) => setOpenJob(r.job_id) });
+
+  return (
+    <section>
+      <SectionTitle>Run a Command</SectionTitle>
+      <Card className="space-y-3 p-4">
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            go();
+          }}
+        >
+          <Input aria-label="Command" className="font-mono" placeholder="npm run seed" value={command} onChange={(e) => setCommand(e.target.value)} />
+          <Button type="submit" variant="primary" size="md" icon="terminal" disabled={!command.trim() || run.isPending}>
+            Run
+          </Button>
+        </form>
+        <p className="text-xs text-subtle">
+          Runs {where}, with its environment, and stops after 30 minutes. The output streams in and stays in the server&apos;s activity.
+        </p>
+        {run.error && <p className="text-xs text-err">{run.error.message}</p>}
+      </Card>
+      <JobPanel jobId={openJob} onClose={() => setOpenJob(null)} />
+    </section>
+  );
 }
 
 /** Commands run inside the app on a schedule. */

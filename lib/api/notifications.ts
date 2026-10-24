@@ -22,6 +22,7 @@ export type NotificationSettings = {
   email_deploy_success: boolean;
   email_deploy_failure: boolean;
   email_alerts: boolean;
+  email_weekly: boolean;
 };
 
 export const notificationKeys = {
@@ -80,7 +81,7 @@ export function useUpdateNotificationSettings() {
 /* Alert channels (shared by all admins) */
 
 export type ChannelKind = "webhook" | "slack" | "telegram";
-export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded" | "job.failed";
+export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded" | "job.failed" | "report.weekly";
 
 export type AlertChannel = {
   id: string;

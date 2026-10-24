@@ -18,7 +18,12 @@ export type JobType =
   | "app.remove"
   | "os.upgrade"
   | "os.reboot"
-  | "app.exec";
+  | "app.exec"
+  | "disk.usage"
+  | "disk.cleanup"
+  | "security.check"
+  | "firewall.apply"
+  | "security.auto_updates";
 
 export type JobStatus = "queued" | "running" | "succeeded" | "failed" | "expired" | "canceled";
 

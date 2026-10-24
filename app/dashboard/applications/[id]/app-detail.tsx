@@ -24,8 +24,12 @@ import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
 import { AppBackupsSection } from "./backups";
-import { CronSection } from "./cron";
+import { CronSection, RunCommandSection } from "./cron";
+import { ErrorsSection } from "./errors";
+import { MoveSection } from "./move";
+import { PreviewsSection } from "./previews";
 import { TrafficSection } from "./traffic";
+import { UsageSection } from "./usage";
 import { UptimeSection } from "./uptime";
 
 export function AppDetailView() {
@@ -85,6 +89,11 @@ export function AppDetailView() {
           <>
             <span className="flex size-8 items-center justify-center rounded-full border border-line bg-bg-200 text-sm font-semibold uppercase">{a.name[0]}</span>
             {a.name}
+            {a.preview_of && (
+              <Link href={`/dashboard/applications/${a.preview_of}`} className="rounded-full border border-line px-2 py-0.5 text-xs font-normal text-muted hover:text-fg">
+                preview of PR #{a.preview_pr}
+              </Link>
+            )}
           </>
         }
         actions={
@@ -273,12 +282,17 @@ export function AppDetailView() {
 
         <UptimeSection domains={appDomains.data ?? []} />
         <TrafficSection appId={a.id} />
+        <UsageSection appId={a.id} />
+        <ErrorsSection appId={a.id} />
 
         <EnvSection key={`env-${a.id}`} app={a} onRedeploy={() => deploy.mutate(undefined, { onSuccess: (d) => goTo(d.id) })} />
         <SettingsSection key={`settings-${a.id}`} app={a} />
+        <PreviewsSection key={`previews-${a.id}`} app={a} />
+        <RunCommandSection app={a} />
         <CronSection app={a} />
         <ErrorAlertsSection key={`errors-${a.id}`} app={a} />
         <AppBackupsSection app={a} />
+        <MoveSection app={a} domains={appDomains.data ?? []} />
 
         <FormCard
           danger
@@ -387,7 +401,9 @@ function SettingsSection({ app }: { app: App }) {
     cpu_limit: app.cpu_limit ?? "",
     memory_limit: app.memory_limit ?? "",
     data_path: app.data_path ?? "",
+    release_command: app.release_command ?? "",
     auto_deploy: app.auto_deploy,
+    private_port: app.private_port,
   });
   const [saved, setSaved] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -414,6 +430,8 @@ function SettingsSection({ app }: { app: App }) {
         cpu_limit: form.cpu_limit.trim() || null,
         memory_limit: form.memory_limit.trim().toLowerCase() || null,
         ...(app.runtime === "docker" ? { data_path: form.data_path.trim() } : {}),
+        release_command: form.release_command.trim() || null,
+        ...(app.runtime !== "systemd" ? { private_port: form.private_port } : {}),
         ...(app.github_repo ? { auto_deploy: form.auto_deploy } : {}),
       },
       { onSuccess: () => setSaved(true) },
@@ -478,6 +496,16 @@ function SettingsSection({ app }: { app: App }) {
         {app.runtime === "docker" && (
           <Field id="datapath" label="Data folder (kept across deploys)" value={form.data_path} onChange={set("data_path")} placeholder="e.g. /app/uploads" mono />
         )}
+        <div className="sm:col-span-3">
+          <Field
+            id="releasecmd"
+            label="Release command (runs before each new version goes live; a failure stops the deploy)"
+            value={form.release_command}
+            onChange={set("release_command")}
+            placeholder="e.g. npx prisma migrate deploy"
+            mono
+          />
+        </div>
         <div>
           <Label>Source</Label>
           <div className="flex h-10 items-center gap-2 truncate rounded-md border border-line bg-bg-200 px-3 text-[13px] text-muted">
@@ -492,6 +520,22 @@ function SettingsSection({ app }: { app: App }) {
             <Badge className="ml-auto">{runtimeLabel[app.runtime] ?? app.runtime}</Badge>
           </div>
         </div>
+        {app.runtime !== "systemd" && (
+          <label className="flex cursor-pointer items-center gap-3 sm:col-span-3">
+            <input
+              type="checkbox"
+              checked={form.private_port}
+              onChange={(e) => {
+                setSaved(false);
+                setForm((f) => ({ ...f, private_port: e.target.checked }));
+              }}
+              className="accent-[var(--color-accent)]"
+            />
+            <span className="text-sm">
+              Private port: reachable only through the app&apos;s domains, not on port {app.host_port} from the internet (applies on the next deploy)
+            </span>
+          </label>
+        )}
         {app.github_repo && (
           <label className="flex cursor-pointer items-center gap-3 sm:col-span-3">
             <input
