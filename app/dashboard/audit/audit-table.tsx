@@ -71,7 +71,7 @@ export function AuditTable() {
             </thead>
             <tbody>
               {shown.map((e) => (
-                <tr key={e.id} className="hover:bg-white/[0.02]">
+                <tr key={e.id} className="hover:bg-black/[0.02]">
                   <Td className="whitespace-nowrap text-[13px] text-muted">{formatDate(e.created_at)}</Td>
                   <Td>
                     <span className="flex items-center gap-2 text-[13px]">

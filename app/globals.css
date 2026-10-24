@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 /*
- * Geist-inspired dark palette (Vercel / Next.js).
+ * Light, quiet palette: white surfaces, hairline borders, near-black text and
+ * a single indigo accent for buttons and links.
  * Everything in the UI reads from these tokens.
  */
 @theme {
-  --color-bg: #000000;
-  --color-bg-100: #0a0a0a;
-  --color-bg-200: #111111;
-  --color-bg-300: #1a1a1a;
-  --color-line: rgb(255 255 255 / 0.1);
-  --color-line-strong: rgb(255 255 255 / 0.16);
-  --color-fg: #ededed;
-  --color-muted: #a1a1a1;
-  --color-subtle: #707070;
+  --color-bg: #ffffff;
+  --color-bg-100: #ffffff;
+  --color-bg-200: #fafafa;
+  --color-bg-300: #f3f3f4;
+  --color-line: rgb(0 0 0 / 0.08);
+  --color-line-strong: rgb(0 0 0 / 0.14);
+  --color-fg: #111111;
+  --color-muted: #555555;
+  --color-subtle: #7a7a7a;
 
-  --color-blue: #0070f3;
-  --color-blue-hover: #0060d1;
-  --color-blue-fg: #52a8ff;
-  --color-ok: #0cce6b;
-  --color-warn: #f5a623;
-  --color-err: #ff4d4f;
-  --color-violet: #8e4ec6;
-  --color-teal: #12a594;
+  --color-blue: #4338ca;
+  --color-blue-hover: #3730a3;
+  --color-blue-fg: #4338ca;
+  --color-ok: #16a34a;
+  --color-warn: #d97706;
+  --color-err: #dc2626;
+  --color-violet: #7c3aed;
+  --color-teal: #0d9488;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -79,7 +80,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
@@ -95,12 +96,11 @@ body {
 }
 
 ::selection {
-  background: rgb(165 76 162 / 0.5);
-  color: #fff;
+  background: rgb(67 56 202 / 0.18);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-blue-fg);
+  outline: 2px solid rgb(67 56 202 / 0.5);
   outline-offset: 2px;
 }
 
@@ -113,19 +113,19 @@ body {
 
 @utility thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
+  scrollbar-color: #d4d4d8 transparent;
 }
 
 /* Next.js-style blueprint grid used behind hero sections. */
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.06) 1px, transparent 1px);
+    linear-gradient(to right, rgb(0 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.05) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
 @utility bg-dots {
-  background-image: radial-gradient(rgb(255 255 255 / 0.12) 1px, transparent 1px);
+  background-image: radial-gradient(rgb(0 0 0 / 0.1) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
@@ -134,47 +134,32 @@ body {
 }
 
 @utility skeleton {
-  background: linear-gradient(90deg, #111 25%, #1c1c1c 37%, #111 63%);
+  background: linear-gradient(90deg, #f1f1f2 25%, #e7e7e9 37%, #f1f1f2 63%);
   background-size: 400% 100%;
   animation: var(--animate-shimmer);
 }
 
 /*
- * Console theme for the dashboard: neutral grays on an inset #1c1c1c panel
- * with a magenta accent (#a54ca2). Overrides the tokens above inside `.theme-console`,
- * so every component re-themes without per-page changes.
+ * Dashboard and marketing chrome: a soft gray frame around a white panel.
+ * The accent is indigo, kept for buttons, links and the active state.
  */
 @theme {
-  --color-panel: #1c1c1c;
-  --color-accent: #a54ca2;
-  --color-accent-hover: #b45bb1;
-  --color-accent-fg: #e3a6e0;
-  --color-inset: #0d0d0d;
-}
-
-.theme-console {
-  --color-bg: #111111;
-  --color-bg-100: #232323;
-  --color-bg-200: #2a2a2a;
-  --color-bg-300: #333333;
-  --color-line: rgb(255 255 255 / 0.07);
-  --color-line-strong: rgb(255 255 255 / 0.12);
-  --color-blue: #a54ca2;
-  --color-blue-hover: #b45bb1;
-  --color-blue-fg: #e3a6e0;
-  --color-violet: #6e56cf;
+  --color-panel: #ffffff;
+  --color-chrome: #f6f6f7;
+  --color-accent: #4338ca;
+  --color-accent-hover: #3730a3;
+  --color-accent-fg: #4338ca;
+  --color-inset: #f7f7f8;
 }
 
 /* Unlayered, so it wins over the utility classes on the shared Button. */
-.theme-console .btn-primary {
-  background: linear-gradient(180deg, #b45bb1 0%, #a04a9d 100%);
+.btn-primary {
+  background: var(--color-accent);
   color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.18),
-    0 1px 2px rgb(0 0 0 / 0.4);
+  box-shadow: 0 1px 2px rgb(67 56 202 / 0.25);
 }
-.theme-console .btn-primary:hover {
-  background: linear-gradient(180deg, #c066bd 0%, #ab53a8 100%);
+.btn-primary:hover {
+  background: var(--color-accent-hover);
 }
 
 /* ------------------------------------------------------------------ */
@@ -351,6 +336,11 @@ body {
   animation: word-in 0.9s var(--ease-out-expo) both;
   animation-delay: var(--d, 0ms);
 }
+/* Same entrance as .word-in, but keeps the element's own display (flex, block...). */
+.rise-in {
+  animation: word-in 0.9s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
 .stroke-draw {
   stroke-dasharray: 1400;
   animation: stroke-draw 2.8s var(--ease-in-out) both;
@@ -412,7 +402,7 @@ body {
   z-index: -1;
   border-radius: inherit;
   opacity: 0;
-  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(165 76 162 / 0.16), transparent 45%);
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(67 56 202 / 0.06), transparent 45%);
   transition: opacity 0.3s;
   pointer-events: none;
 }
@@ -423,8 +413,8 @@ body {
 /* Animated gradient border (announcement pill). */
 .border-spin {
   background:
-    linear-gradient(#141414, #141414) padding-box,
-    conic-gradient(from var(--angle), rgb(255 255 255 / 0.08) 0%, #c066bd 12%, rgb(255 255 255 / 0.08) 28%, rgb(255 255 255 / 0.08) 100%) border-box;
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(from var(--angle), rgb(0 0 0 / 0.08) 0%, #6366f1 12%, rgb(0 0 0 / 0.08) 28%, rgb(0 0 0 / 0.08) 100%) border-box;
   border: 1px solid transparent;
   animation: spin-border 4s linear infinite;
 }

@@ -90,13 +90,13 @@ export function CommandMenu() {
 
   let lastGroup = "";
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/60 px-4 pt-[12vh] backdrop-blur-[2px]" onMouseDown={() => setOpen(false)}>
+    <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/25 px-4 pt-[12vh] backdrop-blur-[2px]" onMouseDown={() => setOpen(false)}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Command menu"
         onMouseDown={(e) => e.stopPropagation()}
-        className="w-full max-w-[640px] animate-fade-up overflow-hidden rounded-xl border border-line-strong bg-bg-100 shadow-[0_24px_80px_rgb(0_0_0/0.7)]"
+        className="w-full max-w-[640px] animate-fade-up overflow-hidden rounded-xl border border-line-strong bg-bg-100 shadow-[0_24px_80px_rgb(0_0_0/0.1)]"
       >
         <div className="flex items-center gap-3 border-b border-line px-4">
           <Icon name="search" className="text-subtle" />
@@ -136,7 +136,7 @@ export function CommandMenu() {
                   type="button"
                   onMouseEnter={() => setIdx(i)}
                   onClick={() => go(c)}
-                  className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === idx ? "bg-white/[0.08] text-fg" : "text-muted")}
+                  className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === idx ? "bg-black/[0.08] text-fg" : "text-muted")}
                 >
                   <Icon name={c.icon} />
                   <span className="flex-1">{c.label}</span>
@@ -204,7 +204,7 @@ export function Dropdown({
           role="menu"
           onClick={() => setOpen(false)}
           className={cn(
-            "absolute top-full z-50 mt-2 animate-fade-up rounded-xl border border-line-strong bg-bg-100 p-1.5 shadow-[0_16px_48px_rgb(0_0_0/0.6)]",
+            "absolute top-full z-50 mt-2 animate-fade-up rounded-xl border border-line-strong bg-bg-100 p-1.5 shadow-[0_16px_48px_rgb(0_0_0/0.08)]",
             align === "right" ? "right-0" : "left-0",
             width,
           )}
@@ -222,7 +222,7 @@ export function MenuItem({ href, icon, children, danger, hint }: { href: string;
       href={href}
       role="menuitem"
       className={cn(
-        "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-white/[0.06]",
+        "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-black/[0.06]",
         danger ? "text-err" : "text-muted hover:text-fg",
       )}
     >
@@ -255,7 +255,7 @@ export function AccountMenu() {
         role="menuitem"
         disabled={logout.isPending}
         onClick={() => logout.mutate(undefined, { onSettled: () => router.replace("/login") })}
-        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-60"
+        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-black/[0.06] hover:text-fg disabled:opacity-60"
       >
         <Icon name="log-out" />
         <span className="flex-1">{logout.isPending ? "Logging out…" : "Log Out"}</span>
@@ -334,7 +334,7 @@ export function NotificationsMenu() {
                 if (!n.read_at) markRead.mutate([n.id]);
                 if (n.link) router.push(n.link);
               }}
-              className="flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left hover:bg-white/[0.05]"
+              className="flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left hover:bg-black/[0.05]"
             >
               <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", levelDot[n.level] ?? "bg-blue-fg", n.read_at && "opacity-30")} />
               <span className="min-w-0 flex-1">

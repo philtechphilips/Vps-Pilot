@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
-import { CodeTexture } from "@/components/code-texture";
 import { Icon, type IconName } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
@@ -12,11 +11,11 @@ type Variant = "primary" | "secondary" | "tertiary" | "blue" | "danger" | "ghost
 type Size = "xs" | "sm" | "md" | "lg";
 
 const variants: Record<Variant, string> = {
-  primary: "btn-primary bg-fg text-black hover:bg-[#cccccc] border border-transparent",
-  secondary: "bg-bg-100 text-fg border border-line-strong hover:bg-bg-300",
+  primary: "btn-primary bg-accent text-white hover:bg-accent-hover border border-transparent",
+  secondary: "bg-bg text-fg border border-line-strong shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:bg-bg-300",
   tertiary: "bg-transparent text-fg border border-transparent hover:bg-bg-300",
   blue: "bg-blue text-white hover:bg-blue-hover border border-transparent",
-  danger: "bg-[#e5484d] text-white hover:bg-[#d13b40] border border-transparent",
+  danger: "bg-err text-white hover:bg-[#b91c1c] border border-transparent",
   ghost: "bg-transparent text-muted hover:text-fg border border-transparent",
 };
 
@@ -24,7 +23,7 @@ const sizes: Record<Size, string> = {
   xs: "h-7 px-2 text-xs gap-1 rounded-md",
   sm: "h-8 px-3 text-[13px] gap-1.5 rounded-md",
   md: "h-10 px-4 text-sm gap-2 rounded-md",
-  lg: "h-12 px-6 text-base gap-2 rounded-full",
+  lg: "h-12 px-6 text-[15px] gap-2 rounded-full",
 };
 
 export function buttonClass(variant: Variant = "secondary", size: Size = "sm", className?: string) {
@@ -112,9 +111,9 @@ const badgeTone: Record<Tone, string> = {
   ok: "bg-ok/10 text-ok border-ok/20",
   warn: "bg-warn/10 text-warn border-warn/20",
   err: "bg-err/10 text-err border-err/20",
-  neutral: "bg-white/[0.06] text-muted border-line",
-  blue: "bg-blue/15 text-blue-fg border-blue/30",
-  violet: "bg-violet/15 text-[#bf7af0] border-violet/30",
+  neutral: "bg-black/[0.04] text-muted border-line",
+  blue: "bg-blue/[0.07] text-blue-fg border-blue/20",
+  violet: "bg-violet/[0.07] text-violet border-violet/20",
 };
 
 export function Badge({ tone = "neutral", children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
@@ -219,15 +218,15 @@ export function Container({ className, children }: { className?: string; childre
   return <div className={cn("w-full px-4 py-5 sm:px-6", className)}>{children}</div>;
 }
 
-/** Framed search field: dark inset input inside a lighter rail, with filter and shortcut hints. */
+/** Search field with filter and shortcut hints. */
 export function SearchBar({ className, ...props }: ComponentProps<"input">) {
   return (
-    <div className={cn("rounded-xl border border-white/[0.06] bg-[#2a2a2a] p-1.5", className)}>
+    <div className={className}>
       <div className="relative flex items-center">
         <Icon name="search" className="pointer-events-none absolute left-3 text-subtle" />
         <input
           type="search"
-          className="h-10 w-full rounded-lg border border-white/[0.06] bg-inset pr-24 pl-10 text-sm text-fg outline-none placeholder:text-subtle focus:border-white/20"
+          className="h-10 w-full rounded-lg border border-line bg-bg pr-24 pl-10 text-sm text-fg outline-none placeholder:text-subtle focus:border-accent/60"
           {...props}
         />
         <span className="pointer-events-none absolute right-3 flex items-center gap-2 text-subtle">
@@ -250,7 +249,7 @@ export function Input({ className, icon, ...props }: ComponentProps<"input"> & {
       <div className={cn("relative", className)}>
         <Icon name={icon} className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-subtle" />
         <input
-          className="h-10 w-full rounded-md border border-line-strong bg-bg pr-3 pl-9 text-sm text-fg placeholder:text-subtle transition-shadow outline-none focus:border-[#555] focus:shadow-[0_0_0_3px_rgb(255_255_255/0.08)]"
+          className="h-10 w-full rounded-md border border-line-strong bg-bg pr-3 pl-9 text-sm text-fg placeholder:text-subtle transition-shadow outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgb(67_56_202/0.12)]"
           {...props}
         />
       </div>
@@ -259,7 +258,7 @@ export function Input({ className, icon, ...props }: ComponentProps<"input"> & {
   return (
     <input
       className={cn(
-        "h-10 w-full rounded-md border border-line-strong bg-bg px-3 text-sm text-fg placeholder:text-subtle transition-shadow outline-none focus:border-[#555] focus:shadow-[0_0_0_3px_rgb(255_255_255/0.08)]",
+        "h-10 w-full rounded-md border border-line-strong bg-bg px-3 text-sm text-fg placeholder:text-subtle transition-shadow outline-none focus:border-accent/60 focus:shadow-[0_0_0_3px_rgb(67_56_202/0.12)]",
         className,
       )}
       {...props}
@@ -271,7 +270,7 @@ export function Select({ className, children, ...props }: ComponentProps<"select
   return (
     <div className={cn("relative", className)}>
       <select
-        className="h-10 w-full appearance-none rounded-md border border-line-strong bg-bg pr-9 pl-3 text-sm text-fg outline-none focus:border-[#555]"
+        className="h-10 w-full appearance-none rounded-md border border-line-strong bg-bg pr-9 pl-3 text-sm text-fg outline-none focus:border-accent/60"
         {...props}
       >
         {children}
@@ -311,7 +310,7 @@ export function Meter({ value, tone, className }: { value: number; tone?: Tone; 
   const t: Tone = tone ?? (value >= 85 ? "err" : value >= 70 ? "warn" : "blue");
   const color = { ok: "bg-ok", warn: "bg-warn", err: "bg-err", neutral: "bg-subtle", blue: "bg-blue-fg", violet: "bg-violet" }[t];
   return (
-    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08]", className)} role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
+    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-black/[0.08]", className)} role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
       <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.min(100, value)}%` }} />
     </div>
   );
@@ -360,11 +359,9 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#060606] px-6 py-16 text-center", className)}>
-      <CodeTexture />
-      <Icon name={icon} size={150} strokeWidth={0.6} className="pointer-events-none absolute -right-6 -bottom-8 text-white/[0.06]" />
+    <div className={cn("relative overflow-hidden rounded-xl border border-dashed border-line-strong bg-bg-200 px-6 py-16 text-center", className)}>
       <div className="relative flex flex-col items-center">
-        <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-[#111] text-muted shadow-[inset_0_1px_0_rgb(255_255_255/0.04)]">
+        <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-line bg-bg text-muted shadow-[0_1px_2px_rgb(0_0_0/0.05)]">
           <Icon name={icon} size={26} strokeWidth={1.25} />
         </div>
         <h3 className="font-semibold">{title}</h3>
@@ -410,7 +407,7 @@ export function Callout({ tone = "neutral", icon = "info", title, children }: { 
     err: "border-err/30 bg-err/[0.06] text-err",
     neutral: "border-line bg-bg-200 text-muted",
     blue: "border-blue/30 bg-blue/[0.08] text-blue-fg",
-    violet: "border-violet/30 bg-violet/[0.08] text-[#bf7af0]",
+    violet: "border-violet/30 bg-violet/[0.08] text-violet",
   };
   return (
     <div className={cn("flex gap-3 rounded-lg border p-4 text-sm", styles[tone])}>

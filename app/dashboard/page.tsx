@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AppCount, BackupSize, BackupsCard, DatabaseCount, OverviewApps, RecentDeployments } from "@/components/apps/overview-apps";
-import { CodeTexture } from "@/components/code-texture";
 import { AlertList, FiringBadge } from "@/components/dashboard/cards";
 import { AgentsCard, FleetCard, ServerCount } from "@/components/servers/overview-fleet";
 import { Greeting } from "@/components/dashboard/greeting";
@@ -29,12 +28,12 @@ export default function OverviewPage() {
               <AddNewMenu />
             </span>
           </div>
-          <div className="grid grid-cols-2 border-t border-line bg-white/[0.025] md:grid-cols-4">
+          <div className="grid grid-cols-2 border-t border-line bg-black/[0.025] md:grid-cols-4">
             {stats.map((s) => (
               <Link
                 key={s.label}
                 href={s.href}
-                className="group relative overflow-hidden border-line px-5 py-4 transition-colors hover:bg-white/[0.03] [&:not(:last-child)]:border-r max-md:[&:nth-child(2)]:border-r-0 max-md:[&:nth-child(-n+2)]:border-b"
+                className="group relative overflow-hidden border-line px-5 py-4 transition-colors hover:bg-black/[0.03] [&:not(:last-child)]:border-r max-md:[&:nth-child(2)]:border-r-0 max-md:[&:nth-child(-n+2)]:border-b"
               >
                 <div className="text-[11px] text-muted">{s.label}</div>
                 <div className="mt-1.5 flex items-baseline gap-1.5">
@@ -45,7 +44,7 @@ export default function OverviewPage() {
                   name={s.icon}
                   size={64}
                   strokeWidth={1}
-                  className="pointer-events-none absolute -right-3 -bottom-5 text-white/[0.05] transition-colors group-hover:text-white/[0.09]"
+                  className="pointer-events-none absolute -right-3 -bottom-5 text-black/[0.05] transition-colors group-hover:text-black/[0.09]"
                 />
               </Link>
             ))}
@@ -55,11 +54,8 @@ export default function OverviewPage() {
         <AgentsCard />
       </div>
 
-      {/* Applications on texture */}
-      <section className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#060606] p-5">
-        <CodeTexture seed={3} />
-        <Icon name="box" size={180} strokeWidth={0.5} className="pointer-events-none absolute -right-8 -bottom-12 text-white/[0.05]" />
-        <div className="relative">
+      <section className="rounded-xl border border-line bg-bg-200 p-5">
+        <div>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold">Applications</h2>
             <Link href="/dashboard/applications" className="text-xs text-muted hover:text-fg">

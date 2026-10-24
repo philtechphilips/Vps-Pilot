@@ -90,7 +90,7 @@ export function EnrollFlow() {
             <p className="text-sm text-muted">
               SSH into the server once and run this. It installs the agent as an unprivileged systemd service. The token works once.
             </p>
-            <div className="overflow-hidden rounded-xl border border-line-strong bg-[#0d0d0d]">
+            <div className="overflow-hidden rounded-xl border border-line-strong bg-inset">
               <div className="flex items-center justify-between border-b border-line px-3 py-2">
                 <span className="text-xs text-subtle">bash · as root or with sudo</span>
                 <span className="flex items-center gap-3">

@@ -4,13 +4,13 @@ import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const palette = {
-  blue: "#52a8ff",
-  ok: "#0cce6b",
-  warn: "#f5a623",
-  err: "#ff4d4f",
-  violet: "#bf7af0",
-  teal: "#3dd9c4",
-  gray: "#a1a1a1",
+  blue: "#4f46e5",
+  ok: "#16a34a",
+  warn: "#d97706",
+  err: "#dc2626",
+  violet: "#7c3aed",
+  teal: "#0d9488",
+  gray: "#a1a1aa",
 } as const;
 
 export type ChartColor = keyof typeof palette;
@@ -118,7 +118,7 @@ export function AreaChart({
               </clipPath>
             </defs>
             {[0, 0.5, 1].map((f) => (
-              <line key={f} x1="0" x2={w} y1={f * height} y2={f * height} stroke="rgb(255 255 255 / 0.08)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
+              <line key={f} x1="0" x2={w} y1={f * height} y2={f * height} stroke="rgb(0 0 0 / 0.06)" strokeDasharray="3 4" vectorEffect="non-scaling-stroke" />
             ))}
             {series.map((s, i) => {
               const line = toPath(s.data, w, height, max, 1);
@@ -130,7 +130,7 @@ export function AreaChart({
               );
             })}
             {hover !== null && (
-              <line x1={hover * step} x2={hover * step} y1="0" y2={height} stroke="rgb(255 255 255 / 0.35)" vectorEffect="non-scaling-stroke" />
+              <line x1={hover * step} x2={hover * step} y1="0" y2={height} stroke="rgb(0 0 0 / 0.2)" vectorEffect="non-scaling-stroke" />
             )}
           </svg>
           {hover !== null && (

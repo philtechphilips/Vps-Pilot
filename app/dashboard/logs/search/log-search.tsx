@@ -107,7 +107,7 @@ function ServerResults({ search }: { search: Search }) {
       {data && data.matches.length > 0 && (
         <div className="max-h-[480px] overflow-auto font-mono text-[12px] leading-5">
           {data.matches.map((m, i) => (
-            <div key={i} className="flex gap-3 border-b border-line/50 px-4 py-1 last:border-0 hover:bg-white/[0.02]">
+            <div key={i} className="flex gap-3 border-b border-line/50 px-4 py-1 last:border-0 hover:bg-black/[0.02]">
               <span className="shrink-0 text-subtle">{new Date(m.t * 1000).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
               <Mono className="w-24 shrink-0 truncate text-muted">{m.app}</Mono>
               <span className="break-all whitespace-pre-wrap">{m.line}</span>

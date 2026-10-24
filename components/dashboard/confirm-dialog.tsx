@@ -43,7 +43,7 @@ export function ConfirmDialog({
   const ok = a === confirmText && (!phrase || b === phrase);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         role="alertdialog"
         aria-modal="true"

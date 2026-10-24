@@ -114,8 +114,8 @@ export function LogsViewer() {
               type="button"
               onClick={() => pick({ kind: "journal", unit: null })}
               className={cn(
-                "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/[0.04]",
-                source.kind === "journal" && !source.unit && "bg-white/[0.06] text-fg",
+                "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-black/[0.04]",
+                source.kind === "journal" && !source.unit && "bg-black/[0.06] text-fg",
               )}
             >
               <Icon name="terminal" size={14} className="text-subtle" /> Journal, all units
@@ -147,8 +147,8 @@ export function LogsViewer() {
                     type="button"
                     onClick={() => pick({ kind: "container", container: c.name })}
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-white/[0.04]",
-                      source.kind === "container" && source.container === c.name && "bg-white/[0.06] text-fg",
+                      "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-black/[0.04]",
+                      source.kind === "container" && source.container === c.name && "bg-black/[0.06] text-fg",
                     )}
                   >
                     <span className={cn("size-1.5 shrink-0 rounded-full", c.state === "running" ? "bg-ok" : "bg-subtle")} />
@@ -162,7 +162,7 @@ export function LogsViewer() {
           <div>
             <h3 className="mb-2 text-xs font-medium text-subtle">Level</h3>
             {LEVELS.map((l) => (
-              <label key={l} className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-white/[0.04]">
+              <label key={l} className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-black/[0.04]">
                 <input type="checkbox" checked={levels.has(l)} onChange={() => toggleLevel(l)} className="size-3.5 accent-white" />
                 <span className={cn("h-3 w-1 rounded-full", levelStyle[l].bar)} />
                 <span className="flex-1">{levelStyle[l].label}</span>
@@ -248,7 +248,7 @@ export function LogsViewer() {
                   key={e.key}
                   type="button"
                   onClick={() => setOpen(e)}
-                  className={cn("flex w-full gap-3 px-4 text-left hover:bg-white/[0.03]", open?.key === e.key && "bg-white/[0.06]", e.level === "error" && "bg-err/[0.05]")}
+                  className={cn("flex w-full gap-3 px-4 text-left hover:bg-black/[0.03]", open?.key === e.key && "bg-black/[0.06]", e.level === "error" && "bg-err/[0.05]")}
                 >
                   <span className={cn("my-1 w-1 shrink-0 self-stretch rounded-full", levelStyle[e.level].bar)} />
                   <span className="hidden w-[74px] shrink-0 text-subtle sm:inline">{new Date(e.time).toLocaleTimeString(undefined, { hour12: false })}</span>
@@ -263,7 +263,7 @@ export function LogsViewer() {
             <aside className="hidden w-[380px] shrink-0 border-l border-line bg-bg-100 xl:block">
               <div className="flex items-center justify-between border-b border-line px-4 py-3">
                 <span className="text-sm font-medium">Log line</span>
-                <button type="button" aria-label="Close" onClick={() => setOpen(null)} className="rounded p-1 text-muted hover:bg-white/10 hover:text-fg">
+                <button type="button" aria-label="Close" onClick={() => setOpen(null)} className="rounded p-1 text-muted hover:bg-black/10 hover:text-fg">
                   <Icon name="x" size={14} />
                 </button>
               </div>

@@ -68,7 +68,7 @@ export function AppGrid() {
                   </span>
                 </div>
 
-                <span className="mt-4 inline-flex w-fit max-w-full items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-1 text-xs text-fg">
+                <span className="mt-4 inline-flex w-fit max-w-full items-center gap-1.5 rounded-full bg-black/[0.06] px-2.5 py-1 text-xs text-fg">
                   <Icon name={a.source_type === "git" ? "github" : "container"} size={13} />
                   <span className="truncate">{sourceLabel(a)}</span>
                 </span>

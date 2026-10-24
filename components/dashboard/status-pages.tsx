@@ -44,10 +44,10 @@ export function StatusPagesSection({ domains }: { domains: Domain[] }) {
                 {p.components.length} site{p.components.length === 1 ? "" : "s"}
               </span>
               <span className="ml-auto flex gap-1">
-                <button type="button" aria-label={`Edit ${p.title}`} onClick={() => setEditing(p)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-fg">
+                <button type="button" aria-label={`Edit ${p.title}`} onClick={() => setEditing(p)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-fg">
                   <Icon name="settings" size={14} />
                 </button>
-                <button type="button" aria-label={`Delete ${p.title}`} onClick={() => setDeleting(p)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-err">
+                <button type="button" aria-label={`Delete ${p.title}`} onClick={() => setDeleting(p)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
                   <Icon name="trash" size={14} />
                 </button>
               </span>
@@ -84,7 +84,7 @@ function PageDialog({ page, domains, onClose }: { page: StatusPage | null; domai
   const valid = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/.test(slug) && Object.keys(picked).length > 0;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"

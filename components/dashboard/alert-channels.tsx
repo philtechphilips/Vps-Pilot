@@ -57,7 +57,7 @@ export function AlertChannelsCard() {
         {secret && (
           <Callout tone="ok" icon="key" title="Webhook signing secret (shown once)">
             <div className="mt-1 flex items-center gap-2">
-              <code className="min-w-0 flex-1 truncate rounded bg-black/30 px-2 py-1 font-mono text-[12px]">{secret}</code>
+              <code className="min-w-0 flex-1 truncate rounded bg-black/[0.04] px-2 py-1 font-mono text-[12px]">{secret}</code>
               <CopyButton value={secret} />
             </div>
             <p className="mt-2 text-xs">
@@ -120,7 +120,7 @@ function ChannelRow({ channel: c }: { channel: AlertChannel }) {
           >
             <span className={cn("absolute top-0.5 size-[14px] rounded-full bg-white shadow transition-[left]", c.enabled ? "left-[18px]" : "left-0.5")} />
           </button>
-          <button type="button" aria-label={`Delete ${c.name}`} onClick={() => setConfirm(true)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-err">
+          <button type="button" aria-label={`Delete ${c.name}`} onClick={() => setConfirm(true)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
             <Icon name="trash" size={14} />
           </button>
         </span>

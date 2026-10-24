@@ -35,7 +35,7 @@ function SidebarLinks({ pathname, onNavigate }: { pathname: string | null; onNav
             aria-current={active ? "page" : undefined}
             className={cn(
               "flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] transition-colors",
-              active ? "bg-panel text-fg shadow-[inset_0_0_0_1px_rgb(255_255_255/0.04)]" : "text-muted hover:bg-white/[0.04] hover:text-fg",
+              active ? "bg-panel text-fg shadow-[0_1px_2px_rgb(0_0_0/0.06),inset_0_0_0_1px_rgb(0_0_0/0.06)]" : "text-muted hover:bg-black/[0.04] hover:text-fg",
             )}
           >
             <Icon name={t.icon} size={16} className={active ? "text-fg" : "text-subtle"} />
@@ -55,7 +55,7 @@ function ControlPlaneStatus() {
   const online = enrolled.filter((s) => s.status === "online").length;
   const healthy = !servers.error;
   return (
-    <div className="mx-1 rounded-xl border border-white/[0.06] bg-[#0d0d0d] p-3">
+    <div className="mx-1 rounded-xl border border-line bg-panel p-3">
       <div className="flex items-center gap-2 text-xs">
         <span className="relative flex size-2">
           {healthy && <span className="absolute inline-flex size-full animate-ping rounded-full bg-ok opacity-50" />}
@@ -81,10 +81,10 @@ function SidebarFooter() {
     <div className="mt-auto space-y-3 px-2 pb-4">
       <ControlPlaneStatus />
       <div className="flex flex-col gap-0.5">
-        <Link href="/#changelog" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-white/[0.04] hover:text-fg">
+        <Link href="/#changelog" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-black/[0.04] hover:text-fg">
           <Icon name="file-text" className="text-subtle" /> Changelog
         </Link>
-        <Link href="/#docs" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-white/[0.04] hover:text-fg">
+        <Link href="/#docs" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-black/[0.04] hover:text-fg">
           <Icon name="book" className="text-subtle" /> Docs
         </Link>
       </div>
@@ -138,14 +138,14 @@ export function MobileNav() {
         type="button"
         aria-label="Open navigation"
         onClick={() => setOpen(true)}
-        className="inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-white/[0.06] hover:text-fg lg:hidden"
+        className="inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-black/[0.06] hover:text-fg lg:hidden"
       >
         <Icon name="menu" />
       </button>
       {open && (
         <div className="fixed inset-0 z-[90] lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
-          <div className="absolute inset-0 bg-black/70" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 left-0 flex w-[260px] animate-fade-up flex-col overflow-y-auto border-r border-white/[0.06] bg-black">
+          <div className="absolute inset-0 bg-black/25" onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 left-0 flex w-[260px] animate-fade-up flex-col overflow-y-auto border-r border-black/[0.06] bg-bg">
             <SidebarBrand />
             <SidebarLinks pathname={pathname} onNavigate={() => setOpen(false)} />
             <SidebarFooter />
@@ -165,7 +165,7 @@ export function SectionCrumb() {
   const pathname = usePathname();
   const t = sectionLabel(pathname);
   return (
-    <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-fg hover:bg-white/[0.06]">
+    <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-fg hover:bg-black/[0.06]">
       <Icon name={t.icon} size={14} className="text-subtle" />
       {t.label}
       <Icon name="chevrons-up-down" size={12} className="text-subtle" />
@@ -174,5 +174,5 @@ export function SectionCrumb() {
 }
 
 export function SectionCrumbFallback() {
-  return <span className="h-6 w-20 rounded-md bg-white/[0.04]" />;
+  return <span className="h-6 w-20 rounded-md bg-black/[0.04]" />;
 }

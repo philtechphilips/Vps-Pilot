@@ -120,7 +120,7 @@ export function RegisterForm() {
               }}
               className={cn(
                 "flex items-center gap-3 rounded-md border p-3 text-left transition-colors",
-                engine === e ? "border-fg bg-white/[0.04]" : "border-line hover:border-line-strong",
+                engine === e ? "border-fg bg-black/[0.04]" : "border-line hover:border-line-strong",
               )}
             >
               <BrandChip name={ENGINE_BRAND[e]} size={26} />

@@ -266,7 +266,7 @@ function ProtectDialog({ d, onClose }: { d: Domain; onClose: () => void }) {
   const valid = (!password || password.length >= 8) && /^[A-Za-z0-9._@-]{1,64}$/.test(user);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"

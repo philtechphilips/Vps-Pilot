@@ -3,7 +3,7 @@ import { Logotype } from "@/components/logo";
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="theme-console relative flex min-h-dvh flex-col bg-black">
+    <div className="relative flex min-h-dvh flex-col bg-bg">
       <div className="pointer-events-none absolute inset-0 bg-grid [mask-image:radial-gradient(ellipse_at_top,black_10%,transparent_60%)]" aria-hidden="true" />
       <header className="relative flex h-16 items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex" aria-label="VPSPilot home">

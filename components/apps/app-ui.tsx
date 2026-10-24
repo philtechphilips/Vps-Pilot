@@ -59,7 +59,7 @@ export function DeploymentRow({ d, showApp = true, serverName }: { d: Deployment
   return (
     <Link
       href={`/dashboard/deployments/${d.id}`}
-      className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 border-b border-line px-4 py-3.5 transition-colors last:border-0 hover:bg-white/[0.02] md:grid-cols-[minmax(160px,1.1fr)_minmax(120px,0.8fr)_minmax(200px,1.6fr)_auto]"
+      className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 border-b border-line px-4 py-3.5 transition-colors last:border-0 hover:bg-black/[0.02] md:grid-cols-[minmax(160px,1.1fr)_minmax(120px,0.8fr)_minmax(200px,1.6fr)_auto]"
     >
       <div className="min-w-0">
         <div className="flex items-center gap-2">

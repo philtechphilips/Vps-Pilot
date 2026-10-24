@@ -220,7 +220,7 @@ function RunRow({ r }: { r: BackupRun }) {
 
   return (
     <>
-      <tr className="border-b border-line align-top last:border-0 hover:bg-white/[0.02]">
+      <tr className="border-b border-line align-top last:border-0 hover:bg-black/[0.02]">
         <td className="px-4 py-3">
           <div className="flex items-center gap-2.5">
             {r.engine && <BrandChip name={ENGINE_BRAND[r.engine]} size={22} />}
@@ -290,7 +290,7 @@ function RunRow({ r }: { r: BackupRun }) {
                 Restore
               </Button>
             )}
-            <button type="button" aria-label="Delete backup" onClick={() => setDeleting(true)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-err">
+            <button type="button" aria-label="Delete backup" onClick={() => setDeleting(true)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
               <Icon name="trash" size={14} />
             </button>
           </span>
@@ -333,7 +333,7 @@ function RestoreDialog({ r, onClose, onRestore }: { r: BackupRun; onClose: () =>
   const valid = mode === "new" ? /^[a-z_][a-z0-9_]{0,62}$/.test(into) && into !== r.database : confirm === r.database;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div role="dialog" aria-modal="true" aria-label="Restore backup" onMouseDown={(e) => e.stopPropagation()} className="w-full max-w-[500px] animate-fade-up overflow-hidden rounded-t-xl border border-line-strong bg-bg-100 shadow-2xl sm:rounded-xl">
         <div className="space-y-4 p-6">
           <h2 className="text-xl font-semibold tracking-tight">Restore {r.database}</h2>

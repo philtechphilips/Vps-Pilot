@@ -19,7 +19,7 @@ const docLinks: Record<string, string> = {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-white/[0.06] bg-black">
+    <footer className="border-t border-black/[0.06] bg-bg">
       <div className="mx-auto max-w-[1080px] px-4 py-14 sm:px-6">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(4,1fr)]">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
@@ -44,8 +44,8 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <a href="#" className="inline-flex w-fit items-center gap-2 rounded-full border border-white/[0.06] bg-[#141414] px-3 py-1.5 text-[13px] text-muted hover:text-fg">
+        <div className="mt-14 flex flex-col gap-4 border-t border-black/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <a href="#" className="inline-flex w-fit items-center gap-2 rounded-full border border-black/[0.06] bg-bg-100 px-3 py-1.5 text-[13px] text-muted hover:text-fg">
             <Dot tone="ok" pulse />
             All systems normal
           </a>
@@ -56,9 +56,9 @@ export function MarketingFooter() {
                 <span
                   key={i}
                   role="radio"
-                  aria-checked={i === "moon"}
+                  aria-checked={i === "sun"}
                   aria-label={i === "monitor" ? "System" : i === "sun" ? "Light" : "Dark"}
-                  className={`flex size-7 items-center justify-center rounded-full ${i === "moon" ? "bg-white/10 text-fg" : ""}`}
+                  className={`flex size-7 items-center justify-center rounded-full ${i === "sun" ? "bg-black/[0.06] text-fg" : ""}`}
                 >
                   <Icon name={i} size={14} />
                 </span>

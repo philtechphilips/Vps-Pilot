@@ -78,7 +78,7 @@ export function PreviewsSection({ app }: { app: App }) {
             <Label>Open previews</Label>
             <div className="flex flex-wrap gap-2">
               {app.previews.map((p) => (
-                <Link key={p.id} href={`/dashboard/applications/${p.id}`} className="inline-flex items-center gap-2 rounded-md border border-line px-2.5 py-1 text-sm hover:bg-white/[0.04]">
+                <Link key={p.id} href={`/dashboard/applications/${p.id}`} className="inline-flex items-center gap-2 rounded-md border border-line px-2.5 py-1 text-sm hover:bg-black/[0.04]">
                   <Badge>#{p.pr}</Badge>
                   <Mono>{p.name}</Mono>
                 </Link>

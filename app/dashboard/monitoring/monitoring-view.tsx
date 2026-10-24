@@ -182,7 +182,7 @@ function StatCard({ icon, label, value, tone }: { icon: "server" | "alert" | "ey
         <Dot tone={tone} /> {label}
       </div>
       <div className="mt-2 text-xl font-semibold tabular-nums">{value}</div>
-      <Icon name={icon} size={56} strokeWidth={1} className="pointer-events-none absolute -right-2 -bottom-3 text-white/[0.05]" />
+      <Icon name={icon} size={56} strokeWidth={1} className="pointer-events-none absolute -right-2 -bottom-3 text-black/[0.05]" />
     </Card>
   );
 }
@@ -215,7 +215,7 @@ function ServerHealth({ fleet }: { fleet: Fleet }) {
         {fleet.servers.map((s) => {
           const p = s.points.at(-1);
           return (
-            <Link key={s.id} href={`/dashboard/servers/${s.id}`} className="grid grid-cols-[minmax(0,1fr)_repeat(3,64px)] items-center gap-3 px-4 py-2.5 text-xs hover:bg-white/[0.02] sm:grid-cols-[minmax(0,1fr)_repeat(3,96px)]">
+            <Link key={s.id} href={`/dashboard/servers/${s.id}`} className="grid grid-cols-[minmax(0,1fr)_repeat(3,64px)] items-center gap-3 px-4 py-2.5 text-xs hover:bg-black/[0.02] sm:grid-cols-[minmax(0,1fr)_repeat(3,96px)]">
               <span className="flex min-w-0 items-center gap-2 text-[13px]">
                 <Dot tone={s.status === "online" ? "ok" : "err"} pulse={s.status === "online"} />
                 <span className="truncate">{s.name}</span>
@@ -385,7 +385,7 @@ function PauseDialog({ onClose }: { onClose: () => void }) {
   const [kind, id] = scope.split(":");
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -517,7 +517,7 @@ function Rules() {
           </thead>
           <tbody>
             {(rules.data ?? []).map((r) => (
-              <tr key={r.id} className={cn("border-b border-line last:border-0 hover:bg-white/[0.02]", !r.enabled && "text-muted")}>
+              <tr key={r.id} className={cn("border-b border-line last:border-0 hover:bg-black/[0.02]", !r.enabled && "text-muted")}>
                 <td className="px-4 py-3 font-medium">{r.name}</td>
                 <td className="px-4 py-3 text-muted">{KIND_INFO[r.kind]?.describe(r) ?? r.kind}</td>
                 <td className="px-4 py-3 text-muted">{ruleScope(r, serverName, appName)}</td>
@@ -532,10 +532,10 @@ function Rules() {
                 </td>
                 <td className="px-4 py-3">
                   <span className="flex justify-end gap-1">
-                    <button type="button" aria-label={`Edit ${r.name}`} onClick={() => setEditing(r)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-fg">
+                    <button type="button" aria-label={`Edit ${r.name}`} onClick={() => setEditing(r)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-fg">
                       <Icon name="settings" size={14} />
                     </button>
-                    <button type="button" aria-label={`Delete ${r.name}`} onClick={() => setDeleting(r)} className="rounded p-1.5 text-subtle hover:bg-white/10 hover:text-err">
+                    <button type="button" aria-label={`Delete ${r.name}`} onClick={() => setDeleting(r)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
                       <Icon name="trash" size={14} />
                     </button>
                   </span>
@@ -600,7 +600,7 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/25 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={onClose}>
       <div
         role="dialog"
         aria-modal="true"

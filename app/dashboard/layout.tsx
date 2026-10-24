@@ -13,26 +13,26 @@ export const metadata: Metadata = {
 
 function Crumb({ children }: { children: React.ReactNode }) {
   return (
-    <button type="button" className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] whitespace-nowrap text-fg transition-colors hover:bg-white/[0.06]">
+    <button type="button" className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] whitespace-nowrap text-fg transition-colors hover:bg-black/[0.06]">
       {children}
       <Icon name="chevrons-up-down" size={12} className="text-subtle" />
     </button>
   );
 }
 
-const Slash = () => <span className="text-[#3a3a3a] select-none">/</span>;
+const Slash = () => <span className="text-black/20 select-none">/</span>;
 
 export default function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   return (
-    <div className="theme-console min-h-dvh bg-black">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col overflow-y-auto bg-black lg:flex">
+    <div className="min-h-dvh bg-chrome">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col overflow-y-auto bg-chrome lg:flex">
         <Suspense fallback={<SidebarFallback />}>
           <Sidebar />
         </Suspense>
       </aside>
 
       <div className="flex min-h-dvh flex-col lg:pl-[220px]">
-        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 bg-black px-3 sm:px-4">
+        <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-2 bg-chrome px-3 sm:px-4">
           <Suspense fallback={null}>
             <MobileNav />
           </Suspense>
@@ -56,14 +56,14 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
           </nav>
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <SearchButton />
-            <span className="mx-1 hidden h-5 w-px bg-white/10 sm:block" />
+            <span className="mx-1 hidden h-5 w-px bg-black/10 sm:block" />
             <NotificationsMenu />
             <AccountMenu />
           </div>
         </header>
 
         <main className="flex flex-1 flex-col lg:pr-2">
-          <div className="flex-1 border-t border-white/[0.06] bg-panel lg:rounded-tl-2xl lg:rounded-tr-2xl lg:border-x">
+          <div className="flex-1 border-t border-line bg-panel shadow-[0_1px_3px_rgb(0_0_0/0.04)] lg:rounded-tl-2xl lg:rounded-tr-2xl lg:border-x">
             <ViewerBanner />
             <Suspense fallback={<GateLoading />}>
               <AuthGate>{children}</AuthGate>

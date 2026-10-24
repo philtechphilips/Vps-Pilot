@@ -11,7 +11,7 @@ function Spark({ days }: { days: number[] }) {
   return (
     <span className="flex h-6 items-end gap-[2px]" aria-label="errors per day, last 14 days">
       {days.map((n, i) => (
-        <span key={i} className={cn("w-1.5 rounded-sm", n ? "bg-err/70" : "bg-white/10")} style={{ height: `${Math.max(8, (100 * n) / max)}%` }} />
+        <span key={i} className={cn("w-1.5 rounded-sm", n ? "bg-err/70" : "bg-black/10")} style={{ height: `${Math.max(8, (100 * n) / max)}%` }} />
       ))}
     </span>
   );

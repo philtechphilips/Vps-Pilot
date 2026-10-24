@@ -37,7 +37,7 @@ function ActionButton({ icon, label, onClick, disabled }: { icon: "refresh" | "p
       title={label}
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex size-7 items-center justify-center rounded text-subtle transition-colors hover:bg-white/10 hover:text-fg disabled:pointer-events-none disabled:opacity-30"
+      className="inline-flex size-7 items-center justify-center rounded text-subtle transition-colors hover:bg-black/10 hover:text-fg disabled:pointer-events-none disabled:opacity-30"
     >
       <Icon name={icon} size={14} />
     </button>
@@ -308,7 +308,7 @@ export function ServerDetailView() {
                   </thead>
                   <tbody>
                     {shownServices.map((v) => (
-                      <tr key={v.name} className="hover:bg-white/[0.02]">
+                      <tr key={v.name} className="hover:bg-black/[0.02]">
                         <Td className="h-11 font-mono text-[13px]">{v.name.replace(/\.service$/, "")}</Td>
                         <Td className="h-11">
                           <span className="flex items-center gap-2 text-[13px]">
@@ -429,7 +429,7 @@ export function ServerDetailView() {
                       key={j.id}
                       type="button"
                       onClick={() => setOpenJob(j.id)}
-                      className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left last:border-0 hover:bg-white/[0.02]"
+                      className="flex w-full items-center gap-3 border-b border-line px-4 py-3 text-left last:border-0 hover:bg-black/[0.02]"
                     >
                       <Dot tone={jobTone[j.status]} pulse={isActive(j.status)} />
                       <span className="min-w-0 flex-1 truncate text-sm">{jobTitle(j)}</span>

@@ -63,14 +63,14 @@ export function Lead({ children }: { children: ReactNode }) {
 
 export function C({ children }: { children: ReactNode }) {
   return (
-    <code className="rounded-[5px] border border-white/[0.08] bg-white/[0.05] px-[0.35em] py-[0.1em] font-mono text-[0.84em] text-fg">
+    <code className="rounded-[5px] border border-black/[0.08] bg-black/[0.05] px-[0.35em] py-[0.1em] font-mono text-[0.84em] text-fg">
       {children}
     </code>
   );
 }
 
 export function A({ href, children }: { href: string; children: ReactNode }) {
-  const cls = "font-medium text-fg underline decoration-white/25 underline-offset-[3px] transition-colors hover:decoration-fg";
+  const cls = "font-medium text-fg underline decoration-black/25 underline-offset-[3px] transition-colors hover:decoration-fg";
   return href.startsWith("/") ? (
     <Link href={href} className={cls}>
       {children}
@@ -84,7 +84,7 @@ export function A({ href, children }: { href: string; children: ReactNode }) {
 
 export function Ul({ children }: { children: ReactNode }) {
   return (
-    <ul className="my-4 space-y-2 text-[15px] leading-7 text-muted [&_strong]:font-medium [&_strong]:text-fg [&>li]:relative [&>li]:pl-5 [&>li]:before:absolute [&>li]:before:top-[0.7em] [&>li]:before:left-1 [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-white/25">
+    <ul className="my-4 space-y-2 text-[15px] leading-7 text-muted [&_strong]:font-medium [&_strong]:text-fg [&>li]:relative [&>li]:pl-5 [&>li]:before:absolute [&>li]:before:top-[0.7em] [&>li]:before:left-1 [&>li]:before:size-1.5 [&>li]:before:rounded-full [&>li]:before:bg-black/25">
       {children}
     </ul>
   );
@@ -105,13 +105,13 @@ export function Ol({ children }: { children: ReactNode }) {
 type Lang = "bash" | "json" | "text" | "ini" | "http";
 
 const tone = {
-  cmd: "text-[#79b8ff]",
-  flag: "text-[#b392f0]",
-  str: "text-[#ffab70]",
-  com: "text-[#6a737d] italic",
-  var: "text-[#f97583]",
-  num: "text-[#79b8ff]",
-  key: "text-[#9ecbff]",
+  cmd: "text-[#0550ae]",
+  flag: "text-[#8250df]",
+  str: "text-[#953800]",
+  com: "text-[#6e7781] italic",
+  var: "text-[#cf222e]",
+  num: "text-[#0550ae]",
+  key: "text-[#0a3069]",
   plain: "",
 };
 
@@ -179,18 +179,18 @@ export function CodeBlock({ code, lang = "bash", title }: { code: string; lang?:
   const value = code.replace(/^\n+|\s+$/g, "");
   const lines = value.split("\n");
   return (
-    <div className="group/code my-5 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0b0b0b]">
-      <div className="flex h-10 items-center gap-3 border-b border-white/[0.06] bg-white/[0.02] pr-1.5 pl-4">
+    <div className="group/code my-5 overflow-hidden rounded-xl border border-black/[0.08] bg-inset">
+      <div className="flex h-10 items-center gap-3 border-b border-black/[0.06] bg-black/[0.02] pr-1.5 pl-4">
         <span className="flex gap-1.5" aria-hidden="true">
-          <span className="size-2.5 rounded-full bg-white/15" />
-          <span className="size-2.5 rounded-full bg-white/15" />
-          <span className="size-2.5 rounded-full bg-white/15" />
+          <span className="size-2.5 rounded-full bg-black/15" />
+          <span className="size-2.5 rounded-full bg-black/15" />
+          <span className="size-2.5 rounded-full bg-black/15" />
         </span>
         {title && <span className="truncate font-mono text-xs text-subtle">{title}</span>}
         <span className="ml-auto font-mono text-[11px] tracking-wide text-subtle uppercase">{lang === "text" ? "" : lang}</span>
         <CopyButton value={value} />
       </div>
-      <pre className="thin-scrollbar overflow-x-auto px-4 py-3.5 font-mono text-[13px] leading-6 text-[#e1e4e8]">
+      <pre className="thin-scrollbar overflow-x-auto px-4 py-3.5 font-mono text-[13px] leading-6 text-[#24292f]">
         <code>
           {lines.map((line, i) => (
             <span key={i} className="block min-h-6">
@@ -212,7 +212,7 @@ export function CodeBlock({ code, lang = "bash", title }: { code: string; lang?:
 // ---------------------------------------------------------------------------
 
 const callouts = {
-  note: { icon: "info", cls: "border-white/[0.1] bg-white/[0.03]", ic: "text-muted", label: "Note" },
+  note: { icon: "info", cls: "border-black/[0.1] bg-black/[0.03]", ic: "text-muted", label: "Note" },
   tip: { icon: "sparkles", cls: "border-ok/25 bg-ok/[0.05]", ic: "text-ok", label: "Tip" },
   warning: { icon: "alert", cls: "border-warn/30 bg-warn/[0.06]", ic: "text-warn", label: "Warning" },
   security: { icon: "shield-check", cls: "border-accent/30 bg-accent/[0.07]", ic: "text-accent-fg", label: "Security" },
@@ -238,7 +238,7 @@ export function Steps({ children }: { children: ReactNode }) {
 export function Step({ title, children }: { title: string; children: ReactNode }) {
   const id = slugify(title);
   return (
-    <div className="relative pb-6 pl-10 [counter-increment:step] before:absolute before:top-0 before:left-0 before:flex before:size-7 before:items-center before:justify-center before:rounded-full before:border before:border-white/15 before:bg-[#141414] before:font-mono before:text-xs before:text-fg before:content-[counter(step)] after:absolute after:top-9 after:bottom-1 after:left-3.5 after:w-px after:bg-white/10 last:pb-0 last:after:hidden">
+    <div className="relative pb-6 pl-10 [counter-increment:step] before:absolute before:top-0 before:left-0 before:flex before:size-7 before:items-center before:justify-center before:rounded-full before:border before:border-black/15 before:bg-bg-100 before:font-mono before:text-xs before:text-fg before:content-[counter(step)] after:absolute after:top-9 after:bottom-1 after:left-3.5 after:w-px after:bg-black/10 last:pb-0 last:after:hidden">
       <h3 id={id} data-toc="3" className="scroll-mt-24 pt-0.5 text-base font-semibold tracking-[-0.01em] text-fg">
         {title}
       </h3>
@@ -249,9 +249,9 @@ export function Step({ title, children }: { title: string; children: ReactNode }
 
 export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
   return (
-    <div className="thin-scrollbar my-6 overflow-x-auto rounded-xl border border-white/[0.08]">
+    <div className="thin-scrollbar my-6 overflow-x-auto rounded-xl border border-black/[0.08]">
       <table className="w-full text-left text-[13.5px]">
-        <thead className="bg-white/[0.03] text-xs text-subtle">
+        <thead className="bg-black/[0.03] text-xs text-subtle">
           <tr>
             {head.map((h) => (
               <th key={h} className="px-4 py-2.5 font-medium whitespace-nowrap">
@@ -260,7 +260,7 @@ export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/[0.06]">
+        <tbody className="divide-y divide-black/[0.06]">
           {rows.map((r, i) => (
             <tr key={i} className="align-top">
               {r.map((cell, j) => (
@@ -282,7 +282,7 @@ export function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
 
 const methods = {
   GET: "text-ok border-ok/30 bg-ok/[0.08]",
-  POST: "text-[#79b8ff] border-[#79b8ff]/30 bg-[#79b8ff]/[0.08]",
+  POST: "text-[#0550ae] border-blue/30 bg-blue/[0.08]",
   PUT: "text-warn border-warn/30 bg-warn/[0.08]",
   PATCH: "text-warn border-warn/30 bg-warn/[0.08]",
   DELETE: "text-err border-err/30 bg-err/[0.08]",
@@ -292,7 +292,7 @@ export type Route = [method: keyof typeof methods, path: string, description: Re
 
 export function Endpoints({ routes }: { routes: Route[] }) {
   return (
-    <div className="my-5 divide-y divide-white/[0.06] overflow-hidden rounded-xl border border-white/[0.08]">
+    <div className="my-5 divide-y divide-black/[0.06] overflow-hidden rounded-xl border border-black/[0.08]">
       {routes.map(([method, path, description]) => (
         <div key={method + path} className="flex flex-col gap-1.5 px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
           <div className="flex min-w-0 items-baseline gap-3 sm:w-[46%] sm:shrink-0">
@@ -310,7 +310,7 @@ export function Endpoints({ routes }: { routes: Route[] }) {
 
 export function Fields({ rows }: { rows: [name: string, type: string, description: ReactNode][] }) {
   return (
-    <div className="my-5 divide-y divide-white/[0.06] rounded-xl border border-white/[0.08]">
+    <div className="my-5 divide-y divide-black/[0.06] rounded-xl border border-black/[0.08]">
       {rows.map(([name, type, description]) => (
         <div key={name} className="px-4 py-3">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -336,9 +336,9 @@ export function CardLink({ href, icon, title, children }: { href: string; icon: 
   return (
     <Link
       href={href}
-      className="group flex gap-3.5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 transition-colors hover:border-white/20 hover:bg-white/[0.04]"
+      className="group flex gap-3.5 rounded-xl border border-black/[0.08] bg-black/[0.02] p-4 transition-colors hover:border-black/20 hover:bg-black/[0.04]"
     >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-muted transition-colors group-hover:text-fg">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-black/10 bg-black/[0.03] text-muted transition-colors group-hover:text-fg">
         <Icon name={icon} />
       </span>
       <span className="min-w-0">

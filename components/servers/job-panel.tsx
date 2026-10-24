@@ -61,7 +61,7 @@ export function JobPanel({ jobId, onClose }: { jobId: string | null; onClose: ()
         aria-modal="true"
         aria-label="Job details"
         onMouseDown={(e) => e.stopPropagation()}
-        className="flex h-full w-full max-w-[640px] animate-fade-up flex-col border-l border-white/10 bg-[#141414] shadow-2xl"
+        className="flex h-full w-full max-w-[640px] animate-fade-up flex-col border-l border-black/10 bg-bg-100 shadow-2xl"
       >
         <div className="flex items-start gap-3 border-b border-line p-5">
           <div className="min-w-0 flex-1">
@@ -78,7 +78,7 @@ export function JobPanel({ jobId, onClose }: { jobId: string | null; onClose: ()
               </div>
             )}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close" className="rounded-md p-1.5 text-muted hover:bg-white/10 hover:text-fg">
+          <button type="button" onClick={onClose} aria-label="Close" className="rounded-md p-1.5 text-muted hover:bg-black/10 hover:text-fg">
             <Icon name="x" />
           </button>
         </div>
@@ -98,8 +98,8 @@ export function JobPanel({ jobId, onClose }: { jobId: string | null; onClose: ()
           )}
           {data?.error && <p className="rounded-lg border border-err/30 bg-err/10 p-3 text-sm text-err">{data.error}</p>}
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-white/[0.06] bg-[#0d0d0d]">
-            <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-2 text-xs text-subtle">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-black/[0.06] bg-inset">
+            <div className="flex items-center gap-2 border-b border-black/[0.06] px-3 py-2 text-xs text-subtle">
               <Icon name="terminal" size={13} /> Output
               {data && isActive(data.status) && <span className="ml-auto animate-pulse text-warn">live</span>}
             </div>

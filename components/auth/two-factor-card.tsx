@@ -49,12 +49,12 @@ export function TwoFactorCard() {
       }
     >
       {mode === "setup" && (
-        <div className="rounded-xl border border-white/[0.06] bg-[#141414] p-5">
+        <div className="rounded-xl border border-black/[0.06] bg-bg-100 p-5">
           <TotpSetupPanel onCancel={() => setSettingUp(false)} />
         </div>
       )}
       {mode === "codes" && (
-        <div className="rounded-xl border border-white/[0.06] bg-[#141414] p-5">
+        <div className="rounded-xl border border-black/[0.06] bg-bg-100 p-5">
           <RecoveryCodesPanel
             codes={codes ?? []}
             doneLabel="Done"

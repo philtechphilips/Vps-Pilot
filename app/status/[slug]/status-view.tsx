@@ -12,7 +12,7 @@ const OVERALL = {
 } as const;
 
 function barTone(uptime: number | null) {
-  if (uptime === null) return "bg-white/10";
+  if (uptime === null) return "bg-black/10";
   if (uptime >= 99.5) return "bg-ok";
   if (uptime >= 95) return "bg-warn";
   return "bg-err";
@@ -28,7 +28,7 @@ export function StatusView() {
   const data = status.data;
 
   return (
-    <main className="theme-console min-h-dvh bg-black px-4 py-12 text-fg">
+    <main className="min-h-dvh bg-bg px-4 py-12 text-fg">
       <div className="mx-auto max-w-3xl space-y-8">
         {status.isLoading ? (
           <div className="skeleton h-40 rounded-xl" />

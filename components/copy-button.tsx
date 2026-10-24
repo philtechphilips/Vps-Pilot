@@ -22,7 +22,7 @@ export function CopyButton({ value, className, label = "Copy to clipboard" }: { 
         setTimeout(() => setCopied(false), 1400);
       }}
       className={cn(
-        "inline-flex size-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-white/[0.08] hover:text-fg",
+        "inline-flex size-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-black/[0.08] hover:text-fg",
         className,
       )}
     >
