@@ -1,0 +1,233 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[{"id":"theme","type":"enum","label":"Theme","default":"light","options":[{"value":"light","label":"Light"},{"value":"dark","label":"Dark"}]}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1000, height=880" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MorphSVGPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <link rel="stylesheet" href="assets/clip.css" />
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/Geist.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/GeistMono.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      html,
+      body {
+        width: 1000px;
+        height: 880px;
+        overflow: hidden;
+      }
+      #s-card {
+        left: 60px;
+        top: 52px;
+        width: 380px;
+        height: 336px;
+      }
+      .s-head {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 52px;
+        padding: 0 18px 0 20px;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--line);
+      }
+      .s-title {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      #s-mfa {
+        position: relative;
+        width: 74px;
+        height: 22px;
+      }
+      #s-mfa-bg {
+        position: absolute;
+        inset: 0;
+        border-radius: 11px;
+        background: color-mix(in srgb, var(--accent) 11%, transparent);
+      }
+      .s-mfa-body {
+        position: absolute;
+        inset: 0;
+        padding-left: 6px;
+        gap: 5px;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: var(--accent);
+      }
+      .s-mfa-body svg {
+        width: 12px;
+        height: 12px;
+        overflow: visible;
+      }
+      #s-list {
+        position: absolute;
+        left: 1px;
+        right: 1px;
+        top: 52px;
+        bottom: 1px;
+        overflow: hidden;
+        border-radius: 0 0 16px 16px;
+      }
+      .s-row {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 56px;
+        padding: 0 20px;
+        gap: 12px;
+        border-top: 1px solid var(--line);
+      }
+      .s-row:first-child,
+      #s-new {
+        border-top: 0;
+      }
+      /* Row content paints above the row's tint layer. */
+      .s-row > svg,
+      .s-row > div,
+      .s-row > .s-when {
+        position: relative;
+      }
+      .s-icon {
+        width: 22px;
+        height: 22px;
+        flex: none;
+        overflow: visible;
+      }
+      .s-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .s-action {
+        font-size: 11.5px;
+      }
+      .s-target {
+        font-size: 11px;
+        color: var(--subtle);
+        margin-top: 2px;
+      }
+      .s-when {
+        font-size: 11px;
+        color: var(--subtle);
+      }
+      .s-rejected-bg {
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--err) 6%, transparent);
+      }
+      #s-new {
+        top: 0;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+        z-index: 2;
+      }
+      #s-new-bg {
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--accent) 6%, transparent);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="security" data-start="0" data-duration="5" data-width="1000" data-height="880">
+      <div id="s-scene" class="clip" data-start="0" data-duration="5" data-track-index="0">
+        <div class="stage" style="width: 500px; height: 440px; transform: scale(2)">
+          <div id="s-card" class="lift">
+            <div class="surface">
+              <div class="s-head row">
+                <span class="s-title s-in">Audit log</span>
+                <span id="s-mfa">
+                  <span id="s-mfa-bg"></span>
+                  <span class="s-mfa-body row">
+                    <svg viewBox="0 0 24 24"><path id="s-shield" d="M12 9a3 3 0 1 1 0 6a3 3 0 1 1 0-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    <span id="s-mfa-text">MFA on</span>
+                  </span>
+                </span>
+              </div>
+              <div id="s-list">
+                <div id="s-new" class="s-row row">
+                  <span id="s-new-bg"></span>
+                  <svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--accent)" fill-opacity="0.12" /><path class="s-mark" d="M6.8 11.3 L9.6 14 L15.2 8.2" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                  <div class="s-text n-in"><p class="s-action mono">app.rollback</p><p class="s-target">storefront → a1c9f2e</p></div>
+                  <span class="s-when n-in">just now</span>
+                </div>
+                <div id="s-rows">
+                  <div class="s-row row" style="top: 0px"><svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--ok)" fill-opacity="0.13" /><path class="s-mark" d="M6.8 11.3 L9.6 14 L15.2 8.2" fill="none" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg><div class="s-text"><p class="s-action mono">app.deploy</p><p class="s-target">storefront</p></div><span class="s-when">2m ago</span></div>
+                  <div class="s-row row" style="top: 56px"><svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--ok)" fill-opacity="0.13" /><path class="s-mark" d="M6.8 11.3 L9.6 14 L15.2 8.2" fill="none" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg><div class="s-text"><p class="s-action mono">database.user.create</p><p class="s-target">orders · reporting</p></div><span class="s-when">14m ago</span></div>
+                  <div class="s-row row" style="top: 112px"><span class="s-rejected-bg"></span><svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--err)" fill-opacity="0.13" /><path class="s-mark" d="M8 8 L14 14 M14 8 L8 14" fill="none" stroke="var(--err)" stroke-width="1.8" stroke-linecap="round" /></svg><div class="s-text"><p class="s-action mono">database.query</p><p class="s-target">rejected · read-only role</p></div><span class="s-when">1h ago</span></div>
+                  <div class="s-row row" style="top: 168px"><svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--ok)" fill-opacity="0.13" /><path class="s-mark" d="M6.8 11.3 L9.6 14 L15.2 8.2" fill="none" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg><div class="s-text"><p class="s-action mono">backup.restore.verify</p><p class="s-target">orders</p></div><span class="s-when">3h ago</span></div>
+                  <div class="s-row row" style="top: 224px"><svg class="s-icon" viewBox="0 0 22 22"><circle class="s-dot" cx="11" cy="11" r="11" fill="var(--ok)" fill-opacity="0.13" /><path class="s-mark" d="M6.8 11.3 L9.6 14 L15.2 8.2" fill="none" stroke="var(--ok)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg><div class="s-text"><p class="s-action mono">server.enroll</p><p class="s-target">web-3</p></div><span class="s-when">5h ago</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/motion.js"></script>
+    <script>
+      applyTheme();
+      const SHIELD = "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z";
+      const tl = gsap.timeline({ paused: true });
+      const rows = gsap.utils.toArray("#s-rows .s-row");
+      const mfa = document.getElementById("s-mfa-bg");
+      const fresh = document.getElementById("s-new");
+
+      gsap.set(".s-in, #s-mfa, #s-mfa-text, .s-rejected-bg, .n-in, #s-new", { opacity: 0 });
+      gsap.set(rows, { opacity: 0 });
+      gsap.set(mfa, { clipPath: shape(mfa, { x: 0, y: 0, w: 22, h: 22 }, 11) });
+      gsap.set(fresh, { clipPath: shape(fresh, { x: 150, y: 27, w: 80, h: 1 }, 1) });
+      document.querySelectorAll(".s-mark").forEach((mark) => {
+        const len = mark.getTotalLength();
+        gsap.set(mark, { strokeDasharray: len, strokeDashoffset: len });
+      });
+
+      // 1. The log card rises in.
+      tl.fromTo("#s-card", { y: 28, opacity: 0 }, { y: 0, duration: 1, ease: SPRING }, 0.1);
+      tl.to("#s-card", { opacity: 1, duration: 0.35, ease: "arrive" }, 0.1);
+      blurIn(tl, ".s-in", 0.4);
+
+      // 2. "MFA on": a dot pops, turns into a shield, then the badge grows out of it.
+      tl.to("#s-mfa", { opacity: 1, duration: 0.15, ease: "glide" }, 0.55);
+      tl.fromTo("#s-mfa", { scale: 0, transformOrigin: "11px 11px" }, { scale: 1, duration: 0.7, ease: BOUNCE }, 0.55);
+      tl.to("#s-shield", { morphSVG: SHIELD, duration: 0.45, ease: "arrive" }, 0.85);
+      tl.to(mfa, { clipPath: full(11), duration: 0.55, ease: "arrive" }, 1.05);
+      blurIn(tl, "#s-mfa-text", 1.2, { duration: 0.35 });
+
+      // 3. Entries arrive one after another; each mark draws itself.
+      const entry = (row, at) => {
+        tl.fromTo(row, { opacity: 0, y: 10, filter: "blur(6px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.5, ease: "arrive" }, at);
+        tl.fromTo(row.querySelector(".s-icon"), { scale: 0.5, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.6, ease: BOUNCE }, at + 0.12);
+        tl.to(row.querySelector(".s-mark"), { strokeDashoffset: 0, duration: 0.35, ease: "arrive" }, at + 0.22);
+      };
+      rows.forEach((row, i) => entry(row, 0.85 + i * 0.12));
+      tl.to(".s-rejected-bg", { opacity: 1, duration: 0.4, ease: "glide" }, 1.4);
+
+      // 4. A stillness, then a new event: the list makes room on a spring and
+      //    the entry opens out of a hairline.
+      tl.to("#s-rows", { y: 56, duration: 0.95, ease: SPRING }, 2.9);
+      tl.to(rows[rows.length - 1], { opacity: 0, filter: "blur(4px)", duration: 0.3, ease: "leave" }, 2.95);
+      tl.to(fresh, { opacity: 1, duration: 0.1, ease: "glide" }, 2.95);
+      tl.to(fresh, { clipPath: full(0), duration: 0.65, ease: "glide" }, 2.95);
+      blurIn(tl, ".n-in", 3.3, { stagger: 0.06 });
+      tl.fromTo("#s-new .s-icon", { scale: 0.5, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.6, ease: BOUNCE }, 3.35);
+      tl.to("#s-new .s-mark", { strokeDashoffset: 0, duration: 0.35, ease: "arrive" }, 3.45);
+      tl.to("#s-new-bg", { opacity: 0, duration: 1, ease: "glide" }, 3.9);
+
+      window.__timelines["security"] = tl;
+    </script>
+  </body>
+</html>

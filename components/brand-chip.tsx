@@ -51,7 +51,7 @@ export function BrandChip({ name, size = 28, className }: { name: Brand; size?: 
     return (
       <span
         title={name}
-        className={cn("inline-flex shrink-0 items-center justify-center rounded-md border border-black/10 bg-white", className)}
+        className={cn("inline-flex shrink-0 items-center justify-center rounded-md border border-ink/10 bg-white", className)}
         style={{ width: size, height: size }}
         aria-hidden="true"
       >
@@ -63,7 +63,7 @@ export function BrandChip({ name, size = 28, className }: { name: Brand; size?: 
     <span
       title={name}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-md border border-black/10 font-mono font-semibold text-white",
+        "inline-flex shrink-0 items-center justify-center rounded-md border border-ink/10 font-mono font-semibold text-white",
         className,
       )}
       style={{ width: size, height: size, background: c.bg, fontSize: Math.round(size * 0.4) }}

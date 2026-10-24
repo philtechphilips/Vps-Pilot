@@ -53,15 +53,15 @@ async function Doc({ params }: { params: PageProps<"/docs/[[...slug]]">["params"
           <div className="mb-3 text-[13px] font-medium text-accent-fg">{doc.section}</div>
           <h1 className="text-[32px] leading-[1.15] font-semibold tracking-[-0.04em] text-fg sm:text-[40px]">{doc.title}</h1>
           <p className="mt-4 text-[17px] leading-8 text-muted">{doc.description}</p>
-          <div className="mt-8 h-px bg-black/[0.06]" />
+          <div className="mt-8 h-px bg-ink/[0.06]" />
 
           <div className="mt-10">
             <Body />
           </div>
 
-          <nav aria-label="Previous and next page" className="mt-16 grid gap-3 border-t border-black/[0.06] pt-8 sm:grid-cols-2">
+          <nav aria-label="Previous and next page" className="mt-16 grid gap-3 border-t border-ink/[0.06] pt-8 sm:grid-cols-2">
             {prev ? (
-              <Link href={docHref(prev.slug)} className="group rounded-xl border border-black/[0.08] p-4 transition-colors hover:border-black/20">
+              <Link href={docHref(prev.slug)} className="group rounded-xl border border-ink/[0.08] p-4 transition-colors hover:border-ink/20">
                 <span className="flex items-center gap-1 text-xs text-subtle">
                   <Icon name="arrow-left" size={12} className="transition-transform group-hover:-translate-x-0.5" /> Previous
                 </span>
@@ -71,7 +71,7 @@ async function Doc({ params }: { params: PageProps<"/docs/[[...slug]]">["params"
               <span />
             )}
             {next && (
-              <Link href={docHref(next.slug)} className="group rounded-xl border border-black/[0.08] p-4 text-right transition-colors hover:border-black/20">
+              <Link href={docHref(next.slug)} className="group rounded-xl border border-ink/[0.08] p-4 text-right transition-colors hover:border-ink/20">
                 <span className="flex items-center justify-end gap-1 text-xs text-subtle">
                   Next <Icon name="arrow-right" size={12} className="transition-transform group-hover:translate-x-0.5" />
                 </span>

@@ -233,7 +233,7 @@ function StorageForm({ initial }: { initial: BackupSettings }) {
               role="tab"
               aria-selected={provider === value}
               onClick={() => setProvider(value)}
-              className={cn("h-9 rounded-md text-sm transition-colors", provider === value ? "bg-black/[0.08] text-fg" : "text-muted hover:text-fg")}
+              className={cn("h-9 rounded-md text-sm transition-colors", provider === value ? "bg-ink/[0.08] text-fg" : "text-muted hover:text-fg")}
             >
               {label}
             </button>

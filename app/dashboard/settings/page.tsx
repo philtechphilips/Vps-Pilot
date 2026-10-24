@@ -34,7 +34,7 @@ export default function SettingsPage() {
             <a
               key={s.id}
               href={`#${s.id}`}
-              className={`shrink-0 rounded-md px-3 py-2 text-sm transition-colors hover:bg-black/[0.06] hover:text-fg ${i === 0 ? "bg-black/[0.06] text-fg" : "text-muted"}`}
+              className={`shrink-0 rounded-md px-3 py-2 text-sm transition-colors hover:bg-ink/[0.06] hover:text-fg ${i === 0 ? "bg-ink/[0.06] text-fg" : "text-muted"}`}
             >
               {s.label}
             </a>

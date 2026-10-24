@@ -15,7 +15,7 @@ const variants: Record<Variant, string> = {
   secondary: "bg-bg text-fg border border-line-strong shadow-[0_1px_2px_rgb(0_0_0/0.04)] hover:bg-bg-300",
   tertiary: "bg-transparent text-fg border border-transparent hover:bg-bg-300",
   blue: "bg-blue text-white hover:bg-blue-hover border border-transparent",
-  danger: "bg-err text-white hover:bg-[#b91c1c] border border-transparent",
+  danger: "bg-err text-white hover:bg-err/90 border border-transparent",
   ghost: "bg-transparent text-muted hover:text-fg border border-transparent",
 };
 
@@ -111,7 +111,7 @@ const badgeTone: Record<Tone, string> = {
   ok: "bg-ok/10 text-ok border-ok/20",
   warn: "bg-warn/10 text-warn border-warn/20",
   err: "bg-err/10 text-err border-err/20",
-  neutral: "bg-black/[0.04] text-muted border-line",
+  neutral: "bg-ink/[0.04] text-muted border-line",
   blue: "bg-blue/[0.07] text-blue-fg border-blue/20",
   violet: "bg-violet/[0.07] text-violet border-violet/20",
 };
@@ -310,7 +310,7 @@ export function Meter({ value, tone, className }: { value: number; tone?: Tone; 
   const t: Tone = tone ?? (value >= 85 ? "err" : value >= 70 ? "warn" : "blue");
   const color = { ok: "bg-ok", warn: "bg-warn", err: "bg-err", neutral: "bg-subtle", blue: "bg-blue-fg", violet: "bg-violet" }[t];
   return (
-    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-black/[0.08]", className)} role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
+    <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-ink/[0.08]", className)} role="meter" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100}>
       <div className={cn("h-full rounded-full", color)} style={{ width: `${Math.min(100, value)}%` }} />
     </div>
   );

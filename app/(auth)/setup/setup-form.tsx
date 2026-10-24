@@ -72,7 +72,7 @@ export function SetupForm() {
   if (step === "loading" || finishedEarlier) {
     return (
       <div className="flex flex-col items-center gap-3" role="status">
-        <span className="size-6 animate-spin rounded-full border-2 border-black/10 border-t-accent-fg" />
+        <span className="size-6 animate-spin rounded-full border-2 border-ink/10 border-t-accent-fg" />
         <span className="text-sm text-muted">Loading setup…</span>
       </div>
     );
@@ -234,7 +234,7 @@ function AccountStep() {
           <Input id="password" name="password" type="password" autoComplete="new-password" value={pw} onChange={(e) => setPw(e.target.value)} required minLength={12} maxLength={128} />
           <div className="mt-2 flex gap-1" aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
-              <span key={i} className={cn("h-1 flex-1 rounded-full", i < score ? (score < 2 ? "bg-err" : score < 4 ? "bg-warn" : "bg-ok") : "bg-black/10")} />
+              <span key={i} className={cn("h-1 flex-1 rounded-full", i < score ? (score < 2 ? "bg-err" : score < 4 ? "bg-warn" : "bg-ok") : "bg-ink/10")} />
             ))}
           </div>
           <p className="mt-1.5 text-xs text-subtle" aria-live="polite">
@@ -269,9 +269,9 @@ function ServerStep({
         role="switch"
         aria-checked={selfManage}
         onClick={() => setSelfManage(!selfManage)}
-        className="flex w-full items-start gap-4 rounded-xl border border-black/[0.06] bg-bg-100 p-4 text-left transition-colors hover:border-black/15"
+        className="flex w-full items-start gap-4 rounded-xl border border-ink/[0.06] bg-bg-100 p-4 text-left transition-colors hover:border-ink/15"
       >
-        <span className={cn("mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors", selfManage ? "bg-accent" : "bg-black/15")}>
+        <span className={cn("mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors", selfManage ? "bg-accent" : "bg-ink/15")}>
           <span className={cn("size-4 rounded-full bg-white transition-transform", selfManage && "translate-x-4")} />
         </span>
         <span>
@@ -329,12 +329,12 @@ function Progress({ index }: { index: number }) {
 }
 
 function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("w-full rounded-2xl border border-black/[0.06] bg-bg-200 p-6 sm:p-8", className)}>{children}</div>;
+  return <div className={cn("w-full rounded-2xl border border-ink/[0.06] bg-bg-200 p-6 sm:p-8", className)}>{children}</div>;
 }
 
 function IconTile({ icon, className }: { icon: IconName; className?: string }) {
   return (
-    <div className={cn("flex size-12 items-center justify-center rounded-2xl border border-black/10 bg-bg-100 text-accent-fg", className)}>
+    <div className={cn("flex size-12 items-center justify-center rounded-2xl border border-ink/10 bg-bg-100 text-accent-fg", className)}>
       <Icon name={icon} size={20} />
     </div>
   );
@@ -357,9 +357,9 @@ function Choice({ icon, title, text, badge, onClick }: { icon: IconName; title: 
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-start gap-4 rounded-xl border border-black/[0.08] bg-bg-100 p-4 text-left transition-colors hover:border-accent/50 hover:bg-accent/[0.06]"
+      className="group flex w-full items-start gap-4 rounded-xl border border-ink/[0.08] bg-bg-100 p-4 text-left transition-colors hover:border-accent/50 hover:bg-accent/[0.06]"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-inset text-muted group-hover:text-accent-fg">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-inset text-muted group-hover:text-accent-fg">
         <Icon name={icon} />
       </span>
       <span className="min-w-0 flex-1">
@@ -375,7 +375,7 @@ function Choice({ icon, title, text, badge, onClick }: { icon: IconName; title: 
 
 function Summary({ icon, label, value }: { icon: IconName; label: string; value: string }) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-black/[0.06] bg-bg-100 px-4 py-3">
+    <li className="flex items-center gap-3 rounded-xl border border-ink/[0.06] bg-bg-100 px-4 py-3">
       <Icon name={icon} size={16} className="text-accent-fg" />
       <span className="text-muted">{label}</span>
       <span className="ml-auto truncate text-fg">{value}</span>

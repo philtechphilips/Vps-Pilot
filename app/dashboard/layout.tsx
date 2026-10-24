@@ -13,14 +13,14 @@ export const metadata: Metadata = {
 
 function Crumb({ children }: { children: React.ReactNode }) {
   return (
-    <button type="button" className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] whitespace-nowrap text-fg transition-colors hover:bg-black/[0.06]">
+    <button type="button" className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] whitespace-nowrap text-fg transition-colors hover:bg-ink/[0.06]">
       {children}
       <Icon name="chevrons-up-down" size={12} className="text-subtle" />
     </button>
   );
 }
 
-const Slash = () => <span className="text-black/20 select-none">/</span>;
+const Slash = () => <span className="text-ink/20 select-none">/</span>;
 
 export default function DashboardLayout({ children }: LayoutProps<"/dashboard">) {
   return (
@@ -56,7 +56,7 @@ export default function DashboardLayout({ children }: LayoutProps<"/dashboard">)
           </nav>
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
             <SearchButton />
-            <span className="mx-1 hidden h-5 w-px bg-black/10 sm:block" />
+            <span className="mx-1 hidden h-5 w-px bg-ink/10 sm:block" />
             <NotificationsMenu />
             <AccountMenu />
           </div>

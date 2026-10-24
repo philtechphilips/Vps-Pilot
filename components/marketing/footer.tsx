@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Icon } from "@/components/icons";
 import { Logotype } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Dot } from "@/components/ui";
 
 const columns = [
@@ -19,7 +19,7 @@ const docLinks: Record<string, string> = {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-black/[0.06] bg-bg">
+    <footer className="border-t border-ink/[0.06] bg-bg">
       <div className="mx-auto max-w-[1080px] px-4 py-14 sm:px-6">
         <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-[1.2fr_repeat(4,1fr)]">
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
@@ -44,26 +44,14 @@ export function MarketingFooter() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-black/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <a href="#" className="inline-flex w-fit items-center gap-2 rounded-full border border-black/[0.06] bg-bg-100 px-3 py-1.5 text-[13px] text-muted hover:text-fg">
+        <div className="mt-14 flex flex-col gap-4 border-t border-ink/[0.06] pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <a href="#" className="inline-flex w-fit items-center gap-2 rounded-full border border-ink/[0.06] bg-bg-100 px-3 py-1.5 text-[13px] text-muted hover:text-fg">
             <Dot tone="ok" pulse />
             All systems normal
           </a>
           <div className="flex items-center gap-4 text-sm text-subtle">
             <span>© 2026 VPSPilot</span>
-            <div className="flex items-center rounded-full border border-line p-0.5" role="radiogroup" aria-label="Theme">
-              {(["monitor", "sun", "moon"] as const).map((i) => (
-                <span
-                  key={i}
-                  role="radio"
-                  aria-checked={i === "sun"}
-                  aria-label={i === "monitor" ? "System" : i === "sun" ? "Light" : "Dark"}
-                  className={`flex size-7 items-center justify-center rounded-full ${i === "sun" ? "bg-black/[0.06] text-fg" : ""}`}
-                >
-                  <Icon name={i} size={14} />
-                </span>
-              ))}
-            </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>

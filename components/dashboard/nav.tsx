@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Avatar, Kbd } from "@/components/ui";
 import { useLogout } from "@/lib/api/auth";
 import { useApps } from "@/lib/api/apps";
@@ -136,7 +137,7 @@ export function CommandMenu() {
                   type="button"
                   onMouseEnter={() => setIdx(i)}
                   onClick={() => go(c)}
-                  className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === idx ? "bg-black/[0.08] text-fg" : "text-muted")}
+                  className={cn("flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm", i === idx ? "bg-ink/[0.08] text-fg" : "text-muted")}
                 >
                   <Icon name={c.icon} />
                   <span className="flex-1">{c.label}</span>
@@ -222,7 +223,7 @@ export function MenuItem({ href, icon, children, danger, hint }: { href: string;
       href={href}
       role="menuitem"
       className={cn(
-        "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-black/[0.06]",
+        "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-ink/[0.06]",
         danger ? "text-err" : "text-muted hover:text-fg",
       )}
     >
@@ -249,13 +250,18 @@ export function AccountMenu() {
       <MenuItem href="/dashboard/settings#sessions" icon="key">Sessions</MenuItem>
       <MenuItem href="/dashboard/audit" icon="shield">Audit Log</MenuItem>
       <div className="my-1 h-px bg-line" />
+      <div className="flex items-center justify-between px-2.5 py-1.5 text-sm text-muted">
+        Theme
+        <ThemeToggle />
+      </div>
+      <div className="my-1 h-px bg-line" />
       <MenuItem href="/" icon="external-link">Home Page</MenuItem>
       <button
         type="button"
         role="menuitem"
         disabled={logout.isPending}
         onClick={() => logout.mutate(undefined, { onSettled: () => router.replace("/login") })}
-        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-black/[0.06] hover:text-fg disabled:opacity-60"
+        className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-ink/[0.06] hover:text-fg disabled:opacity-60"
       >
         <Icon name="log-out" />
         <span className="flex-1">{logout.isPending ? "Logging out…" : "Log Out"}</span>
@@ -334,7 +340,7 @@ export function NotificationsMenu() {
                 if (!n.read_at) markRead.mutate([n.id]);
                 if (n.link) router.push(n.link);
               }}
-              className="flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left hover:bg-black/[0.05]"
+              className="flex w-full gap-3 rounded-md px-2.5 py-2.5 text-left hover:bg-ink/[0.05]"
             >
               <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", levelDot[n.level] ?? "bg-blue-fg", n.read_at && "opacity-30")} />
               <span className="min-w-0 flex-1">

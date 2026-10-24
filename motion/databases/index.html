@@ -1,0 +1,278 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[{"id":"theme","type":"enum","label":"Theme","default":"light","options":[{"value":"light","label":"Light"},{"value":"dark","label":"Dark"}]}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1000, height=880" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MorphSVGPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <link rel="stylesheet" href="assets/clip.css" />
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/Geist.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/GeistMono.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      html,
+      body {
+        width: 1000px;
+        height: 880px;
+        overflow: hidden;
+      }
+      #b-card {
+        left: 75px;
+        top: 52px;
+        width: 350px;
+        height: 336px;
+      }
+      .b-head {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 20px;
+        justify-content: space-between;
+      }
+      .b-title {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .b-count {
+        font-size: 11px;
+        color: var(--subtle);
+      }
+      .b-row {
+        position: absolute;
+        left: 16px;
+        width: 318px;
+        height: 50px;
+      }
+      .b-row-surface {
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        box-shadow: inset 0 0 0 1px var(--line);
+        background: var(--surface);
+      }
+      .b-row-body {
+        position: absolute;
+        left: 52px;
+        right: 10px;
+        top: 0;
+        bottom: 0;
+        justify-content: space-between;
+      }
+      .b-name {
+        font-size: 12.5px;
+        font-weight: 500;
+      }
+      .b-meta {
+        font-size: 11px;
+        color: var(--subtle);
+        margin-top: 1px;
+      }
+      .b-chip {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+      .b-chip img {
+        width: 19px;
+        height: 19px;
+      }
+      .b-badge {
+        position: relative;
+        width: 100px;
+        height: 20px;
+      }
+      .b-badge-bg {
+        position: absolute;
+        inset: 0;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--ok) 13%, transparent);
+      }
+      .b-badge-text {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: var(--ok-text);
+      }
+      .b-badge-text svg {
+        width: 10px;
+        height: 10px;
+      }
+      #b-query {
+        position: absolute;
+        left: 16px;
+        top: 236px;
+        width: 318px;
+        height: 84px;
+        border-radius: 12px;
+        background: var(--surface-2);
+        box-shadow: inset 0 0 0 1px var(--line);
+        padding: 16px 14px;
+        font-size: 11.5px;
+        line-height: 22px;
+      }
+      #b-typed {
+        display: inline-block;
+        white-space: pre;
+      }
+      .kw {
+        color: var(--accent);
+      }
+      #b-caret {
+        position: absolute;
+        left: 14px;
+        top: 20px;
+        width: 1.5px;
+        height: 14px;
+        background: var(--accent);
+      }
+      #b-result {
+        color: var(--muted);
+      }
+      #b-result b {
+        color: var(--ink);
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="databases" data-start="0" data-duration="6.2" data-width="1000" data-height="880">
+      <div id="b-scene" class="clip" data-start="0" data-duration="6.2" data-track-index="0">
+        <div class="stage" style="width: 500px; height: 440px; transform: scale(2)">
+          <div id="b-card" class="lift">
+            <div class="surface">
+              <div class="b-head row b-in">
+                <span class="b-title">Databases</span>
+                <span class="b-count">3 engines</span>
+              </div>
+
+              <div class="b-row" id="b-row-0" style="top: 54px">
+                <div class="b-row-surface"></div>
+                <span class="b-chip"><img src="assets/brands/postgresql.svg" alt="" /></span>
+                <div class="b-row-body row">
+                  <div class="r-in"><p class="b-name">orders</p><p class="b-meta">PostgreSQL · 2.4 GB</p></div>
+                  <span class="b-badge"><span class="b-badge-bg"></span><span class="b-badge-text"><svg viewBox="0 0 12 12"><path class="b-check" d="M2.5 6.2 L5 8.6 L9.5 3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>Backup verified</span></span>
+                </div>
+              </div>
+              <div class="b-row" id="b-row-1" style="top: 112px">
+                <div class="b-row-surface"></div>
+                <span class="b-chip"><img src="assets/brands/mysql.svg" alt="" /></span>
+                <div class="b-row-body row">
+                  <div class="r-in"><p class="b-name">wordpress</p><p class="b-meta">MySQL · 640 MB</p></div>
+                  <span class="b-badge"><span class="b-badge-bg"></span><span class="b-badge-text"><svg viewBox="0 0 12 12"><path class="b-check" d="M2.5 6.2 L5 8.6 L9.5 3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>Backup verified</span></span>
+                </div>
+              </div>
+              <div class="b-row" id="b-row-2" style="top: 170px">
+                <div class="b-row-surface"></div>
+                <span class="b-chip"><img src="assets/brands/redis.svg" alt="" /></span>
+                <div class="b-row-body row">
+                  <div class="r-in"><p class="b-name">sessions</p><p class="b-meta">Redis · 38 MB</p></div>
+                  <span class="b-badge"><span class="b-badge-bg"></span><span class="b-badge-text"><svg viewBox="0 0 12 12"><path class="b-check" d="M2.5 6.2 L5 8.6 L9.5 3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" /></svg>Backup verified</span></span>
+                </div>
+              </div>
+
+              <div id="b-query" class="mono">
+                <span id="b-typed"><span class="kw">select</span> count(*) <span class="kw">from</span> orders;</span>
+                <span id="b-caret"></span>
+                <p id="b-result">→ <b id="b-rows">0</b> rows · 12 ms</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/motion.js"></script>
+    <script>
+      applyTheme();
+      const tl = gsap.timeline({ paused: true });
+      const rows = [0, 1, 2].map((i) => document.getElementById(`b-row-${i}`));
+
+      gsap.set(".b-in, .r-in, .b-badge, #b-result, #b-caret", { opacity: 0 });
+      gsap.set("#b-query", { clipPath: "inset(41px 0px 42px 0px round 1px)", opacity: 0 });
+      rows.forEach((row, i) => {
+        const surface = row.querySelector(".b-row-surface");
+        gsap.set(surface, { clipPath: shape(surface, { x: 10, y: 10, w: 30, h: 30 }, 15) });
+        // Each logo starts as a larger circle in a line across the card.
+        gsap.set(row.querySelector(".b-chip"), { x: 64 + i * 70, y: 61 - i * 58, scale: 0, borderRadius: 15 });
+        const badge = row.querySelector(".b-badge-bg");
+        gsap.set(badge, { clipPath: shape(badge, { x: 6, y: 7, w: 6, h: 6 }, 3) });
+        const check = row.querySelector(".b-check");
+        const len = check.getTotalLength();
+        gsap.set(check, { strokeDasharray: len, strokeDashoffset: len });
+      });
+      gsap.set(".b-row-surface, .b-badge-text", { opacity: 0 });
+
+      // 1. The card rises in.
+      tl.fromTo("#b-card", { y: 28, opacity: 0 }, { y: 0, duration: 1, ease: SPRING }, 0.1);
+      tl.to("#b-card", { opacity: 1, duration: 0.35, ease: "arrive" }, 0.1);
+      blurIn(tl, ".b-in", 0.4);
+
+      // 2. Three engines pop in as circles, then each flies to its slot and its row grows out of it.
+      rows.forEach((row, i) => {
+        const chip = row.querySelector(".b-chip");
+        const surface = row.querySelector(".b-row-surface");
+        tl.to(chip, { scale: 1.45, duration: 0.7, ease: BOUNCE }, 0.6 + i * 0.09);
+        const go = 1.4 + i * 0.09;
+        tl.to(chip, { x: 0, duration: 0.8, ease: "glide" }, go);
+        tl.to(chip, { y: 0, duration: 0.8, ease: "arrive" }, go);
+        tl.to(chip, { scale: 1, borderRadius: 8, duration: 0.8, ease: "glide" }, go);
+        tl.to(surface, { opacity: 1, duration: 0.2, ease: "glide" }, go + 0.35);
+        tl.to(surface, { clipPath: full(12), duration: 0.75, ease: "arrive" }, go + 0.35);
+        blurIn(tl, row.querySelector(".r-in"), go + 0.6);
+      });
+
+      // 3. A dot on each row grows into "Backup verified" and the check draws.
+      rows.forEach((row, i) => {
+        const at = 2.55 + i * 0.18;
+        tl.to(row.querySelector(".b-badge"), { opacity: 1, duration: 0.15, ease: "glide" }, at);
+        tl.to(row.querySelector(".b-badge-bg"), { clipPath: full(10), duration: 0.6, ease: "arrive" }, at);
+        tl.to(row.querySelector(".b-badge-text"), { opacity: 1, duration: 0.3, ease: "glide" }, at + 0.2);
+        tl.to(row.querySelector(".b-check"), { strokeDashoffset: 0, duration: 0.4, ease: "arrive" }, at + 0.25);
+      });
+
+      // 4. The query panel opens from a hairline; the query types itself.
+      tl.to("#b-query", { opacity: 1, duration: 0.15, ease: "glide" }, 3.4);
+      tl.to("#b-query", { clipPath: full(12), duration: 0.6, ease: "glide" }, 3.4);
+      const typed = document.getElementById("b-typed");
+      const chars = typed.textContent.length;
+      const width = typed.offsetWidth;
+      const typing = { duration: chars * 0.04, ease: `steps(${chars})` };
+      gsap.set(typed, { clipPath: "inset(0px 100% 0px 0px)" });
+      tl.to("#b-caret", { opacity: 1, duration: 0.01 }, 3.7);
+      tl.to(typed, { clipPath: "inset(0px 0% 0px 0px)", ...typing }, 3.75);
+      tl.to("#b-caret", { x: width, ...typing }, 3.75);
+      tl.to("#b-caret", { opacity: 0, duration: 0.15, ease: "glide" }, 3.75 + typing.duration + 0.2);
+
+      // 5. The answer arrives and its count settles.
+      blurIn(tl, "#b-result", 5.0, { duration: 0.35 });
+      countUp(tl, document.getElementById("b-rows"), 128406, 5.0, 0.7, (v) => Math.round(v).toLocaleString("en-US"));
+
+      window.__timelines["databases"] = tl;
+    </script>
+  </body>
+</html>

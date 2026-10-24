@@ -9,7 +9,7 @@ export function SearchButton() {
       aria-label="Search (⌘K)"
       title="Search (⌘K)"
       onClick={() => window.dispatchEvent(new Event("open-command-menu"))}
-      className="inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-black/[0.06] hover:text-fg"
+      className="inline-flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-ink/[0.06] hover:text-fg"
     >
       <Icon name="search" />
     </button>

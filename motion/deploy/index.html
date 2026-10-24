@@ -1,0 +1,296 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[{"id":"theme","type":"enum","label":"Theme","default":"light","options":[{"value":"light","label":"Light"},{"value":"dark","label":"Dark"}]}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1000, height=880" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MorphSVGPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <link rel="stylesheet" href="assets/clip.css" />
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/Geist.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/GeistMono.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      html,
+      body {
+        width: 1000px;
+        height: 880px;
+        overflow: hidden;
+      }
+      #d-card {
+        left: 80px;
+        top: 74px;
+        width: 340px;
+        height: 240px;
+        z-index: 2;
+      }
+      #d-pill-label {
+        position: absolute;
+        left: 162px;
+        top: 175px;
+        width: 176px;
+        height: 38px;
+        z-index: 3;
+        justify-content: center;
+        gap: 6px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      .d-head {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 20px;
+        gap: 10px;
+      }
+      .d-chip {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .d-chip img {
+        width: 18px;
+        height: 18px;
+      }
+      .d-name {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .d-sub {
+        font-size: 11px;
+        color: var(--subtle);
+        margin-top: 1px;
+      }
+      #d-badge {
+        position: absolute;
+        right: 20px;
+        top: 26px;
+        width: 72px;
+        height: 20px;
+      }
+      .d-badge-bg {
+        position: absolute;
+        inset: 0;
+        border-radius: 10px;
+      }
+      #d-badge-build {
+        background: color-mix(in srgb, var(--warn) 12%, transparent);
+      }
+      #d-badge-live {
+        background: color-mix(in srgb, var(--ok) 12%, transparent);
+      }
+      .d-badge-text {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10.5px;
+        font-weight: 500;
+        gap: 5px;
+      }
+      #d-badge-build-text {
+        width: 70px;
+        color: var(--warn-text);
+      }
+      #d-badge-live-text {
+        width: 44px;
+        color: var(--ok-text);
+      }
+      .d-badge-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+      .d-steps {
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 70px;
+      }
+      .d-step {
+        height: 30px;
+        gap: 10px;
+        font-size: 12px;
+      }
+      .d-step svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        overflow: visible;
+      }
+      .d-step .label {
+        flex: 1;
+      }
+      .d-step .time {
+        font-size: 11px;
+        color: var(--subtle);
+        font-variant-numeric: tabular-nums;
+      }
+      #d-preview {
+        left: 190px;
+        top: 310px;
+        width: 260px;
+        height: 54px;
+        z-index: 1;
+      }
+      #d-preview .surface {
+        border-radius: 14px;
+      }
+      .d-preview-body {
+        position: absolute;
+        inset: 0;
+        padding: 0 16px;
+        gap: 12px;
+      }
+      .d-preview-title {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .d-preview-url {
+        font-size: 11px;
+        color: var(--subtle);
+        margin-top: 1px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="deploy" data-start="0" data-duration="6.4" data-width="1000" data-height="880">
+      <div id="d-scene" class="clip" data-start="0" data-duration="6.4" data-track-index="0">
+        <div id="d-stage" class="stage" style="width: 500px; height: 440px; transform: scale(2)">
+          <!-- The pill and the card are one shape: the card starts clipped to the pill. -->
+          <div id="d-card" class="lift">
+            <div id="d-surface" class="surface">
+              <div class="d-head row">
+                <span class="d-chip d-in"><img src="assets/brands/nextjs.svg" alt="" /></span>
+                <div class="d-in">
+                  <p class="d-name">storefront</p>
+                  <p class="d-sub">Deploying from GitHub</p>
+                </div>
+              </div>
+              <div id="d-badge">
+                <span id="d-badge-build" class="d-badge-bg"></span>
+                <span id="d-badge-live" class="d-badge-bg"></span>
+                <span id="d-badge-build-text" class="d-badge-text"><span class="d-badge-dot"></span>Building</span>
+                <span id="d-badge-live-text" class="d-badge-text">Live</span>
+              </div>
+              <div class="d-steps">
+                <div class="d-step row" id="d-step-0"><svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="8" /><g class="spin"><path class="mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg><span class="label">Cloned main @ a1c9f2e</span><span class="time">3s</span></div>
+                <div class="d-step row" id="d-step-1"><svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="8" /><g class="spin"><path class="mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg><span class="label">Built image with Dockerfile</span><span class="time">38s</span></div>
+                <div class="d-step row" id="d-step-2"><svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="8" /><g class="spin"><path class="mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg><span class="label">Ran release command: migrate</span><span class="time">4s</span></div>
+                <div class="d-step row" id="d-step-3"><svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="8" /><g class="spin"><path class="mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg><span class="label">Health check passed on :3001</span><span class="time">2s</span></div>
+                <div class="d-step row" id="d-step-4"><svg viewBox="0 0 16 16"><circle class="bg" cx="8" cy="8" r="8" /><g class="spin"><path class="mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg><span class="label">Switched traffic, no downtime</span><span class="time">0s</span></div>
+              </div>
+              <div id="d-tint" class="tint"></div>
+            </div>
+          </div>
+          <div id="d-pill-label" class="row">
+            Deploy storefront
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+          </div>
+
+          <div id="d-preview" class="lift">
+            <div id="d-preview-surface" class="surface">
+              <div class="d-preview-body row">
+                <svg class="p-in" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5" /><circle cx="6" cy="18" r="2.5" /><circle cx="18" cy="8" r="2.5" /><path d="M6 8.5v7M18 10.5c0 4-6 3-11 6" /></svg>
+                <div class="p-in">
+                  <p class="d-preview-title">Preview for PR #42</p>
+                  <p class="d-preview-url">pr-42.storefront.example.com</p>
+                </div>
+              </div>
+              <div id="d-preview-tint" class="tint"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/motion.js"></script>
+    <script>
+      applyTheme();
+      const css = getComputedStyle(document.getElementById("root"));
+      const color = (name) => css.getPropertyValue(name).trim();
+      const ACCENT = color("--accent");
+      const OK = color("--ok");
+      const CHECK = "M4.7 8.2 L7 10.5 L11.4 5.8";
+
+      const surface = document.getElementById("d-surface");
+      const pill = { x: 82, y: 101, w: 176, h: 38 };
+      const preview = document.getElementById("d-preview-surface");
+      const dot = { x: 17, y: 20, w: 14, h: 14 };
+
+      const tl = gsap.timeline({ paused: true });
+
+      // Start states.
+      gsap.set(surface, { clipPath: shape(surface, pill, 19) });
+      gsap.set(preview, { clipPath: shape(preview, dot, 7) });
+      gsap.set(".d-in, .p-in, .d-step, .d-step .time, #d-badge > *", { opacity: 0 });
+      gsap.set(".d-step .mark", { stroke: ACCENT });
+      gsap.set(".d-step .bg", { fill: ACCENT, fillOpacity: 0.12 });
+      gsap.set("#d-badge-live", { clipPath: "inset(0px 0px 0px 2px round 10px)" });
+      gsap.set("#d-badge-build", { clipPath: "inset(0px 0px 0px 2px round 10px)" });
+
+      // 1. The pill arrives on a soft spring.
+      gsap.set("#d-card", { transformOrigin: "170px 120px" });
+      gsap.set("#d-pill-label", { transformOrigin: "88px 19px" });
+      tl.fromTo(["#d-card", "#d-pill-label"], { scale: 0.82 }, { scale: 1, duration: 0.82, ease: BOUNCE }, 0.1);
+      tl.fromTo(["#d-card", "#d-pill-label"], { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "arrive" }, 0.1);
+
+      // 2. Pressed, then the pill morphs into the deployment card.
+      tl.to(["#d-card", "#d-pill-label"], { scale: 0.95, duration: 0.12, ease: "glide" }, 0.95);
+      tl.to("#d-card", { scale: 1, duration: 0.9, ease: SPRING }, 1.07);
+      tl.to(surface, { clipPath: full(16), duration: 0.75, ease: "arrive" }, 1.07);
+      tl.to("#d-pill-label", { opacity: 0, filter: "blur(6px)", duration: 0.18, ease: "leave" }, 1.07);
+      tl.to("#d-tint", { opacity: 0, duration: 0.42, ease: "glide" }, 1.12);
+
+      // 3. Header lands, then each step spins and morphs into a check.
+      blurIn(tl, ".d-in", 1.5, { stagger: 0.06 });
+      blurIn(tl, ["#d-badge-build", "#d-badge-build-text"], 1.66, { stagger: 0 });
+      for (let i = 0; i < 5; i++) {
+        const at = 1.9 + i * 0.42;
+        const step = `#d-step-${i}`;
+        blurIn(tl, step, at, { duration: 0.35 });
+        tl.fromTo(`${step} .spin`, { rotation: 0, svgOrigin: "8 8" }, { rotation: 720, duration: 0.9, ease: "glide" }, at);
+        tl.to(`${step} .mark`, { morphSVG: CHECK, stroke: OK, duration: 0.34, ease: "arrive" }, at + 0.55);
+        tl.to(`${step} .bg`, { fill: OK, duration: 0.3, ease: "glide" }, at + 0.55);
+        tl.fromTo(`${step} svg`, { scale: 0.7, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.55, ease: BOUNCE }, at + 0.55);
+        if (i < 4) blurIn(tl, `${step} .time`, at + 0.62, { duration: 0.3 });
+      }
+
+      // 4. The badge morphs from Building to Live.
+      tl.to(["#d-badge-build", "#d-badge-live"], { clipPath: "inset(0px 0px 0px 28px round 10px)", duration: 0.45, ease: "glide" }, 4.25);
+      tl.to("#d-badge-build", { opacity: 0, duration: 0.3, ease: "glide" }, 4.3);
+      tl.fromTo("#d-badge-live", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "glide" }, 4.25);
+      tl.to("#d-badge-build-text", { opacity: 0, filter: "blur(4px)", duration: 0.16, ease: "leave" }, 4.25);
+      blurIn(tl, "#d-badge-live-text", 4.38, { duration: 0.3 });
+
+      // 5. A dot slides out from under the card and grows into the preview.
+      tl.fromTo("#d-preview", { y: -30, opacity: 0 }, { y: 0, duration: 0.95, ease: SPRING }, 4.7);
+      tl.to("#d-preview", { opacity: 1, duration: 0.2, ease: "glide" }, 4.7);
+      tl.to(preview, { clipPath: full(14), duration: 0.7, ease: "arrive" }, 4.85);
+      tl.to("#d-preview-tint", { opacity: 0, duration: 0.45, ease: "glide" }, 4.95);
+      blurIn(tl, ".p-in", 5.2, { stagger: 0.06 });
+
+      window.__timelines["deploy"] = tl;
+    </script>
+  </body>
+</html>

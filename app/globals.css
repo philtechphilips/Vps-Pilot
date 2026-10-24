@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
+/* `dark:` follows the theme chosen on <html data-theme>, not only the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /*
- * Light, quiet palette: white surfaces, hairline borders, near-black text and
- * a single indigo accent for buttons and links.
- * Everything in the UI reads from these tokens.
+ * Quiet palette: plain surfaces, hairline borders and a single indigo accent
+ * for buttons and links. Light by default; [data-theme="dark"] below swaps
+ * every token, so the UI reads only from these.
  */
 @theme {
   --color-bg: #ffffff;
@@ -14,7 +17,7 @@
   --color-line-strong: rgb(0 0 0 / 0.14);
   --color-fg: #111111;
   --color-muted: #555555;
-  --color-subtle: #7a7a7a;
+  --color-subtle: #737373;
 
   --color-blue: #4338ca;
   --color-blue-hover: #3730a3;
@@ -24,6 +27,21 @@
   --color-err: #dc2626;
   --color-violet: #7c3aed;
   --color-teal: #0d9488;
+
+  /* Tints and hairlines: black on light surfaces, white on dark ones. */
+  --color-ink: #000000;
+  /* Soft panel behind product shots. */
+  --color-shot: #f4f4f5;
+  --color-chart-blue: #4f46e5;
+
+  /* Code samples (GitHub light). */
+  --color-syn-text: #24292f;
+  --color-syn-kw: #cf222e;
+  --color-syn-str: #0a3069;
+  --color-syn-fn: #8250df;
+  --color-syn-const: #0550ae;
+  --color-syn-var: #953800;
+  --color-syn-comment: #6e7781;
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -96,7 +114,7 @@ body {
 }
 
 ::selection {
-  background: rgb(67 56 202 / 0.18);
+  background: rgb(99 102 241 / 0.25);
 }
 
 :focus-visible {
@@ -113,19 +131,19 @@ body {
 
 @utility thin-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: #d4d4d8 transparent;
+  scrollbar-color: var(--color-line-strong) transparent;
 }
 
 /* Next.js-style blueprint grid used behind hero sections. */
 @utility bg-grid {
   background-image:
-    linear-gradient(to right, rgb(0 0 0 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(0 0 0 / 0.05) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
 @utility bg-dots {
-  background-image: radial-gradient(rgb(0 0 0 / 0.1) 1px, transparent 1px);
+  background-image: radial-gradient(color-mix(in oklab, var(--color-ink) 10%, transparent) 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
@@ -134,7 +152,7 @@ body {
 }
 
 @utility skeleton {
-  background: linear-gradient(90deg, #f1f1f2 25%, #e7e7e9 37%, #f1f1f2 63%);
+  background: linear-gradient(90deg, var(--color-bg-200) 25%, var(--color-bg-300) 37%, var(--color-bg-200) 63%);
   background-size: 400% 100%;
   animation: var(--animate-shimmer);
 }
@@ -150,6 +168,47 @@ body {
   --color-accent-hover: #3730a3;
   --color-accent-fg: #4338ca;
   --color-inset: #f7f7f8;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0a0a0b;
+  --color-bg-100: #111113;
+  --color-bg-200: #151517;
+  --color-bg-300: #1d1d20;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-fg: #ededed;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+
+  --color-blue: #6366f1;
+  --color-blue-hover: #818cf8;
+  --color-blue-fg: #a5b4fc;
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --color-err: #ef4444;
+  --color-violet: #a78bfa;
+  --color-teal: #2dd4bf;
+
+  --color-ink: #ffffff;
+  --color-shot: #141416;
+  --color-chart-blue: #818cf8;
+
+  --color-syn-text: #e6edf3;
+  --color-syn-kw: #ff7b72;
+  --color-syn-str: #a5d6ff;
+  --color-syn-fn: #d2a8ff;
+  --color-syn-const: #79c0ff;
+  --color-syn-var: #ffa657;
+  --color-syn-comment: #8b949e;
+
+  --color-panel: #0f0f11;
+  --color-chrome: #0a0a0b;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-fg: #a5b4fc;
+  --color-inset: #0d0d0f;
 }
 
 /* Unlayered, so it wins over the utility classes on the shared Button. */
@@ -413,8 +472,8 @@ body {
 /* Animated gradient border (announcement pill). */
 .border-spin {
   background:
-    linear-gradient(#fff, #fff) padding-box,
-    conic-gradient(from var(--angle), rgb(0 0 0 / 0.08) 0%, #6366f1 12%, rgb(0 0 0 / 0.08) 28%, rgb(0 0 0 / 0.08) 100%) border-box;
+    linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
+    conic-gradient(from var(--angle), var(--color-line) 0%, #6366f1 12%, var(--color-line) 28%, var(--color-line) 100%) border-box;
   border: 1px solid transparent;
   animation: spin-border 4s linear infinite;
 }

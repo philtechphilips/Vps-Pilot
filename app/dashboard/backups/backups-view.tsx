@@ -220,7 +220,7 @@ function RunRow({ r }: { r: BackupRun }) {
 
   return (
     <>
-      <tr className="border-b border-line align-top last:border-0 hover:bg-black/[0.02]">
+      <tr className="border-b border-line align-top last:border-0 hover:bg-ink/[0.02]">
         <td className="px-4 py-3">
           <div className="flex items-center gap-2.5">
             {r.engine && <BrandChip name={ENGINE_BRAND[r.engine]} size={22} />}
@@ -290,7 +290,7 @@ function RunRow({ r }: { r: BackupRun }) {
                 Restore
               </Button>
             )}
-            <button type="button" aria-label="Delete backup" onClick={() => setDeleting(true)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
+            <button type="button" aria-label="Delete backup" onClick={() => setDeleting(true)} className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-err">
               <Icon name="trash" size={14} />
             </button>
           </span>

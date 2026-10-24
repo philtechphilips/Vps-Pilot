@@ -112,10 +112,10 @@ export function CronSection({ app }: { app: App }) {
                 <Button variant="secondary" size="xs" icon="play" disabled={run.isPending || j.last_status === "running"} onClick={() => run.mutate(j.id, { onSuccess: (r) => setOpenJob(r.job_id) })}>
                   Run now
                 </Button>
-                <button type="button" aria-label={`Edit ${j.name}`} onClick={() => setEditing(j)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-fg">
+                <button type="button" aria-label={`Edit ${j.name}`} onClick={() => setEditing(j)} className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-fg">
                   <Icon name="settings" size={14} />
                 </button>
-                <button type="button" aria-label={`Delete ${j.name}`} onClick={() => setDeleting(j)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
+                <button type="button" aria-label={`Delete ${j.name}`} onClick={() => setDeleting(j)} className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-err">
                   <Icon name="trash" size={14} />
                 </button>
               </div>

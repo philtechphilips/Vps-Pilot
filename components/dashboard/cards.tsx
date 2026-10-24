@@ -26,7 +26,7 @@ export function AlertList({ limit, compact }: { limit?: number; compact?: boolea
         <Link
           key={a.id}
           href="/dashboard/monitoring"
-          className="flex items-start gap-3 border-b border-line px-4 py-3 transition-colors last:border-0 hover:bg-black/[0.02]"
+          className="flex items-start gap-3 border-b border-line px-4 py-3 transition-colors last:border-0 hover:bg-ink/[0.02]"
         >
           <Icon name="alert" className={a.severity === "critical" ? "mt-0.5 shrink-0 text-err" : "mt-0.5 shrink-0 text-warn"} />
           <div className="min-w-0 flex-1">

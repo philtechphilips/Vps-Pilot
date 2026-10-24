@@ -45,7 +45,7 @@ export function LoginForm() {
   if (authStatus === "authenticated") {
     return (
       <div className="flex flex-col items-center gap-3" role="status">
-        <span className="size-6 animate-spin rounded-full border-2 border-black/10 border-t-accent-fg" />
+        <span className="size-6 animate-spin rounded-full border-2 border-ink/10 border-t-accent-fg" />
         <span className="text-sm text-muted">Signing you in…</span>
       </div>
     );
@@ -128,7 +128,7 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6 flex items-center gap-2 rounded-xl border border-black/[0.06] bg-bg-100 p-3 text-xs text-muted">
+      <div className="mt-6 flex items-center gap-2 rounded-xl border border-ink/[0.06] bg-bg-100 p-3 text-xs text-muted">
         <Icon name="shield-check" size={14} className="shrink-0 text-accent-fg" />
         After your password you’ll confirm with your authenticator app or an emailed code. Repeated failures lock the account for 15 minutes.
       </div>

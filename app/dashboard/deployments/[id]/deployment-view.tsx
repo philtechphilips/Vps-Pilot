@@ -334,7 +334,7 @@ export function DeploymentView() {
                 <div
                   key={i}
                   className={cn(
-                    "flex gap-4 px-4 hover:bg-black/[0.03]",
+                    "flex gap-4 px-4 hover:bg-ink/[0.03]",
                     l.kind === "error" && "bg-err/[0.07]",
                     l.kind === "warn" && "bg-warn/[0.05]",
                     l.kind === "step" && i > 0 && "mt-1",

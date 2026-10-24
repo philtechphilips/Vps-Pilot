@@ -168,7 +168,7 @@ export function RuntimeLogsView() {
                 return (
                   <div
                     key={`${l.t}-${i}`}
-                    className={cn("flex gap-3 px-4 hover:bg-black/[0.03]", level === "err" && "bg-err/[0.07]", level === "warn" && "bg-warn/[0.05]")}
+                    className={cn("flex gap-3 px-4 hover:bg-ink/[0.03]", level === "err" && "bg-err/[0.07]", level === "warn" && "bg-warn/[0.05]")}
                   >
                     <span className="hidden w-[74px] shrink-0 text-subtle select-none sm:inline" title={formatDate(l.t)}>
                       {new Date(l.t).toLocaleTimeString(undefined, { hour12: false })}

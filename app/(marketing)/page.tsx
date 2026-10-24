@@ -4,7 +4,7 @@ import { BrandChip, type Brand } from "@/components/brand-chip";
 import { CommandPill } from "@/components/copy-button";
 import { Icon, type IconName } from "@/components/icons";
 import { TerminalMock } from "@/components/marketing/mocks";
-import { DatabaseShot, DeployShot, HeroShot, MonitorShot, SecurityShot, ShotPanel } from "@/components/marketing/shots";
+import { MotionClip } from "@/components/marketing/motion-clip";
 import { cn } from "@/lib/utils";
 
 // Installs the control plane (dashboard, API, database, HTTPS) on Ubuntu/Debian.
@@ -29,7 +29,7 @@ export default function HomePage() {
             { icon: "rollback", lead: "Roll back in one click", text: "to any earlier release that is still on the server." },
           ]}
           cta={{ label: "Deploy your first app", href: "/docs/getting-started/install" }}
-          shot={<DeployShot />}
+          clip="deploy"
         />
         <Feature
           id="monitor"
@@ -42,7 +42,7 @@ export default function HomePage() {
             { icon: "calendar", lead: "A weekly report", text: "with uptime, deploys, errors and disk growth." },
           ]}
           cta={{ label: "See monitoring", href: "/dashboard/monitoring" }}
-          shot={<MonitorShot />}
+          clip="monitor"
         />
         <Feature
           id="databases"
@@ -54,7 +54,7 @@ export default function HomePage() {
             { icon: "check-circle", lead: "Restore-verified:", text: "a backup counts only once it has been restored." },
           ]}
           cta={{ label: "Explore databases", href: "/dashboard/databases" }}
-          shot={<DatabaseShot />}
+          clip="databases"
         />
         <Feature
           id="security"
@@ -67,7 +67,7 @@ export default function HomePage() {
             { icon: "file-text", lead: "Full audit trail:", text: "who did what, to which target, and how it went." },
           ]}
           cta={{ label: "Read the security model", href: "/docs/concepts/security" }}
-          shot={<SecurityShot />}
+          clip="security"
         />
         <GetStarted />
         <Stack />
@@ -126,9 +126,9 @@ function Hero() {
         </div>
       </div>
       <div className="mx-auto mt-16 max-w-[1180px] sm:mt-20">
-        <ShotPanel className="px-4 pt-10 pb-0 sm:px-12 sm:pt-14">
-          <HeroShot className="rounded-b-none border-b-0" />
-        </ShotPanel>
+        <div className="overflow-hidden rounded-[28px] bg-shot">
+          <MotionClip name="hero" width={1920} height={840} />
+        </div>
       </div>
     </section>
   );
@@ -146,7 +146,7 @@ function Feature({
   desc,
   points,
   cta,
-  shot,
+  clip,
   flip,
 }: {
   id: string;
@@ -154,13 +154,15 @@ function Feature({
   desc: string;
   points: Point[];
   cta: { label: string; href: string };
-  shot: ReactNode;
+  clip: string;
   flip?: boolean;
 }) {
   return (
     <section id={id} className="grid scroll-mt-24 items-center gap-10 lg:grid-cols-2 lg:gap-16">
       <div className={cn(flip && "lg:order-2")}>
-        <ShotPanel className="flex min-h-[380px] items-center justify-center sm:min-h-[440px]">{shot}</ShotPanel>
+        <div className="overflow-hidden rounded-[28px] bg-shot">
+          <MotionClip name={clip} width={1000} height={880} />
+        </div>
       </div>
       <div data-reveal style={d(100)} className={cn("max-w-[440px]", flip && "lg:order-1")}>
         <Heading>{title}</Heading>
@@ -201,16 +203,16 @@ function GetStarted() {
           VPSPilot installs on your own server with one command, then adds your other servers with a single-use token each.
         </p>
         <div className="mt-7 flex justify-center">
-          <CommandPill command={INSTALL} className="w-full max-w-[520px] rounded-full border-line bg-white pl-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)]" />
+          <CommandPill command={INSTALL} className="w-full max-w-[520px] rounded-full border-line bg-bg-100 pl-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)]" />
         </div>
       </div>
-      <ShotPanel className="mt-12">
+      <div data-reveal className="mt-12 rounded-[28px] bg-shot p-6 sm:p-10">
         <div className="mx-auto grid max-w-[880px] items-center gap-8 lg:grid-cols-[1fr_260px]">
           <TerminalMock />
           <ol className="space-y-5">
             {steps.map((s, i) => (
               <li key={s.title} className="flex gap-3.5">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white text-[12px] font-semibold text-accent shadow-[0_1px_2px_rgb(0_0_0/0.06),inset_0_0_0_1px_rgb(0_0_0/0.06)]">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-bg-100 text-[12px] font-semibold text-accent shadow-[0_1px_2px_rgb(0_0_0/0.06),inset_0_0_0_1px_rgb(0_0_0/0.06)]">
                   {i + 1}
                 </span>
                 <div>
@@ -221,7 +223,7 @@ function GetStarted() {
             ))}
           </ol>
         </div>
-      </ShotPanel>
+      </div>
     </section>
   );
 }
@@ -293,7 +295,7 @@ function Faq() {
 function FinalCta() {
   return (
     <section className="px-4 pb-24 sm:px-6 sm:pb-32">
-      <div data-reveal className="mx-auto max-w-[1080px] rounded-[28px] bg-[#f4f4f5] px-6 py-20 text-center sm:py-24">
+      <div data-reveal className="mx-auto max-w-[1080px] rounded-[28px] bg-shot px-6 py-20 text-center sm:py-24">
         <Heading>Your servers. Your control plane.</Heading>
         <p className="mx-auto mt-4 max-w-md text-[15px] text-muted">Open source and self-hosted. Nothing leaves your infrastructure unless you send it.</p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-5">

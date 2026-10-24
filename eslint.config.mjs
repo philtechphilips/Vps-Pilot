@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // HyperFrames clip sources: plain browser scripts sharing globals, rendered to video.
+    "motion/**",
   ]),
 ]);
 

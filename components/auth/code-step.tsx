@@ -66,7 +66,7 @@ export function OtpInput({
           }}
           className={cn(
             "size-12 rounded-xl border bg-inset text-center font-mono text-xl outline-none transition-[border,box-shadow] disabled:opacity-50 sm:size-14",
-            invalid ? "border-err/60" : "border-black/10 focus:border-accent focus:shadow-[0_0_0_3px_rgb(165_76_162/0.25)]",
+            invalid ? "border-err/60" : "border-ink/10 focus:border-accent focus:shadow-[0_0_0_3px_rgb(165_76_162/0.25)]",
           )}
         />
       ))}
@@ -121,7 +121,7 @@ export function CodeStep({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="w-full max-w-[400px] animate-fade-up text-center">
-      <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-black/10 bg-bg-100 text-accent-fg">
+      <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-ink/10 bg-bg-100 text-accent-fg">
         <Icon name={icon} size={22} />
       </div>
       <h1 className="mt-6 text-[26px] font-semibold tracking-tight">{recovery ? "Use a recovery code" : heading}</h1>
@@ -155,7 +155,7 @@ export function CodeStep({ onBack }: { onBack: () => void }) {
             spellCheck={false}
             placeholder="xxxx-xxxx"
             aria-label="Recovery code"
-            className="h-12 w-full rounded-xl border border-black/10 bg-inset text-center font-mono text-lg tracking-widest outline-none focus:border-accent"
+            className="h-12 w-full rounded-xl border border-ink/10 bg-inset text-center font-mono text-lg tracking-widest outline-none focus:border-accent"
           />
         ) : (
           <OtpInput value={code} onChange={setCode} onComplete={submit} disabled={verify.isPending} invalid={!!verify.error} />

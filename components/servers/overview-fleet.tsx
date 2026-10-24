@@ -45,7 +45,7 @@ export function AgentsCard() {
               <Link key={s.id} href={`/dashboard/servers/${s.id}`} title={`${s.name} · ${s.status}`} className="group flex flex-col items-center gap-2">
                 <span
                   className={`relative flex size-12 items-center justify-center rounded-full border-2 bg-bg-100 transition-transform group-hover:scale-105 ${
-                    on ? "border-accent/80 text-accent-fg" : s.status === "pending" ? "border-dashed border-black/20 text-subtle" : "border-black/10 text-subtle"
+                    on ? "border-accent/80 text-accent-fg" : s.status === "pending" ? "border-dashed border-ink/20 text-subtle" : "border-ink/10 text-subtle"
                   }`}
                 >
                   <Icon name={s.status === "revoked" ? "lock" : s.is_control_plane ? "shield" : "server"} size={18} />

@@ -12,7 +12,7 @@ const OVERALL = {
 } as const;
 
 function barTone(uptime: number | null) {
-  if (uptime === null) return "bg-black/10";
+  if (uptime === null) return "bg-ink/10";
   if (uptime >= 99.5) return "bg-ok";
   if (uptime >= 95) return "bg-warn";
   return "bg-err";

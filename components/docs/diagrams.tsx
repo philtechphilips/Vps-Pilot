@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 type Tone = "neutral" | "accent" | "ok" | "err" | "blue" | "warn";
 
 const toneRing: Record<Tone, string> = {
-  neutral: "border-black/[0.1] bg-black/[0.03]",
+  neutral: "border-ink/[0.1] bg-ink/[0.03]",
   accent: "border-accent/40 bg-accent/[0.08]",
   ok: "border-ok/35 bg-ok/[0.07]",
   err: "border-err/35 bg-err/[0.07]",
@@ -27,12 +27,12 @@ const toneIcon: Record<Tone, string> = {
 
 function Frame({ title, children, caption }: { title: string; children: ReactNode; caption?: ReactNode }) {
   return (
-    <figure className="my-6 overflow-hidden rounded-xl border border-black/[0.08] bg-inset">
-      <div className="flex h-10 items-center border-b border-black/[0.06] bg-black/[0.02] px-4">
+    <figure className="my-6 overflow-hidden rounded-xl border border-ink/[0.08] bg-inset">
+      <div className="flex h-10 items-center border-b border-ink/[0.06] bg-ink/[0.02] px-4">
         <span className="font-mono text-xs text-subtle">{title}</span>
       </div>
       <div className="p-4 sm:p-6">{children}</div>
-      {caption && <figcaption className="border-t border-black/[0.06] px-4 py-3 text-xs leading-5 text-subtle sm:px-6">{caption}</figcaption>}
+      {caption && <figcaption className="border-t border-ink/[0.06] px-4 py-3 text-xs leading-5 text-subtle sm:px-6">{caption}</figcaption>}
     </figure>
   );
 }
@@ -55,7 +55,7 @@ function Node({
   return (
     <div className={cn("flex min-w-0 items-center gap-2.5 rounded-lg border px-3 py-2.5", compact && "sm:justify-center sm:px-2 sm:text-center", toneRing[tone], className)}>
       {icon && (
-        <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-md border border-black/10 bg-black/[0.04]", compact && "sm:hidden")}>
+        <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-md border border-ink/10 bg-ink/[0.04]", compact && "sm:hidden")}>
           <Icon name={icon} size={14} className={toneIcon[tone]} />
         </span>
       )}
@@ -71,7 +71,7 @@ function Node({
 function Flow({ label, className }: { label?: string; className?: string }) {
   return (
     <div className={cn("relative flex shrink-0 items-center justify-center text-subtle", "h-9 flex-col sm:h-auto sm:w-14 sm:flex-row", className)}>
-      <span className="h-full w-px bg-black/20 sm:h-px sm:w-auto sm:flex-1" />
+      <span className="h-full w-px bg-ink/20 sm:h-px sm:w-auto sm:flex-1" />
       <Icon name="chevron-right" size={12} className="-mt-1.5 rotate-90 sm:mt-0 sm:-ml-1.5 sm:rotate-0" />
       {label && (
         <span className="absolute top-1/2 left-1/2 ml-2 -translate-y-1/2 bg-inset font-mono text-[10px] whitespace-nowrap text-subtle sm:top-auto sm:bottom-full sm:left-1/2 sm:mb-1 sm:ml-0 sm:-translate-x-1/2 sm:translate-y-0 sm:bg-transparent">
@@ -84,7 +84,7 @@ function Flow({ label, className }: { label?: string; className?: string }) {
 
 function Server({ name, apps }: { name: string; apps: { icon: IconName; title: string; sub: string }[] }) {
   return (
-    <div className="rounded-xl border border-black/[0.08] bg-black/[0.015] p-3">
+    <div className="rounded-xl border border-ink/[0.08] bg-ink/[0.015] p-3">
       <div className="mb-3 flex items-center gap-2 px-1 text-[12px] text-muted">
         <Icon name="server" size={13} />
         <span className="font-mono">{name}</span>
@@ -93,7 +93,7 @@ function Server({ name, apps }: { name: string; apps: { icon: IconName; title: s
       <div className="grid gap-2">
         <Node icon="activity" title="vpspilot-agent" sub="user vpspilot · outbound only" tone="accent" />
         <div className="flex items-center gap-2 pl-6 font-mono text-[10px] text-subtle">
-          <span className="h-4 w-px bg-black/20" />
+          <span className="h-4 w-px bg-ink/20" />
           Unix socket · allowlisted operations
         </div>
         <Node icon="shield" title="vpspilot-helper" sub="root · no shell" tone="warn" />
@@ -114,7 +114,7 @@ export function TopologyDiagram() {
       title="architecture"
       caption="Agents only connect out to the control plane, so servers need no inbound port for VPSPilot. The helper does privileged work for the agent, from a fixed list of operations."
     >
-      <div className="rounded-xl border border-dashed border-black/[0.12] p-3 sm:p-4">
+      <div className="rounded-xl border border-dashed border-ink/[0.12] p-3 sm:p-4">
         <div className="mb-3 flex items-center gap-2 text-[12px] text-muted">
           <Icon name="layers" size={13} />
           Control plane
@@ -133,11 +133,11 @@ export function TopologyDiagram() {
 
       <div className="my-2 flex flex-col items-center text-subtle">
         <Icon name="chevron-right" size={12} className="-rotate-90" />
-        <span className="h-5 w-px bg-black/20" />
-        <span className="rounded-full border border-black/10 bg-bg px-3 py-1 font-mono text-[10px] text-muted">
+        <span className="h-5 w-px bg-ink/20" />
+        <span className="rounded-full border border-ink/10 bg-bg px-3 py-1 font-mono text-[10px] text-muted">
           outbound HTTPS · heartbeat · metrics · jobs
         </span>
-        <span className="h-5 w-px bg-black/20" />
+        <span className="h-5 w-px bg-ink/20" />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -183,7 +183,7 @@ export function JobStatesDiagram() {
           <State name="failed" tone="err" note="error kept on the job" />
         </div>
       </div>
-      <div className="mt-5 grid gap-2 border-t border-black/[0.06] pt-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-2 border-t border-ink/[0.06] pt-4 sm:grid-cols-2">
         <div className="flex items-center gap-3">
           <span className="font-mono text-[11px] whitespace-nowrap text-subtle">queued →</span>
           <State name="canceled" tone="neutral" note="canceled before it started" />

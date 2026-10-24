@@ -79,18 +79,18 @@ export function DocsSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-9 w-full items-center gap-2.5 rounded-lg border border-black/[0.08] bg-black/[0.03] px-3 text-[13px] text-subtle transition-colors hover:border-black/15 hover:text-muted"
+        className="flex h-9 w-full items-center gap-2.5 rounded-lg border border-ink/[0.08] bg-ink/[0.03] px-3 text-[13px] text-subtle transition-colors hover:border-ink/15 hover:text-muted"
       >
         <Icon name="search" size={14} />
         <span>Search docs…</span>
-        <kbd className="ml-auto hidden rounded border border-black/10 bg-black/[0.04] px-1.5 font-mono text-[11px] sm:inline">⌘K</kbd>
+        <kbd className="ml-auto hidden rounded border border-ink/10 bg-ink/[0.04] px-1.5 font-mono text-[11px] sm:inline">⌘K</kbd>
       </button>
 
       {open && (
         <div className="fixed inset-0 z-[70] flex items-start justify-center px-4 pt-[12vh]" role="dialog" aria-modal="true" aria-label="Search documentation">
           <button type="button" aria-label="Close search" className="absolute inset-0 bg-black/25 backdrop-blur-sm" onClick={close} />
-          <div className="relative w-full max-w-xl animate-fade-up overflow-hidden rounded-2xl border border-black/10 bg-inset shadow-[0_24px_80px_-12px_rgb(0_0_0/0.13)]">
-            <div className="flex items-center gap-3 border-b border-black/[0.06] px-4">
+          <div className="relative w-full max-w-xl animate-fade-up overflow-hidden rounded-2xl border border-ink/10 bg-inset shadow-[0_24px_80px_-12px_rgb(0_0_0/0.13)]">
+            <div className="flex items-center gap-3 border-b border-ink/[0.06] px-4">
               <Icon name="search" className="text-subtle" />
               <input
                 ref={input}
@@ -117,7 +117,7 @@ export function DocsSearch() {
                 aria-activedescendant={results[index] ? `docs-result-${index}` : undefined}
                 className="h-13 flex-1 bg-transparent text-[15px] text-fg outline-none placeholder:text-subtle"
               />
-              <kbd className="rounded border border-black/10 px-1.5 font-mono text-[11px] text-subtle">Esc</kbd>
+              <kbd className="rounded border border-ink/10 px-1.5 font-mono text-[11px] text-subtle">Esc</kbd>
             </div>
             <ul ref={list} id="docs-search-results" role="listbox" className="thin-scrollbar max-h-[min(60vh,420px)] overflow-y-auto p-2">
               {results.length === 0 && <li className="px-3 py-10 text-center text-sm text-subtle">No pages match “{query}”.</li>}
@@ -127,7 +127,7 @@ export function DocsSearch() {
                     type="button"
                     onMouseMove={() => setIndex(i)}
                     onClick={() => go(d.slug)}
-                    className={cn("flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left", i === index && "bg-black/[0.06]")}
+                    className={cn("flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left", i === index && "bg-ink/[0.06]")}
                   >
                     <Icon name="file-text" size={15} className="mt-0.5 shrink-0 text-subtle" />
                     <span className="min-w-0">

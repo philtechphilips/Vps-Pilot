@@ -9,7 +9,7 @@ export function FleetMap() {
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="h-auto w-full" aria-hidden="true">
       {WORLD_ROWS.map((row, y) =>
-        [...row].map((c, x) => (c === "x" ? <circle key={`${x}-${y}`} cx={x * CELL + CELL / 2} cy={y * CELL + CELL / 2} r={1.9} fill="#d4d4d8" /> : null)),
+        [...row].map((c, x) => (c === "x" ? <circle key={`${x}-${y}`} cx={x * CELL + CELL / 2} cy={y * CELL + CELL / 2} r={1.9} fill="var(--color-line-strong)" /> : null)),
       )}
     </svg>
   );
@@ -29,7 +29,7 @@ export function Gauge({ value, label, sub }: { value: number; label: string; sub
             <stop offset="1" stopColor="#4338ca" />
           </linearGradient>
         </defs>
-        <path d={`M20 110 A${r} ${r} 0 0 1 200 110`} fill="none" stroke="#ececef" strokeWidth="22" strokeLinecap="round" />
+        <path d={`M20 110 A${r} ${r} 0 0 1 200 110`} fill="none" stroke="var(--color-bg-300)" strokeWidth="22" strokeLinecap="round" />
         <path
           d={`M20 110 A${r} ${r} 0 0 1 200 110`}
           fill="none"

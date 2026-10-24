@@ -1,0 +1,80 @@
+/* Shared look for the homepage clips: the site's tokens, in both themes. */
+/* Fonts are declared in each clip's own <style>, where HyperFrames looks for them. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#root {
+  --shot: #f4f4f5;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --line: rgb(0 0 0 / 0.08);
+  --ink: #111111;
+  --muted: #555555;
+  --subtle: #6e6e6e;
+  --tint: rgb(0 0 0 / 0.05);
+  --accent: #4338ca;
+  --ok: #16a34a;
+  --ok-text: #166534;
+  --warn: #d97706;
+  --warn-text: #b45309;
+  --err: #dc2626;
+
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--shot);
+  color: var(--ink);
+  font-family: "Geist", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#root[data-theme="dark"] {
+  --shot: #141416;
+  --surface: #1b1b1e;
+  --surface-2: #202024;
+  --line: rgb(255 255 255 / 0.09);
+  --ink: #ededed;
+  --muted: #a1a1aa;
+  --subtle: #71717a;
+  --tint: rgb(255 255 255 / 0.06);
+  --accent: #6366f1;
+  --ok: #22c55e;
+  --ok-text: #4ade80;
+  --warn: #f59e0b;
+  --warn-text: #f59e0b;
+  --err: #ef4444;
+}
+
+/* The UI is drawn at the site's own sizes, then scaled up for a sharp render. */
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+.lift {
+  position: absolute;
+}
+.surface {
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.tint {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+}
+.mono {
+  font-family: "Geist Mono", monospace;
+}
+.row {
+  display: flex;
+  align-items: center;
+}

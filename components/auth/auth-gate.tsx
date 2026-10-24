@@ -30,7 +30,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
 export function GateLoading() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4" role="status" aria-live="polite">
-      <span className="size-6 animate-spin rounded-full border-2 border-black/10 border-t-accent-fg" />
+      <span className="size-6 animate-spin rounded-full border-2 border-ink/10 border-t-accent-fg" />
       <span className="text-sm text-muted">Checking your session…</span>
     </div>
   );
@@ -45,7 +45,7 @@ export function OwnerName() {
 export function RoleBadge() {
   const viewer = useAuthStore((s) => s.user?.role === "viewer");
   return viewer ? (
-    <span className="rounded-full bg-black/15 px-1.5 py-px text-[10px] font-semibold text-fg">Viewer</span>
+    <span className="rounded-full bg-ink/15 px-1.5 py-px text-[10px] font-semibold text-fg">Viewer</span>
   ) : (
     <span className="rounded-full bg-accent px-1.5 py-px text-[10px] font-semibold text-white">Owner</span>
   );
@@ -56,7 +56,7 @@ export function ViewerBanner() {
   const viewer = useAuthStore((s) => s.user?.role === "viewer");
   if (!viewer) return null;
   return (
-    <div className="border-b border-black/[0.06] bg-black/[0.03] px-4 py-2 text-center text-xs text-muted">
+    <div className="border-b border-ink/[0.06] bg-ink/[0.03] px-4 py-2 text-center text-xs text-muted">
       You have view-only access: you can see everything, but changes need an admin.
     </div>
   );

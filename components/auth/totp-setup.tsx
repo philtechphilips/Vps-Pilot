@@ -31,7 +31,7 @@ export function TotpSetupPanel({ onCancel }: { onCancel?: () => void }) {
   if (start.isPending || start.isIdle) {
     return (
       <div className="flex flex-col items-center gap-3 py-10" role="status">
-        <span className="size-6 animate-spin rounded-full border-2 border-black/10 border-t-accent-fg" />
+        <span className="size-6 animate-spin rounded-full border-2 border-ink/10 border-t-accent-fg" />
         <span className="text-sm text-muted">Generating your secret…</span>
       </div>
     );
@@ -72,7 +72,7 @@ export function TotpSetupPanel({ onCancel }: { onCancel?: () => void }) {
                   {showKey ? "Hide setup key" : "Can't scan? Enter a key instead"}
                 </button>
                 {showKey && (
-                  <div className="mt-2 flex items-center gap-2 rounded-lg border border-black/10 bg-inset py-1.5 pr-1 pl-3">
+                  <div className="mt-2 flex items-center gap-2 rounded-lg border border-ink/10 bg-inset py-1.5 pr-1 pl-3">
                     <code className="font-mono text-xs break-all text-fg">{grouped}</code>
                     <CopyButton value={setup.secret} label="Copy setup key" />
                   </div>
@@ -138,7 +138,7 @@ export function RecoveryCodesPanel({ codes, onDone, doneLabel = "Continue" }: { 
           These codes are shown <strong>once</strong>. Each one signs you in if you lose your phone. Store them in a password manager.
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2 rounded-xl border border-black/[0.06] bg-inset p-4 font-mono text-sm sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-2 rounded-xl border border-ink/[0.06] bg-inset p-4 font-mono text-sm sm:grid-cols-2">
         {codes.map((c, i) => (
           <span key={c} className="flex items-center gap-2 text-fg">
             <span className="w-4 text-right text-xs text-subtle">{i + 1}</span>
@@ -147,13 +147,13 @@ export function RecoveryCodesPanel({ codes, onDone, doneLabel = "Continue" }: { 
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1 rounded-lg border border-black/10 bg-bg-100 pr-3 pl-1 text-sm text-muted">
+        <span className="inline-flex items-center gap-1 rounded-lg border border-ink/10 bg-bg-100 pr-3 pl-1 text-sm text-muted">
           <CopyButton value={codes.join("\n")} label="Copy recovery codes" /> Copy
         </span>
         <a
           href={`data:text/plain;charset=utf-8,${encodeURIComponent(text)}`}
           download="vpspilot-recovery-codes.txt"
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-black/10 bg-bg-100 px-3 text-sm text-muted hover:text-fg"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-ink/10 bg-bg-100 px-3 text-sm text-muted hover:text-fg"
         >
           <Icon name="download" size={14} /> Download .txt
         </a>

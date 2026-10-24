@@ -212,7 +212,7 @@ export function TransferTab({ d }: { d: DatabaseInstance }) {
       <span className="text-ok">{step.message}</span>
     ) : step.state === "working" ? (
       <span className="flex items-center gap-2">
-        <span className="size-3 animate-spin rounded-full border-2 border-black/20 border-t-black/70" /> {step.message}
+        <span className="size-3 animate-spin rounded-full border-2 border-ink/20 border-t-ink/70" /> {step.message}
       </span>
     ) : null;
 
@@ -245,7 +245,7 @@ export function TransferTab({ d }: { d: DatabaseInstance }) {
           importing.state === "working" && importing.message === "Uploading…" ? (
             <span className="flex items-center gap-3">
               Uploading {Math.round(progress * 100)}%
-              <span className="h-1.5 w-40 overflow-hidden rounded-full bg-black/10">
+              <span className="h-1.5 w-40 overflow-hidden rounded-full bg-ink/10">
                 <span className="block h-full bg-accent" style={{ width: `${progress * 100}%` }} />
               </span>
             </span>
@@ -272,7 +272,7 @@ export function TransferTab({ d }: { d: DatabaseInstance }) {
               type="file"
               accept={d.engine === "postgres" ? ".sql,.gz,.dump,.backup" : ".sql,.gz"}
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block h-10 w-full cursor-pointer rounded-md border border-line bg-bg px-3 py-2 text-[13px] text-muted file:mr-3 file:rounded file:border-0 file:bg-black/10 file:px-2 file:py-0.5 file:text-fg"
+              className="block h-10 w-full cursor-pointer rounded-md border border-line bg-bg px-3 py-2 text-[13px] text-muted file:mr-3 file:rounded file:border-0 file:bg-ink/10 file:px-2 file:py-0.5 file:text-fg"
             />
           </div>
         </div>
@@ -456,7 +456,7 @@ export function RedisLoginsTab({ d }: { d: DatabaseInstance }) {
                       </Button>
                     )}
                     {u.name !== "default" && (
-                      <button type="button" aria-label={`Delete ${u.name}`} onClick={() => setDropping(u.name)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
+                      <button type="button" aria-label={`Delete ${u.name}`} onClick={() => setDropping(u.name)} className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-err">
                         <Icon name="trash" size={14} />
                       </button>
                     )}

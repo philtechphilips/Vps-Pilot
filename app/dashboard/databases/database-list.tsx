@@ -79,7 +79,7 @@ export function DatabaseList() {
             </thead>
             <tbody>
               {list.map((d) => (
-                <tr key={d.id} className="group transition-colors hover:bg-black/[0.02]">
+                <tr key={d.id} className="group transition-colors hover:bg-ink/[0.02]">
                   <Td>
                     <Link href={`/dashboard/databases/${d.id}`} className="flex items-center gap-3">
                       <BrandChip name={ENGINE_BRAND[d.engine]} size={30} />

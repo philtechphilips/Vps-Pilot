@@ -255,7 +255,7 @@ function DatabasesList({ d, ready }: { d: DatabaseInstance; ready: boolean }) {
                 aria-label={`Drop ${r[0]}`}
                 disabled={r[0] === d.default_database || r[0] === "postgres"}
                 onClick={() => setDropping(r[0])}
-                className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err disabled:invisible"
+                className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-err disabled:invisible"
               >
                 <Icon name="trash" size={14} />
               </button>
@@ -305,7 +305,7 @@ function Secret({ value, mono = true }: { value: string; mono?: boolean }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5">
       <span className={cn("min-w-0 truncate text-[13px]", mono && "font-mono", !shown && "tracking-widest text-subtle")}>{shown ? value : "••••••••••••"}</span>
-      <button type="button" aria-label={shown ? "Hide" : "Show"} onClick={() => setShown((s) => !s)} className="rounded p-1 text-subtle hover:bg-black/10 hover:text-fg">
+      <button type="button" aria-label={shown ? "Hide" : "Show"} onClick={() => setShown((s) => !s)} className="rounded p-1 text-subtle hover:bg-ink/10 hover:text-fg">
         <Icon name={shown ? "eye-off" : "eye"} size={13} />
       </button>
       <CopyButton value={value} />
@@ -501,7 +501,7 @@ function QueryTab({ d }: { d: DatabaseInstance }) {
                   <button
                     type="button"
                     onClick={() => preview(t)}
-                    className={cn("flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] hover:bg-black/[0.04]", active && "bg-black/[0.06]")}
+                    className={cn("flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] hover:bg-ink/[0.04]", active && "bg-ink/[0.06]")}
                   >
                     <Icon name="table" size={13} className="shrink-0 text-subtle" />
                     <span className="min-w-0 flex-1 truncate font-mono">
@@ -612,7 +612,7 @@ function ResultGrid({ result }: { result: ResultSet }) {
           </thead>
           <tbody>
             {result.rows.map((row, i) => (
-              <tr key={i} className="hover:bg-black/[0.02]">
+              <tr key={i} className="hover:bg-ink/[0.02]">
                 {row.map((cell, j) => (
                   <td key={j} className="max-w-[420px] truncate border-b border-line/60 px-3 py-1.5" title={cell ?? "NULL"}>
                     {cell === null ? <span className="text-subtle italic">NULL</span> : cell}
@@ -677,7 +677,7 @@ function UsersTab({ d }: { d: DatabaseInstance }) {
                       </Button>
                     )}
                     {!isAdmin && !system && (
-                      <button type="button" aria-label={`Drop ${name}`} onClick={() => setDropping(name)} className="rounded p-1.5 text-subtle hover:bg-black/10 hover:text-err">
+                      <button type="button" aria-label={`Drop ${name}`} onClick={() => setDropping(name)} className="rounded p-1.5 text-subtle hover:bg-ink/10 hover:text-err">
                         <Icon name="trash" size={14} />
                       </button>
                     )}
@@ -819,7 +819,7 @@ function KeysTab({ d }: { d: DatabaseInstance }) {
                 key={k.key}
                 type="button"
                 onClick={() => open(k.key)}
-                className={cn("flex w-full items-center gap-3 border-b border-line px-4 py-2 text-left last:border-0 hover:bg-black/[0.03]", selected?.key === k.key && "bg-black/[0.05]")}
+                className={cn("flex w-full items-center gap-3 border-b border-line px-4 py-2 text-left last:border-0 hover:bg-ink/[0.03]", selected?.key === k.key && "bg-ink/[0.05]")}
               >
                 <Badge>{k.type}</Badge>
                 <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{k.key}</span>

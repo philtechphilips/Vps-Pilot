@@ -46,7 +46,7 @@ export function DocsToc() {
   return (
     <nav aria-label="On this page" className="text-[13px]">
       <div className="mb-3 font-medium text-fg">On this page</div>
-      <ul className="space-y-0.5 border-l border-black/[0.08]">
+      <ul className="space-y-0.5 border-l border-ink/[0.08]">
         {headings.map((h) => (
           <li key={h.id}>
             <a

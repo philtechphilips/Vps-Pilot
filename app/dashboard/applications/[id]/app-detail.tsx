@@ -627,10 +627,10 @@ function AppPreview({ name, url, live }: { name: string; url: string | null; liv
   return (
     <div className="overflow-hidden rounded-md border border-line bg-inset">
       <div className="flex items-center gap-1.5 border-b border-line px-3 py-2">
-        <span className="size-2 rounded-full bg-black/15" />
-        <span className="size-2 rounded-full bg-black/15" />
-        <span className="size-2 rounded-full bg-black/15" />
-        <span className="ml-2 truncate rounded bg-black/[0.06] px-2 py-0.5 font-mono text-[10px] text-subtle">{url?.replace("http://", "") ?? `${name}.internal`}</span>
+        <span className="size-2 rounded-full bg-ink/15" />
+        <span className="size-2 rounded-full bg-ink/15" />
+        <span className="size-2 rounded-full bg-ink/15" />
+        <span className="ml-2 truncate rounded bg-ink/[0.06] px-2 py-0.5 font-mono text-[10px] text-subtle">{url?.replace("http://", "") ?? `${name}.internal`}</span>
       </div>
       <div className="relative flex aspect-[16/10] items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgb(165_76_162/0.22),transparent_60%)]" />

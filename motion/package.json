@@ -1,0 +1,11 @@
+{
+  "name": "vpspilot-motion",
+  "private": true,
+  "type": "module",
+  "description": "HyperFrames sources for the homepage motion clips. `npm run build` renders them into ../public/motion.",
+  "scripts": {
+    "dev": "HYPERFRAMES_NO_TELEMETRY=1 npx --yes hyperframes@0.8.185 preview",
+    "check": "HYPERFRAMES_NO_TELEMETRY=1 npx --yes hyperframes@0.8.185 check",
+    "build": "node render.mjs"
+  }
+}

@@ -37,7 +37,7 @@ export function OverviewApps() {
     return (
       <Link
         href="/dashboard/applications/new"
-        className="flex items-center gap-3 rounded-xl border border-dashed border-black/15 bg-bg-100/90 p-4 text-sm text-muted transition-colors hover:border-black/25 hover:text-fg"
+        className="flex items-center gap-3 rounded-xl border border-dashed border-ink/15 bg-bg-100/90 p-4 text-sm text-muted transition-colors hover:border-black/25 hover:text-fg"
       >
         <Icon name="plus" /> Deploy your first application from Git or a container image
       </Link>
@@ -51,9 +51,9 @@ export function OverviewApps() {
           <Link
             key={a.id}
             href={`/dashboard/applications/${a.id}`}
-            className="flex items-center gap-3 rounded-xl border border-black/[0.07] bg-bg-100/90 p-3 backdrop-blur transition-colors hover:border-black/15"
+            className="flex items-center gap-3 rounded-xl border border-ink/[0.07] bg-bg-100/90 p-3 backdrop-blur transition-colors hover:border-ink/15"
           >
-            <span className="flex size-[34px] shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.04] text-sm font-semibold uppercase">
+            <span className="flex size-[34px] shrink-0 items-center justify-center rounded-xl border border-ink/10 bg-ink/[0.04] text-sm font-semibold uppercase">
               {a.name[0]}
             </span>
             <div className="min-w-0 flex-1">

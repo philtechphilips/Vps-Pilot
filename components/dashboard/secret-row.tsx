@@ -28,14 +28,14 @@ export function EnvRow({ name, value, secret, envs }: { name: string; value: str
               type="button"
               onClick={() => setShown((s) => !s)}
               aria-label={shown ? `Hide ${name}` : `Show ${name}`}
-              className="inline-flex size-7 shrink-0 items-center justify-center rounded text-subtle hover:bg-black/10 hover:text-fg"
+              className="inline-flex size-7 shrink-0 items-center justify-center rounded text-subtle hover:bg-ink/10 hover:text-fg"
             >
               <Icon name={shown ? "eye-off" : "eye"} size={14} />
             </button>
           </>
         )}
       </div>
-      <button type="button" aria-label={`Options for ${name}`} className="inline-flex size-8 items-center justify-center rounded-md text-subtle hover:bg-black/10 hover:text-fg">
+      <button type="button" aria-label={`Options for ${name}`} className="inline-flex size-8 items-center justify-center rounded-md text-subtle hover:bg-ink/10 hover:text-fg">
         <Icon name="more" />
       </button>
     </div>

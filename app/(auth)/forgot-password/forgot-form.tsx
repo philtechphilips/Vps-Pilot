@@ -11,7 +11,7 @@ export function ForgotForm() {
   if (forgot.isSuccess) {
     return (
       <div className="w-full max-w-[380px] animate-fade-up text-center">
-        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-black/10 bg-bg-100 text-accent-fg">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl border border-ink/10 bg-bg-100 text-accent-fg">
           <Icon name="inbox" size={22} />
         </div>
         <h1 className="mt-6 text-[26px] font-semibold tracking-tight">Check your email</h1>

@@ -162,7 +162,7 @@ export function NewAppFlow() {
               onClick={() => setSource(value)}
               className={cn(
                 "flex h-9 items-center justify-center gap-2 rounded-md text-sm transition-colors",
-                source === value ? "bg-black/[0.08] text-fg" : "text-muted hover:text-fg",
+                source === value ? "bg-ink/[0.08] text-fg" : "text-muted hover:text-fg",
               )}
             >
               <Icon name={icon} size={15} /> {label}

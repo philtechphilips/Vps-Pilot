@@ -1,0 +1,461 @@
+<!doctype html>
+<html
+  lang="en"
+  data-composition-variables='[{"id":"theme","type":"enum","label":"Theme","default":"light","options":[{"value":"light","label":"Light"},{"value":"dark","label":"Dark"}]}]'
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=840" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MorphSVGPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <link rel="stylesheet" href="assets/clip.css" />
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("assets/fonts/Geist.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: "Geist Mono";
+        src: url("assets/fonts/GeistMono.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      html,
+      body {
+        width: 1920px;
+        height: 840px;
+        overflow: hidden;
+      }
+      #h-window {
+        left: 60px;
+        top: 44px;
+        width: 960px;
+        height: 440px;
+      }
+      #h-window > .surface {
+        border-radius: 16px 16px 0 0;
+        overflow: hidden;
+      }
+      .h-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 40px;
+        border-bottom: 1px solid var(--line);
+        padding: 0 16px;
+        gap: 6px;
+      }
+      .h-light {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--tint);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .h-url {
+        position: absolute;
+        left: 50%;
+        top: 9px;
+        transform: translateX(-50%);
+        height: 22px;
+        padding: 0 12px;
+        border-radius: 6px;
+        background: var(--tint);
+        gap: 6px;
+        font-size: 11px;
+        color: var(--subtle);
+      }
+      .h-side {
+        position: absolute;
+        left: 0;
+        top: 40px;
+        bottom: 0;
+        width: 190px;
+        padding: 12px;
+        background: var(--surface-2);
+        border-right: 1px solid var(--line);
+      }
+      .h-nav {
+        height: 32px;
+        padding: 0 10px;
+        gap: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .h-nav svg {
+        width: 14px;
+        height: 14px;
+        color: var(--subtle);
+      }
+      .h-nav.active {
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .h-nav.active svg {
+        color: var(--ink);
+      }
+      .h-title {
+        position: absolute;
+        left: 214px;
+        top: 62px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .h-sub {
+        position: absolute;
+        left: 214px;
+        top: 84px;
+        font-size: 11px;
+        color: var(--subtle);
+      }
+      .h-digit {
+        display: inline-block;
+        height: 14px;
+        overflow: hidden;
+        vertical-align: top;
+      }
+      .h-digit span {
+        display: block;
+        height: 14px;
+        line-height: 14px;
+      }
+      .h-pill {
+        position: absolute;
+        left: 832px;
+        top: 64px;
+        width: 104px;
+        height: 28px;
+        border-radius: 14px;
+        justify-content: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #fff;
+      }
+      #h-add {
+        background: var(--accent);
+      }
+      #h-add-label {
+        z-index: 5;
+      }
+      .h-pill svg {
+        width: 12px;
+        height: 12px;
+      }
+      #h-list {
+        position: absolute;
+        left: 214px;
+        top: 124px;
+        width: 722px;
+        height: 400px;
+      }
+      #h-outline {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 722px;
+        height: 180px;
+        border-radius: 12px;
+        box-shadow: inset 0 0 0 1px var(--line);
+      }
+      .h-row {
+        position: absolute;
+        left: 0;
+        width: 722px;
+        height: 60px;
+        padding: 0 18px;
+        gap: 12px;
+      }
+      .h-row + .h-row {
+        border-top: 1px solid var(--line);
+      }
+      .h-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--ok);
+        flex: none;
+      }
+      .h-name {
+        font-size: 12.5px;
+        font-weight: 500;
+      }
+      .h-os {
+        font-size: 11px;
+        color: var(--subtle);
+        margin-top: 1px;
+      }
+      .h-meters {
+        margin-left: auto;
+        gap: 22px;
+      }
+      .h-meter {
+        width: 120px;
+        font-size: 10px;
+        color: var(--subtle);
+      }
+      .h-track {
+        margin-top: 5px;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--tint);
+        overflow: hidden;
+      }
+      .h-fill {
+        height: 100%;
+        width: 100%;
+        border-radius: 3px;
+        background: var(--accent);
+      }
+      .h-fill.mem {
+        background: var(--subtle);
+        opacity: 0.55;
+      }
+      #h-sheet {
+        left: 214px;
+        top: 60px;
+        width: 722px;
+        height: 306px;
+        z-index: 4;
+      }
+      #h-sheet .surface {
+        border-radius: 0;
+      }
+      .h-sheet-body {
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        top: 80px;
+      }
+      .h-sheet-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .h-sheet-sub {
+        margin-top: 4px;
+        font-size: 11.5px;
+        color: var(--subtle);
+      }
+      #h-cmd {
+        margin-top: 16px;
+        height: 42px;
+        border-radius: 10px;
+        background: var(--surface-2);
+        box-shadow: inset 0 0 0 1px var(--line);
+        padding: 0 14px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      #h-cmd-text {
+        white-space: pre;
+      }
+      #h-cmd-text b {
+        color: var(--ink);
+        font-weight: 400;
+      }
+      .h-status {
+        margin-top: 18px;
+        height: 20px;
+        position: relative;
+        font-size: 12px;
+      }
+      .h-status svg {
+        position: absolute;
+        left: 0;
+        top: 2px;
+        width: 16px;
+        height: 16px;
+        overflow: visible;
+      }
+      .h-status-text {
+        position: absolute;
+        left: 26px;
+        top: 1px;
+        white-space: nowrap;
+      }
+      #h-wait {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="hero" data-start="0" data-duration="8" data-width="1920" data-height="840">
+      <div id="h-scene" class="clip" data-start="0" data-duration="8" data-track-index="0">
+        <div class="stage" style="width: 1080px; height: 473px; transform: scale(1.7778)">
+          <div id="h-window" class="lift">
+            <div class="surface">
+              <div class="h-bar row">
+                <span class="h-light"></span><span class="h-light"></span><span class="h-light"></span>
+                <span class="h-url row">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>
+                  pilot.example.com
+                </span>
+              </div>
+
+              <div class="h-side">
+                <div class="h-nav row nav-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>Overview</div>
+                <div class="h-nav row nav-in active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="8" rx="2" /><rect x="3" y="13" width="18" height="8" rx="2" /></svg>Servers</div>
+                <div class="h-nav row nav-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z" /><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z" /></svg>Applications</div>
+                <div class="h-nav row nav-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3" /><path d="M4 5v14c0 1.66 3.58 3 8 3s8-1.34 8-3V5" /><path d="M4 12c0 1.66 3.58 3 8 3s8-1.34 8-3" /></svg>Databases</div>
+                <div class="h-nav row nav-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>Monitoring</div>
+                <div class="h-nav row nav-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="5" rx="1" /><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M10 12h4" /></svg>Backups</div>
+              </div>
+
+              <p class="h-title head-in">Servers</p>
+              <p class="h-sub head-in"><span class="h-digit"><span id="h-digits"><span>3</span><span>4</span></span></span> online · agent 1.1.5</p>
+              <span id="h-add" class="h-pill row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                Add server
+              </span>
+
+              <div id="h-list">
+                <div id="h-outline"></div>
+                <div class="h-row row" style="top: 0px">
+                  <span class="h-dot"></span>
+                  <div><p class="h-name">web-1</p><p class="h-os">Ubuntu 24.04</p></div>
+                  <div class="h-meters row">
+                    <div class="h-meter">CPU 22%<div class="h-track"><div class="h-fill" data-v="22"></div></div></div>
+                    <div class="h-meter">Memory 48%<div class="h-track"><div class="h-fill mem" data-v="48"></div></div></div>
+                  </div>
+                </div>
+                <div class="h-row row" style="top: 60px">
+                  <span class="h-dot"></span>
+                  <div><p class="h-name">web-2</p><p class="h-os">Debian 12</p></div>
+                  <div class="h-meters row">
+                    <div class="h-meter">CPU 64%<div class="h-track"><div class="h-fill" data-v="64"></div></div></div>
+                    <div class="h-meter">Memory 71%<div class="h-track"><div class="h-fill mem" data-v="71"></div></div></div>
+                  </div>
+                </div>
+                <div class="h-row row" style="top: 120px">
+                  <span class="h-dot"></span>
+                  <div><p class="h-name">db-1</p><p class="h-os">Ubuntu 22.04</p></div>
+                  <div class="h-meters row">
+                    <div class="h-meter">CPU 9%<div class="h-track"><div class="h-fill" data-v="9"></div></div></div>
+                    <div class="h-meter">Memory 36%<div class="h-track"><div class="h-fill mem" data-v="36"></div></div></div>
+                  </div>
+                </div>
+                <div class="h-row row" id="h-row-new" style="top: 180px">
+                  <span class="h-dot"></span>
+                  <div><p class="h-name">web-3</p><p class="h-os">Ubuntu 24.04</p></div>
+                  <div class="h-meters row">
+                    <div class="h-meter">CPU 4%<div class="h-track"><div class="h-fill" data-v="4"></div></div></div>
+                    <div class="h-meter">Memory 18%<div class="h-track"><div class="h-fill mem" data-v="18"></div></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- The Add server pill grows into this sheet, which later folds into the new row. -->
+              <div id="h-sheet" class="lift">
+                <div id="h-sheet-surface" class="surface">
+                  <div class="h-sheet-body">
+                    <p class="h-sheet-title sheet-in">Add a server</p>
+                    <p class="h-sheet-sub sheet-in">Run this on the new server. The token works once.</p>
+                    <div id="h-cmd" class="row mono sheet-in"><span id="h-cmd-text"><span style="color: var(--subtle)">$ </span><b>curl -fsSL https://pilot.example.com/agent/install.sh | sudo bash -s -- --token ept_7Kq2••••3f9a</b></span></div>
+                    <div class="h-status" id="h-status">
+                      <svg viewBox="0 0 16 16"><circle id="h-status-bg" cx="8" cy="8" r="8" /><g id="h-spin"><path id="h-mark" d="M8 2.6 A5.4 5.4 0 1 1 2.6 8" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></g></svg>
+                      <span class="h-status-text" id="h-wait">Waiting for the agent to connect…</span>
+                      <span class="h-status-text" id="h-done">web-3 connected · Ubuntu 24.04</span>
+                    </div>
+                  </div>
+                  <div id="h-sheet-tint" class="tint"></div>
+                </div>
+              </div>
+              <span id="h-add-label" class="h-pill row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                Add server
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="assets/motion.js"></script>
+    <script>
+      applyTheme();
+      const css = getComputedStyle(document.getElementById("root"));
+      const ACCENT = css.getPropertyValue("--accent").trim();
+      const OK = css.getPropertyValue("--ok").trim();
+      const CHECK = "M4.7 8.2 L7 10.5 L11.4 5.8";
+      const tl = gsap.timeline({ paused: true });
+
+      const sheet = document.getElementById("h-sheet-surface");
+      const PILL = { x: 618, y: 4, w: 104, h: 28 };
+      const PANEL = { x: 0, y: 56, w: 722, h: 250 };
+      const SLOT = { x: 0, y: 244, w: 722, h: 60 };
+      const rows = gsap.utils.toArray(".h-row");
+      const fresh = document.getElementById("h-row-new");
+
+      gsap.set(".nav-in, .head-in, #h-add, #h-outline, .sheet-in, #h-status, #h-done, #h-sheet, #h-add-label", { opacity: 0 });
+      gsap.set(rows, { opacity: 0 });
+      gsap.set(".h-fill", { scaleX: 0, transformOrigin: "0% 50%" });
+      gsap.set(sheet, { clipPath: shape(sheet, PILL, 14) });
+      gsap.set("#h-mark", { stroke: ACCENT });
+      gsap.set("#h-status-bg", { fill: ACCENT, fillOpacity: 0.12 });
+      const cmd = document.getElementById("h-cmd-text");
+      const chars = cmd.textContent.length;
+
+      const fill = (row, at) =>
+        row.querySelectorAll(".h-fill").forEach((el, j) =>
+          tl.to(el, { scaleX: Number(el.dataset.v) / 100, duration: 1, ease: SPRING }, at + j * 0.08),
+        );
+
+      // 1. The window rises; the sidebar, header and fleet land in sequence.
+      tl.fromTo("#h-window", { y: 70, opacity: 0 }, { y: 0, duration: 1.2, ease: SPRING }, 0.05);
+      tl.to("#h-window", { opacity: 1, duration: 0.4, ease: "arrive" }, 0.05);
+      blurIn(tl, ".nav-in", 0.35, { stagger: 0.05 });
+      blurIn(tl, ".head-in", 0.45, { stagger: 0.07 });
+      tl.to("#h-add", { opacity: 1, duration: 0.2, ease: "glide" }, 0.6);
+      tl.fromTo("#h-add", { scale: 0.7 }, { scale: 1, duration: 0.7, ease: BOUNCE }, 0.6);
+      tl.to("#h-outline", { opacity: 1, duration: 0.4, ease: "glide" }, 0.7);
+      rows.slice(0, 3).forEach((row, i) => {
+        tl.fromTo(row, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.45, ease: "arrive" }, 0.75 + i * 0.1);
+        fill(row, 0.95 + i * 0.1);
+      });
+
+      // 2. Add server is pressed and the pill grows into the enrollment sheet.
+      tl.to("#h-add", { scale: 0.94, duration: 0.12, ease: "glide" }, 1.9);
+      tl.to("#h-add", { opacity: 0, duration: 0.01 }, 2.02);
+      tl.to(["#h-sheet", "#h-add-label"], { opacity: 1, duration: 0.01 }, 2.02);
+      tl.to(sheet, { clipPath: shape(sheet, PANEL, 14), duration: 0.8, ease: "arrive" }, 2.02);
+      tl.to("#h-add-label", { opacity: 0, filter: "blur(6px)", duration: 0.18, ease: "leave" }, 2.02);
+      tl.to("#h-sheet-tint", { opacity: 0, duration: 0.45, ease: "glide" }, 2.08);
+      // The sheet covers the list completely, so the list steps back out of view.
+      tl.to("#h-list", { opacity: 0, filter: "blur(4px)", duration: 0.16, ease: "leave" }, 2.04);
+
+      // 3. The install command types itself; the agent connects.
+      blurIn(tl, ".sheet-in", 2.55, { stagger: 0.07 });
+      gsap.set(cmd, { clipPath: "inset(0px 100% 0px 0px)" });
+      tl.to(cmd, { clipPath: "inset(0px 0% 0px 0px)", duration: chars * 0.013, ease: `steps(${chars})` }, 2.85);
+      blurIn(tl, "#h-status", 4.15, { duration: 0.35 });
+      tl.fromTo("#h-spin", { rotation: 0, svgOrigin: "8 8" }, { rotation: 1080, duration: 1.3, ease: "glide" }, 4.15);
+      tl.to("#h-mark", { morphSVG: CHECK, stroke: OK, duration: 0.35, ease: "arrive" }, 5.05);
+      tl.to("#h-status-bg", { fill: OK, duration: 0.3, ease: "glide" }, 5.05);
+      tl.fromTo("#h-status svg", { scale: 0.7, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.55, ease: BOUNCE }, 5.05);
+      tl.to("#h-wait", { opacity: 0, filter: "blur(4px)", duration: 0.16, ease: "leave" }, 5.05);
+      blurIn(tl, "#h-done", 5.12, { duration: 0.35 });
+
+      // 4. A pause, then the sheet folds down into the new server's row.
+      tl.to(".sheet-in, #h-status", { opacity: 0, filter: "blur(6px)", duration: 0.22, ease: "leave" }, 5.75);
+      tl.to(sheet, { clipPath: shape(sheet, SLOT, 12), duration: 0.7, ease: "glide" }, 5.8);
+      tl.to("#h-list", { opacity: 1, filter: "blur(0px)", duration: 0.5, ease: "glide" }, 5.85);
+      tl.to("#h-outline", { height: 240, duration: 0.7, ease: "glide" }, 5.8);
+      tl.to(fresh, { opacity: 1, duration: 0.01 }, 6.5);
+      tl.to("#h-sheet", { opacity: 0, duration: 0.2, ease: "glide" }, 6.5);
+      tl.fromTo(fresh.querySelectorAll(".h-dot, .h-name, .h-os, .h-meter"), { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.4, stagger: 0.05, ease: "arrive" }, 6.5);
+      tl.fromTo(fresh.querySelector(".h-dot"), { scale: 0, transformOrigin: "50% 50%" }, { scale: 1, duration: 0.6, ease: BOUNCE }, 6.5);
+      fill(fresh, 6.6);
+
+      // 5. The count rolls from 3 to 4 and the button settles back.
+      tl.to("#h-digits", { y: -14, duration: 0.7, ease: SPRING }, 6.6);
+      tl.to("#h-add", { opacity: 1, scale: 1, duration: 0.4, ease: "arrive" }, 6.75);
+
+      window.__timelines["hero"] = tl;
+    </script>
+  </body>
+</html>

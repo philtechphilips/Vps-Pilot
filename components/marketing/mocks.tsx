@@ -54,8 +54,8 @@ export function TerminalMock() {
   const done = line >= lines.length;
 
   return (
-    <div ref={ref} className="overflow-hidden rounded-xl border border-black/[0.06] bg-inset font-mono text-[12px] leading-6">
-      <div className="flex h-9 items-center gap-1.5 border-b border-black/[0.06] px-3">
+    <div ref={ref} className="overflow-hidden rounded-xl border border-ink/[0.06] bg-inset font-mono text-[12px] leading-6">
+      <div className="flex h-9 items-center gap-1.5 border-b border-ink/[0.06] px-3">
         <span className="size-2.5 rounded-full bg-[#ff5f57]/70" />
         <span className="size-2.5 rounded-full bg-[#febc2e]/70" />
         <span className="size-2.5 rounded-full bg-[#28c840]/70" />

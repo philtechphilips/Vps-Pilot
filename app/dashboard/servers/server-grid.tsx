@@ -125,7 +125,7 @@ export function ServerGrid() {
             </thead>
             <tbody>
               {list.map((s) => (
-                <tr key={s.id} className="transition-colors hover:bg-black/[0.02]">
+                <tr key={s.id} className="transition-colors hover:bg-ink/[0.02]">
                   <Td>
                     <Link href={`/dashboard/servers/${s.id}`} className="font-medium hover:underline">
                       {s.name}
