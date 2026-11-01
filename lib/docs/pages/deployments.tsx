@@ -265,6 +265,14 @@ export function Builds() {
         head={["Concern", "How it's decided"]}
         rows={[
           ["Package manager", <>The <C key="a">packageManager</C> field, then the lockfile: bun, pnpm, Yarn, otherwise npm.</>],
+          [
+            "pnpm version",
+            <>
+              The version in <C key="a">packageManager</C>, otherwise the one that made the lockfile (pnpm 10 for <C key="b">lockfileVersion: 9.0</C>).
+              Projects using pnpm 11&apos;s <C key="c">allowBuilds</C> get the latest. Dependency build scripts pnpm 11 hasn&apos;t seen
+              approved fail the install: run <C key="d">pnpm approve-builds</C> and commit <C key="e">pnpm-workspace.yaml</C>. Agent 1.1.6 or later.
+            </>,
+          ],
           ["Node version", <><C key="a">engines.node</C> or <C key="b">.nvmrc</C>; defaults to 22.</>],
           ["Build", <>The <C key="a">build</C> script, when there is one.</>],
           [
