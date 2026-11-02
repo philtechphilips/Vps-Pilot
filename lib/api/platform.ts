@@ -15,6 +15,7 @@ export type Platform = {
   updated_at: string | null;
   recovery_kit_at: string | null;
   weekly_report: boolean;
+  vuln_checks: boolean;
   report_timezone: string;
 };
 
@@ -39,7 +40,7 @@ export function usePlatform() {
 export function useSavePlatform() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (body: { name?: string; public_url?: string; weekly_report?: boolean; report_timezone?: string }) =>
+    mutationFn: (body: { name?: string; public_url?: string; weekly_report?: boolean; report_timezone?: string; vuln_checks?: boolean }) =>
       api<Platform>("/platform", { method: "PUT", body, auth: true }),
     onSuccess: (data) => queryClient.setQueryData(["platform"], data),
   });

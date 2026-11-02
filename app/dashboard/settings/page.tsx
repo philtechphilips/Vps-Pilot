@@ -6,6 +6,7 @@ import { BackupStorageCard } from "@/components/dashboard/backup-storage-card";
 import { EnrollmentTokensCard, PasswordCard, PlatformCards, RecoveryKitCard, VersionCard } from "@/components/dashboard/platform-settings";
 import { NotificationSettingsCard } from "@/components/dashboard/notification-settings";
 import { TeamCard } from "@/components/dashboard/team-card";
+import { VulnLookupsCard } from "@/components/dashboard/vuln-lookups-card";
 import { WeeklyReportCard } from "@/components/dashboard/weekly-report-card";
 import { GitHubCard } from "@/components/github/github-card";
 import { Container, PageHeader } from "@/components/ui";
@@ -50,6 +51,7 @@ export default function SettingsPage() {
             <TwoFactorCard />
             <PasswordCard />
             <RecoveryKitCard />
+            <VulnLookupsCard />
           </div>
 
           <div id="sessions" className="scroll-mt-20">

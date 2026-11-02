@@ -26,6 +26,7 @@ import { timeAgo } from "@/lib/format";
 import { AppBackupsSection } from "./backups";
 import { CronSection, RunCommandSection } from "./cron";
 import { ErrorsSection } from "./errors";
+import { SecuritySection } from "./security";
 import { MoveSection } from "./move";
 import { PreviewsSection } from "./previews";
 import { TrafficSection } from "./traffic";
@@ -284,6 +285,7 @@ export function AppDetailView() {
         <TrafficSection appId={a.id} />
         <UsageSection appId={a.id} />
         <ErrorsSection appId={a.id} />
+        <SecuritySection appId={a.id} />
 
         <EnvSection key={`env-${a.id}`} app={a} onRedeploy={() => deploy.mutate(undefined, { onSuccess: (d) => goTo(d.id) })} />
         <SettingsSection key={`settings-${a.id}`} app={a} />

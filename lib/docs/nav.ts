@@ -166,6 +166,12 @@ export const sections: DocSection[] = [
         keywords: "metrics cpu memory disk alert rule incident threshold traffic requests latency rollup",
       },
       {
+        slug: "operations/security-checks",
+        title: "Vulnerability Checks",
+        description: "Known vulnerabilities in apps' packages, committed secrets, end-of-life runtimes and account alerts.",
+        keywords: "security vulnerability cve osv advisory dependency lockfile secret leak end of life eol rebuild trivy",
+      },
+      {
         slug: "operations/logs",
         title: "Logs",
         description: "Read the systemd journal and container output from any server.",

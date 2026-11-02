@@ -232,6 +232,18 @@ uv run python -m app.encryption rotate`}
         ]}
       />
 
+      <H2>Sign-in protection</H2>
+      <P>
+        Besides the per-account lockout, sign-in, code, password reset and agent enrollment endpoints are rate limited per address. A sign-in
+        from a new address, a recovery code used, a password change and role changes are reported as they happen: see{" "}
+        <A href="/docs/operations/security-checks#account-and-team-changes">Account and team changes</A>.
+      </P>
+      <P>
+        The dashboard is served with a Content Security Policy (scripts only from itself), framing denied, no MIME sniffing and HSTS behind
+        HTTPS; the API sends the same protections. Apps are checked for known vulnerabilities and committed secrets after every deploy: see{" "}
+        <A href="/docs/operations/security-checks">Vulnerability Checks</A>.
+      </P>
+
       <H2>Audit trail</H2>
       <P>
         Every change, from deployments and database actions to domain edits, server revocations and settings changes, is written to the audit

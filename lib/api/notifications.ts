@@ -81,7 +81,7 @@ export function useUpdateNotificationSettings() {
 /* Alert channels (shared by all admins) */
 
 export type ChannelKind = "webhook" | "slack" | "telegram";
-export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded" | "job.failed" | "report.weekly";
+export type ChannelEvent = "alert.firing" | "alert.resolved" | "deployment.failed" | "deployment.succeeded" | "job.failed" | "report.weekly" | "security";
 
 export type AlertChannel = {
   id: string;

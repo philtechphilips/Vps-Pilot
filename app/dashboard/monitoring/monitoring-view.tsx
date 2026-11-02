@@ -580,10 +580,10 @@ function RuleDialog({ rule, onClose }: { rule: AlertRule | null; onClose: () => 
   const [severity, setSeverity] = useState<Severity>(rule?.severity ?? "warning");
   const [serverId, setServerId] = useState(rule?.server_id ?? "");
   const unit = KIND_UNIT[kind];
-  const metric = !["agent_offline", "app_down", "site_down"].includes(kind);
-  // Certificate and backup rules are checked once; they have no duration.
-  const timed = !unit || !!unit.timed;
-  const forApps = ["app_down", "app_errors", "error_rate", "site_down"].includes(kind);
+  const metric = !["agent_offline", "app_down", "site_down", "secrets_committed", "agent_outdated"].includes(kind);
+  // Certificate, backup and app security rules are checked once; they have no duration.
+  const timed = (!unit || !!unit.timed) && kind !== "secrets_committed";
+  const forApps = ["app_down", "app_errors", "error_rate", "site_down", "vulnerable_deps", "secrets_committed", "runtime_eol"].includes(kind);
   const scoped = timed && !forApps;
   const error = create.error ?? update.error;
   const busy = create.isPending || update.isPending;

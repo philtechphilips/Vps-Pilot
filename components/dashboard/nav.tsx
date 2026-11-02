@@ -25,6 +25,7 @@ export const tabs: { label: string; href: string; icon: IconName }[] = [
   { label: "Monitoring", href: "/dashboard/monitoring", icon: "activity" },
   { label: "Logs", href: "/dashboard/logs", icon: "file-text" },
   { label: "Backups", href: "/dashboard/backups", icon: "archive" },
+  { label: "Security", href: "/dashboard/security", icon: "shield-check" },
   { label: "Audit", href: "/dashboard/audit", icon: "shield" },
   { label: "Settings", href: "/dashboard/settings", icon: "settings" },
 ];

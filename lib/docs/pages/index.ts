@@ -5,6 +5,7 @@ import { DataBrowser, DatabaseOverview, DatabaseUsers } from "./databases";
 import { Applications, Builds, Environment, GitHub, Lifecycle } from "./deployments";
 import { Domains, Logs, Monitoring, Notifications, Troubleshooting } from "./operations";
 import { AgentCli, ApiAccess, ApplicationsApi, Configuration, DatabasesApi, DomainsApi, ServersApi } from "./reference";
+import { SecurityChecks } from "./security-checks";
 import { ConnectServer, FirstDeploy, FirstRun, Install, Introduction } from "./start";
 
 /** Page bodies by slug; titles and order live in lib/docs/nav.ts. */
@@ -30,6 +31,7 @@ export const pages: Record<string, ComponentType> = {
   "backups/s3-storage": S3Storage,
   "operations/domains": Domains,
   "operations/monitoring": Monitoring,
+  "operations/security-checks": SecurityChecks,
   "operations/logs": Logs,
   "operations/notifications": Notifications,
   "operations/troubleshooting": Troubleshooting,

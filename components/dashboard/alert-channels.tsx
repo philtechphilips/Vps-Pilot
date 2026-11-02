@@ -31,9 +31,10 @@ const EVENTS: { value: ChannelEvent; label: string }[] = [
   { value: "deployment.succeeded", label: "Deployment succeeded" },
   { value: "job.failed", label: "Scheduled job failed" },
   { value: "report.weekly", label: "Weekly report" },
+  { value: "security", label: "Security" },
 ];
 
-const DEFAULT_EVENTS: ChannelEvent[] = ["alert.firing", "alert.resolved", "deployment.failed", "job.failed", "report.weekly"];
+const DEFAULT_EVENTS: ChannelEvent[] = ["alert.firing", "alert.resolved", "deployment.failed", "job.failed", "report.weekly", "security"];
 
 export function AlertChannelsCard() {
   const channels = useAlertChannels();

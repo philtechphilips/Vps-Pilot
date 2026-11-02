@@ -14,7 +14,7 @@ export function TeamCard() {
   const admin = me?.role === "admin";
   const users = useQuery({
     queryKey: ["users"],
-    queryFn: () => api<User[]>("/users/?limit=100", { auth: true }),
+    queryFn: () => api<User[]>("/users?limit=100", { auth: true }),
     enabled: admin,
   });
   const setRole = useMutation({

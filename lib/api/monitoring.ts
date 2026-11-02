@@ -39,7 +39,7 @@ export type MaintenanceWindow = {
   created_by: string;
 };
 
-export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "app_errors" | "error_rate" | "updates_pending" | "site_down" | "tls_expiring" | "backup_stale";
+export type RuleKind = "agent_offline" | "cpu_high" | "memory_high" | "disk_high" | "inode_high" | "swap_high" | "app_down" | "app_errors" | "error_rate" | "updates_pending" | "site_down" | "tls_expiring" | "backup_stale" | "vulnerable_deps" | "secrets_committed" | "runtime_eol" | "agent_outdated";
 
 export type AlertRule = {
   id: string;
@@ -202,6 +202,16 @@ export const KIND_INFO: Record<RuleKind, { label: string; describe: (r: Pick<Ale
   site_down: { label: "Site down", describe: (r) => `A domain fails its uptime check for ${r.duration_minutes} min` },
   tls_expiring: { label: "Certificate expiring", describe: (r) => `Certificate valid for less than ${r.threshold} days, or renewal failing` },
   backup_stale: { label: "Backups stale or failing", describe: (r) => `No good backup for ${r.threshold} hours, or the last one failed` },
+  vulnerable_deps: {
+    label: "Vulnerable dependencies",
+    describe: (r) => `${r.threshold === 1 ? "A critical or high vulnerability" : `${r.threshold} critical or high vulnerabilities`} with a fix in an app's packages`,
+  },
+  secrets_committed: { label: "Secrets in the repository", describe: () => "An app's repository contains files that look like secrets" },
+  runtime_eol: { label: "Runtime end of life", describe: (r) => `An app's Node.js, Python or distro stops getting security fixes within ${r.threshold} days` },
+  agent_outdated: {
+    label: "Agent out of date",
+    describe: (r) => `A server's agent is older than the latest for ${r.duration_minutes >= 1440 ? `${Math.round(r.duration_minutes / 1440)} days` : `${r.duration_minutes} min`}`,
+  },
 };
 
 /** Kinds whose threshold isn't a percentage. Without `timed` they are checked
@@ -212,6 +222,8 @@ export const KIND_UNIT: Partial<Record<RuleKind, { label: string; hint: string; 
   updates_pending: { label: "At least", hint: "security updates", default: 1, timed: true },
   tls_expiring: { label: "Days left below", hint: "days", default: 14 },
   backup_stale: { label: "No good backup for", hint: "hours", default: 36 },
+  vulnerable_deps: { label: "At least", hint: "critical/high with a fix", default: 1 },
+  runtime_eol: { label: "Days left below", hint: "days", default: 30 },
 };
 
 /** Who a rule watches, for the rules table. */
