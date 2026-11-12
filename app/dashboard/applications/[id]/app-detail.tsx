@@ -23,6 +23,7 @@ import { type App, isDeploying, runtimeLabel, useApp, useAppDeployments, useDele
 import { domainUrl, useDomains } from "@/lib/api/domains";
 import { useServers } from "@/lib/api/servers";
 import { timeAgo } from "@/lib/format";
+import { docsUrl } from "@/lib/site";
 import { AppBackupsSection } from "./backups";
 import { CronSection, RunCommandSection } from "./cron";
 import { ErrorsSection } from "./errors";
@@ -572,7 +573,16 @@ function ErrorAlertsSection({ app }: { app: App }) {
   return (
     <FormCard
       title="Error Alerts"
-      description="VPSPilot counts error lines in this app's logs and alerts you (App logging errors). Lines containing any of the text below are left out, for noise you already know about."
+      description={
+        <>
+          VPSPilot counts error lines in this app&apos;s logs and alerts you (App logging errors). Lines containing any of the text below are left out, for
+          noise you already know about. Probes from internet scanners are left out on their own, but only while the app is{" "}
+          <a href={docsUrl("operations/monitoring#scanner-noise")} target="_blank" rel="noreferrer" className="text-fg hover:underline">
+            safe from them
+          </a>
+          .
+        </>
+      }
       footer={update.error ? <span className="text-err">{update.error.message}</span> : problem ? problem : saved ? "Saved. The agent picks it up within a minute." : "One per line, plain text, not case-sensitive."}
       action={
         <Button
