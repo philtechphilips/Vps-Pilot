@@ -1,3 +1,0 @@
-Technology logos in this folder come from Devicon (https://devicon.dev,
-MIT License). The logos and names are trademarks of their respective
-owners and are used only to show which technologies VPSPilot supports.

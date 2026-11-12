@@ -256,7 +256,6 @@ export function AccountMenu() {
         <ThemeToggle />
       </div>
       <div className="my-1 h-px bg-line" />
-      <MenuItem href="/" icon="external-link">Home Page</MenuItem>
       <button
         type="button"
         role="menuitem"

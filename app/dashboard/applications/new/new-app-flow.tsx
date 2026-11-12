@@ -10,6 +10,7 @@ import { Badge, Button, Callout, Card, Input, Label, Select } from "@/components
 import { type Runtime, useCreateApp } from "@/lib/api/apps";
 import type { GitHubRepo } from "@/lib/api/github";
 import { useServers } from "@/lib/api/servers";
+import { docsUrl } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 type SourceType = "git" | "image";
@@ -207,7 +208,7 @@ export function NewAppFlow() {
               {runtime === "docker" ? (
                 <>
                   No Dockerfile? Node.js, Bun, Python, Go, Rust and static sites are detected and built automatically.{" "}
-                  <a href="/#stacks" target="_blank" className="text-muted underline underline-offset-2 hover:text-fg">
+                  <a href={docsUrl("deployments/builds")} target="_blank" rel="noreferrer" className="text-muted underline underline-offset-2 hover:text-fg">
                     See supported stacks
                   </a>
                 </>

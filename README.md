@@ -1,8 +1,15 @@
 # VPSPilot Dashboard
 
-The web UI for VPSPilot: a marketing site and the control-plane dashboard
-(servers, applications, deployments, databases, domains, monitoring, logs,
-backups, audit and settings). Next.js 16, React 19, Tailwind CSS 4.
+The web UI every VPSPilot install serves: sign-in, the first-run setup, the
+control-plane dashboard (servers, applications, deployments, databases,
+domains, monitoring, logs, backups, security, audit and settings) and public
+status pages. Next.js 16, React 19, Tailwind CSS 4.
+
+VPSPilot is a self-hosted control plane for your own servers, open source
+under the [Apache License 2.0](LICENSE). Installing it, the API and the agent
+are in [VPS-PIlot-BE](https://github.com/philtechphilips/VPS-PIlot-BE). The
+landing page and docs are a separate website; until it is live, the
+dashboard's Docs links go to GitHub (`lib/site.ts`).
 
 ## Running it
 
@@ -50,15 +57,25 @@ mid-way resumes where you left off.
 
 ```
 app/
-├── (marketing)/      # landing page
 ├── (auth)/           # login, setup, forgot/reset password
-└── dashboard/        # the control-plane UI (mock data except auth)
+├── dashboard/        # the control-plane UI (/ redirects here)
+└── status/[slug]/    # public status pages
 components/
 ├── auth/             # code step, auth gate, sessions card
 ├── dashboard/        # shell, navigation, cards
-└── marketing/        # header, footer, illustrations, product tour
+└── apps/, servers/…  # feature components
 lib/
 ├── api/              # fetch client, React Query hooks, API types
 ├── stores/           # Zustand stores
-└── data.ts           # mock data for dashboard pages not yet on the API
+└── site.ts           # links to the website and the project on GitHub
 ```
+
+## Contributing
+
+Issues and pull requests are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+Report security issues privately as described in [SECURITY.md](SECURITY.md).
+
+## License
+
+[Apache License 2.0](LICENSE). Contributions are accepted under the same
+license.

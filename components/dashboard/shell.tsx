@@ -7,6 +7,7 @@ import { tabs } from "@/components/dashboard/nav";
 import { useServers } from "@/lib/api/servers";
 import { Icon } from "@/components/icons";
 import { Logotype } from "@/components/logo";
+import { docsUrl, PROJECT_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, href: string) {
@@ -81,12 +82,22 @@ function SidebarFooter() {
     <div className="mt-auto space-y-3 px-2 pb-4">
       <ControlPlaneStatus />
       <div className="flex flex-col gap-0.5">
-        <Link href="/#changelog" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-ink/[0.04] hover:text-fg">
+        <a
+          href={`${PROJECT_URL}/commits/main`}
+          target="_blank"
+          rel="noreferrer"
+          className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-ink/[0.04] hover:text-fg"
+        >
           <Icon name="file-text" className="text-subtle" /> Changelog
-        </Link>
-        <Link href="/#docs" className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-ink/[0.04] hover:text-fg">
+        </a>
+        <a
+          href={docsUrl()}
+          target="_blank"
+          rel="noreferrer"
+          className="flex h-9 items-center gap-3 rounded-lg px-3 text-[13px] text-muted hover:bg-ink/[0.04] hover:text-fg"
+        >
           <Icon name="book" className="text-subtle" /> Docs
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -47,6 +47,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // The landing page and docs are on the website; here / is the dashboard,
+  // which sends visitors who aren't signed in to /login.
+  async redirects() {
+    return [{ source: "/", destination: "/dashboard", permanent: false }];
+  },
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
   },

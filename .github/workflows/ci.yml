@@ -53,7 +53,7 @@ jobs:
         run: >-
           docker run --rm -v "$PWD:/src" -w /src -v "$HOME/.cache/trivy:/root/.cache/trivy" "$TRIVY"
           fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --ignore-unfixed
-          --skip-dirs motion --exit-code 1 .
+          --exit-code 1 .
       - name: Build the dashboard image
         run: docker build -t vpspilot/web:ci .
       - name: Scan the image (OS packages and Node.js packages)
@@ -66,7 +66,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           docker run --rm -v "$PWD:/src" -w /src -v "$HOME/.cache/trivy:/root/.cache/trivy" "$TRIVY" \
-            fs --scanners vuln,secret,misconfig --skip-dirs motion --ignore-unfixed --format sarif --output trivy-repo.sarif .
+            fs --scanners vuln,secret,misconfig --ignore-unfixed --format sarif --output trivy-repo.sarif .
           docker run --rm -v "$PWD:/src" -w /src -v /var/run/docker.sock:/var/run/docker.sock \
             -v "$HOME/.cache/trivy:/root/.cache/trivy" "$TRIVY" \
             image --scanners vuln,secret --ignore-unfixed --format sarif --output trivy-image.sarif vpspilot/web:ci
